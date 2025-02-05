@@ -1,0 +1,125 @@
+::ng-deep .p-card {
+  background-color: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  transition: background 0.3s ease-in-out;
+}
+
+::ng-deep .p-card .p-card-title,
+::ng-deep .p-card .p-card-subtitle,
+::ng-deep .p-card .p-card-content,
+::ng-deep .p-card p,
+::ng-deep .p-card label {
+  color: var(--text-color) !important;
+}
+
+::ng-deep input {
+  background-color: var(--input-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--input-border) !important;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+::ng-deep input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+::ng-deep button {
+  color: var(--button-text) !important;
+  background: var(--primary) !important;
+  transition: background 0.3s ease;
+}
+
+::ng-deep button:hover {
+  background: #4338ca !important;
+}
+
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background: var(--bg-color);
+  transition: background 0.3s ease-in-out;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+}
+
+.login-card {
+  width: 400px;
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  background: var(--card-bg);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: background 0.3s ease-in-out;
+
+  .p-card-body {
+    transition: background 0.3s ease-in-out;
+    background-color: var(--card-bg);
+  }
+
+  h2 {
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+  }
+
+  .highlight {
+    color: var(--primary);
+  }
+
+  p {
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+
+    label {
+      color: var(--text-color);
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      text-align: left;
+    }
+
+    input {
+      padding: 0.8rem;
+      border: 1px solid var(--input-border);
+      border-radius: 5px;
+      background: var(--input-bg);
+      color: var(--text-color);
+      font-size: 1rem;
+      transition: border-color 0.5s;
+
+      &:focus {
+        border-color: var(--primary);
+        outline: none;
+      }
+    }
+  }
+
+  // 🔵 Botão estilizado corretamente para ambos os temas
+  p-button {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 5px;
+    background: var(--primary);
+    color: var(--button-text);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+
+    &:hover {
+      background: #4338ca;
+    }
+  }
+}

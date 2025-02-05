@@ -7,14 +7,15 @@ import { LancamentoHorasComponent } from './pages/lancamento-horas/lancamento-ho
 import { RelatoriosComponent } from './pages/relatorios/relatorios.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 
-const routes: Routes = [
+export const routes: Routes = [
+  { path: 'login', loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent) },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'projetos', component: ProjetosComponent },
   { path: 'atividades', component: AtividadesComponent },
   { path: 'lancamento-horas', component: LancamentoHorasComponent },
   { path: 'relatorios', component: RelatoriosComponent },
   { path: 'usuarios', component: UsuariosComponent },
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
+  { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
 
 @NgModule({

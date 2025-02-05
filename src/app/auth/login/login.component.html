@@ -1,0 +1,26 @@
+<div class="login-container">
+
+  <p-card class="login-card">
+    <ng-template pTemplate="header">
+      <h2>Bem-vindo ao <span class="highlight">Hórus</span></h2>
+    </ng-template>
+
+    <ng-template pTemplate="content">
+      <p>Faça login para acessar o sistema</p>
+
+      <form (submit)="onLogin()">
+        <div class="input-group">
+          <label for="email">E-mail</label>
+          <input pInputText type="email" id="email" name="email" [(ngModel)]="email" placeholder="Digite seu e-mail" required>
+        </div>
+      
+        <div class="input-group">
+          <label for="password">Senha</label>
+          <input pInputText type="password" id="password" name="password" [(ngModel)]="password" placeholder="Digite sua senha" required>
+        </div>
+      
+        <button pButton type="submit" class="p-button-primary p-button-lg">Entrar</button>
+      </form>
+    </ng-template>
+  </p-card>
+</div>

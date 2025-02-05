@@ -1,1 +1,17 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+    --primary-bg: #ffffff;
+    --primary-text: #000000;
+  }
+  
+  .dark-mode {
+    --primary-bg: #1f2937;
+    --primary-text: #ffffff;
+  }
+  
+  // Aplicar ao `body`
+  body {
+    background-color: var(--primary-bg);
+    color: var(--primary-text);
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  }
+  
