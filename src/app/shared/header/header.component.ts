@@ -1,12 +1,16 @@
 import { Component } from '@angular/core';
+import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-header',
-  standalone: true,
-  imports: [],
   templateUrl: './header.component.html',
-  styleUrl: './header.component.scss'
+  styleUrls: ['./header.component.scss'],
+  imports: [ThemeToggleComponent],
+  standalone: true
 })
 export class HeaderComponent {
-
+  toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar?.classList.toggle('collapsed');
+  }
 }

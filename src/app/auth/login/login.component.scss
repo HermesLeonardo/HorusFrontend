@@ -107,7 +107,6 @@
     }
   }
 
-  // 🔵 Botão estilizado corretamente para ambos os temas
   p-button {
     width: 100%;
     padding: 1rem;
@@ -117,6 +116,7 @@
     font-size: 1rem;
     cursor: pointer;
     transition: background 0.3s ease;
+    
 
     &:hover {
       background: #4338ca;

@@ -1,0 +1,30 @@
+.dashboard-container {
+    text-align: center;
+    padding: 2rem;
+    
+    h1 {
+      color: var(--primary);
+    }
+  
+    .dashboard-actions {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+  
+      .btn {
+        padding: 0.8rem 1.5rem;
+        border: none;
+        border-radius: 5px;
+        background: var(--primary);
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s ease;
+  
+        &:hover {
+          background: wheat;
+        }
+      }
+    }
+  }
+  

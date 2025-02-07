@@ -1,103 +1,99 @@
 .theme-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    top: 20px;
-    right: 20px;
-  
-    input {
-      display: none;
-    }
-  
-    .toggle-label {
-      width: 120px;
-      height: 40px;
-      background: #e0e0e0;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 5px 10px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: bold;
-      position: relative;
-      transition: background 0.3s ease;
-    }
-  
-    .toggle-icon {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 18px;
-    }
-  
-    .sun {
-      left: 10px;
-      color: red;
-    }
-  
-    .moon {
-      right: 10px;
-      color: orange;
-    }
-  
-    input:checked + .toggle-label {
-      background: #151515;
-      color: white;
-    }
-  
-    input:checked + .toggle-label .sun {
-      display: none;
-    }
-  
-    input:not(:checked) + .toggle-label .moon {
-      display: none;
-    }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 20px;
+  right: 20px;
 
-    .btn-color-mode-switch {
-        display: inline-block;
-        position: relative;
-        cursor: pointer;
-      }
-      
-      .btn-color-mode-switch-inner {
-        width: 140px;
-        height: 30px;
-        background: var(--toggle-bg);
-        border-radius: 26px;
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 5px;
-        transition: background 0.4s ease-in-out, box-shadow 0.4s ease-in-out;
-      }
-      
-      .btn-color-mode-switch-inner::after {
-        content: "";
-        width: 50px;
-        height: 22px;
-        background: var(--toggle-button);
-        border-radius: 26px;
-        position: absolute;
-        top: 4px;
-        left: 4px;
-        transition: transform 0.4s ease-in-out, background 0.4s ease-in-out;
-        box-shadow: 0px 0px 6px -2px #111;
-      }
-      
-      input[type="checkbox"]:checked + .btn-color-mode-switch-inner {
-        background: var(--dark-toggle-bg);
-      }
-      
-      input[type="checkbox"]:checked + .btn-color-mode-switch-inner::after {
-        transform: translateX(70px);
-        background: var(--dark-toggle-button);
-      }
-      
-
+  input {
+    display: none;
   }
 
-  
+  .toggle-label {
+    width: 120px;
+    height: 40px;
+    background: #e0e0e0;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    position: relative;
+    transition: background 0.3s ease, transform 0.1s ease;  // Suaviza a mudan\u00e7a de tema e o clique
+  }
+
+  .toggle-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+  }
+
+  .sun {
+    left: 10px;
+    color: red;
+  }
+
+  .moon {
+    right: 10px;
+    color: orange;
+  }
+
+  input:checked + .toggle-label {
+    background: #151515;
+    color: white;
+  }
+
+  input:checked + .toggle-label .sun {
+    display: none;
+  }
+
+  input:not(:checked) + .toggle-label .moon {
+    display: none;
+  }
+
+  /* Efeito ao clicar no bot\u00e3o */
+  .btn-color-mode-switch-inner {
+    width: 140px;
+    height: 30px;
+    background: var(--toggle-bg);
+    border-radius: 26px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px;
+    transition: background 0.4s ease-in-out, box-shadow 0.4s ease-in-out, transform 0.1s ease-in-out;
+  }
+
+  .btn-color-mode-switch-inner::after {
+    content: "";
+    width: 50px;
+    height: 22px;
+    background: var(--toggle-button);
+    border-radius: 26px;
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    transition: transform 0.4s ease-in-out, background 0.4s ease-in-out, box-shadow 0.2s ease-in-out;
+    box-shadow: 0px 0px 6px -2px #111;
+  }
+
+  input[type="checkbox"]:checked + .btn-color-mode-switch-inner {
+    background: var(--dark-toggle-bg);
+  }
+
+  input[type="checkbox"]:checked + .btn-color-mode-switch-inner::after {
+    transform: translateX(70px);
+    background: var(--dark-toggle-button);
+  }
+
+  .btn-color-mode-switch-inner:active {
+    transform: scale(0.97);  
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);  
+  }
+}

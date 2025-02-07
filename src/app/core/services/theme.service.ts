@@ -46,12 +46,12 @@ export class ThemeService {
 
     document.documentElement.style.setProperty('--toggle-bg', '#3c3c3c');
     document.documentElement.style.setProperty('--toggle-button', '#ffcc00'); // Amarelo
-    document.documentElement.style.setProperty('--dark-toggle-bg', '#151515');
+    document.documentElement.style.setProperty('--dark-toggle-bg', '#6e6f73');
     document.documentElement.style.setProperty('--dark-toggle-button', '#ffffff'); // Branco
   }
 
   private setLightTheme(): void {
-    document.documentElement.style.setProperty('--bg-color', '#f8f9fb');  // Fundo
+    document.documentElement.style.setProperty('--bg-color', '#f8f9fb');  // Fundo 
     document.documentElement.style.setProperty('--card-bg', '#ffffff');  // Cards
     document.documentElement.style.setProperty('--text-color', '#000000');
     document.documentElement.style.setProperty('--input-bg', '#ffffff');

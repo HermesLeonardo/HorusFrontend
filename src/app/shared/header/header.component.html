@@ -1,1 +1,13 @@
-<p>header works!</p>
+<header class="header">
+    <div class="header-left">
+      <button class="menu-toggle" (click)="toggleSidebar()">
+        <i class="pi pi-bars"></i>
+      </button>
+      <h1 class="logo">Hórus</h1>
+    </div>
+    <div class="header-right">
+      <app-theme-toggle></app-theme-toggle>
+      <input type="text" placeholder="Buscar projetos..." class="search-input">
+      <i class="pi pi-user profile-icon"></i>
+    </div>
+  </header>

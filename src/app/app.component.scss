@@ -21,4 +21,31 @@ html, body {
     align-items: center;
     justify-content: center;
   }
+
+  .main-content {
+    margin-left: 250px;
+    transition: margin-left 0.3s ease;
+  
+    &.collapsed {
+      margin-left: 70px;
+    }
+  }
+
+  .main-content {
+    margin-left: 250px;
+    transition: margin-left 0.3s ease;
+  
+    &.collapsed {
+      margin-left: 0; // Remove a margem quando está na página de login
+    }
+  }
+  
+  .login-theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1000; // Garante que o botão fique visível na frente de outros elementos
+  }
+  
+  
   

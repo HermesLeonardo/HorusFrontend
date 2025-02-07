@@ -1,2 +1,14 @@
-<app-theme-toggle></app-theme-toggle>
-<router-outlet></router-outlet>
+<!-- Sidebar e Header aparecem somente se n\u00e3o estivermos na p\u00e1gina de login -->
+<div *ngIf="showLayoutComponents">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <app-header></app-header>
+    <router-outlet></router-outlet>
+  </div>
+</div>
+
+<!-- Na p\u00e1gina de login, apenas o ThemeToggle \u00e9 exibido -->
+<div *ngIf="!showLayoutComponents" class="login-page">
+  <app-theme-toggle></app-theme-toggle>
+  <router-outlet></router-outlet>
+</div>
