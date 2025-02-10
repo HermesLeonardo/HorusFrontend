@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-sidebar',
@@ -6,4 +6,6 @@ import { Component } from '@angular/core';
   styleUrls: ['./sidebar.component.scss'],
   standalone: true
 })
-export class SidebarComponent {}
+export class SidebarComponent {
+  @Input() isCollapsed: boolean = false;  
+}

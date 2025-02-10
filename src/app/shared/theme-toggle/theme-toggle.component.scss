@@ -2,9 +2,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  position: absolute;
-  top: 20px;
-  right: 20px;
+  position: relative;  // Remover o posicionamento absoluto para seguir o fluxo do header
+  margin-right: 15px;  // Espaçamento entre o toggle e o campo de busca
 
   input {
     display: none;
@@ -23,7 +22,7 @@
     font-size: 14px;
     font-weight: bold;
     position: relative;
-    transition: background 0.3s ease, transform 0.1s ease;  // Suaviza a mudan\u00e7a de tema e o clique
+    transition: background 0.3s ease, transform 0.1s ease;
   }
 
   .toggle-icon {
@@ -56,7 +55,7 @@
     display: none;
   }
 
-  /* Efeito ao clicar no bot\u00e3o */
+  /* Efeito ao clicar no botão */
   .btn-color-mode-switch-inner {
     width: 140px;
     height: 30px;
@@ -93,7 +92,7 @@
   }
 
   .btn-color-mode-switch-inner:active {
-    transform: scale(0.97);  
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);  
+    transform: scale(0.97);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 }

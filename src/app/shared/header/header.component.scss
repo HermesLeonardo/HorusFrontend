@@ -1,43 +1,53 @@
 .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: var(--header-bg);
+  transition: margin-left 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  &.collapsed {
+    margin-left: 70px; // Quando o sidebar estiver retraído
+  }
+
+  .header-left {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-    background-color: var(--surface-0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .menu-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.5rem;
+    }
+
+    .logo {
+      margin-left: 15px;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
   
-    .header-left {
-      display: flex;
-      align-items: center;
-  
-      .menu-toggle {
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 1.5rem;
-      }
-  
-      .logo {
-        margin-left: 15px;
-        font-size: 1.5rem;
-        font-weight: bold;
-      }
+    app-theme-toggle {
+      margin-right: 15px; 
     }
   
-    .header-right {
-      display: flex;
-      align-items: center;
-  
-      .search-input {
-        margin: 0 15px;
-        padding: 5px 10px;
-        border: 1px solid var(--surface-border);
-        border-radius: 5px;
-      }
-  
-      .profile-icon {
-        font-size: 1.5rem;
-        cursor: pointer;
-      }
+    .search-input {
+      margin: 0 10px;
+      padding: 5px 10px;
+      border: 1px solid var(--surface-border);
+      border-radius: 5px;
     }
-  } 
+  
+    .profile-icon {
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+  }
+  
+}
