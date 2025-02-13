@@ -22,11 +22,11 @@ export class LoginComponent {
   constructor(private authService: AuthService, private router: Router) {}
 
   onLogin(): void {
-    console.log('🔵 Enviando login para API:', { email: this.email, password: this.password });
+    console.log('Enviando login para API:', { email: this.email, password: this.password });
 
     this.authService.login(this.email, this.password).subscribe({
       next: (response) => {
-        console.log('🟢 Resposta da API:', response);
+        console.log('Resposta da API:', response);
 
         const token = response.token;
         const role = response.roles[0].authority;
@@ -34,19 +34,19 @@ export class LoginComponent {
         localStorage.setItem('token', token);
         localStorage.setItem('userRole', role);
 
-        console.log('🟢 Token salvo no LocalStorage:', token);
-        console.log('🟢 Role do usuário:', role);
+        console.log('Token salvo no LocalStorage:', token);
+        console.log('Role do usuário:', role);
 
         if (role === 'ROLE_ADMIN') {
-          console.log('🟢 Redirecionando para Dashboard Admin...');
+          console.log('Redirecionando para Dashboard Admin...');
           this.router.navigate(['/dashboard/admin']);
         } else {
-          console.log('🟢 Redirecionando para Dashboard Usuário...');
+          console.log('Redirecionando para Dashboard Usuário...');
           this.router.navigate(['/dashboard/user']);
         }
       },
       error: (err) => {
-        console.error('🔴 Erro ao fazer login:', err);
+        console.error('Erro ao fazer login:', err);
         this.errorMessage = 'Credenciais inválidas!';
       }
     });

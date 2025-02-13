@@ -1,30 +1,486 @@
+/* ================== INÍCIO: CONTAINER PRINCIPAL ================== */
 .dashboard-container {
+  padding: 2rem;
+  background-color: var(--background);
+  color: var(--text-primary);
+
+  h1 {
+    color: var(--primary);
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
     text-align: center;
-    padding: 2rem;
-    
-    h1 {
-      color: var(--primary);
-    }
+  }
+
+  p {
+    font-size: 1.2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  /* ================== INÍCIO: CARDS DE ATIVIDADES ================== */
+  .activity-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
   
-    .dashboard-actions {
-      margin-top: 1rem;
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
   
-      .btn {
-        padding: 0.8rem 1.5rem;
-        border: none;
-        border-radius: 5px;
-        background: var(--primary);
-        color: white;
-        cursor: pointer;
-        transition: background 0.3s ease;
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      }
   
-        &:hover {
-          background: wheat;
+      h3 {
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 1.2rem;
+      }
+  
+      .value {
+        font-size: 2.5rem;
+        color: var(--primary);
+        font-weight: bold;
+        margin: 0.5rem 0;
+      }
+  
+      .status {
+        font-size: 1rem;
+        font-weight: bold;
+        &.positivo {
+          color: #66BB6A; // Verde para positivo
+        }
+        &.negativo {
+          color: #EF5350; // Vermelho para negativo
         }
       }
     }
   }
-  
+  /* ================== FIM: CARDS DE ATIVIDADES ================== */
+
+  /* ================== INÍCIO: CONTEÚDO PRINCIPAL ================== */
+  .main-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+
+    .projects-section, .chart-section {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .projects-section {
+      h2 {
+        margin-bottom: 1rem;
+        color: var(--primary);
+        font-size: 1.5rem;
+      }
+
+      .project-list {
+        list-style: none;
+        padding: 0;
+
+        li {
+          padding: 0.8rem 1rem;
+          border-bottom: 1px solid var(--border-color);
+          cursor: pointer;
+          transition: background 0.3s ease;
+
+          &:hover {
+            background-color: var(--hover-bg);
+          }
+        }
+      }
+    }
+
+    .chart-section {
+      h3 {
+        margin-bottom: 1rem;
+        color: var(--primary);
+        font-size: 1.5rem;
+        text-align: center;
+      }
+    }
+  }
+  /* ================== FIM: CONTEÚDO PRINCIPAL ================== */
+
+  /* ================== INÍCIO: USUÁRIOS E PRIORIDADES ================== */
+  .users-section, .top-priority-users {
+    margin-top: 2rem;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+    h2, h3 {
+      color: var(--primary);
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      input {
+        flex: 1;
+        padding: 0.8rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px 0 0 8px;
+        outline: none;
+      }
+
+      button {
+        padding: 0.8rem 1rem;
+        border: none;
+        background-color: var(--primary);
+        color: white;
+        border-radius: 0 8px 8px 0;
+        cursor: pointer;
+        transition: background 0.3s ease;
+
+        &:hover {
+          background-color: var(--hover-primary);
+        }
+      }
+    }
+
+    .user-list, .priority-user-list {
+      list-style: none;
+      padding: 0;
+
+      li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+
+        .user-info {
+          span {
+            display: block;
+          }
+        }
+
+        .view-btn {
+          background-color: var(--primary);
+          border: none;
+          padding: 0.5rem;
+          border-radius: 8px;
+          color: white;
+          cursor: pointer;
+          transition: background 0.3s ease;
+
+          &:hover {
+            background-color: var(--hover-primary);
+          }
+        }
+      }
+    }
+  }
+  /* ================== FIM: USUÁRIOS E PRIORIDADES ================== */
+}
+/* ================== FIM: CONTAINER PRINCIPAL ================== */
+
+/* ================== INÍCIO: MODAL ================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  position: relative;
+
+  h2 {
+    margin-bottom: 1rem;
+    color: var(--primary);
+    font-size: 1.8rem;
+  }
+
+  .close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+  }
+
+  .modal-body {
+    margin-top: 1rem;
+
+    p {
+      margin-bottom: 0.5rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+
+      &:hover {
+        background-color: var(--hover-primary);
+      }
+    }
+  }
+}
+/* ================== FIM: MODAL ================== */
+
+/* ================== INÍCIO: MODAL DE PROJETO ================== */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.custom-modal {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: 12px;
+  width: 50vw;
+  max-width: 600px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+
+  button {
+    padding: 0.8rem 1.5rem;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--hover-primary);
+    }
+  }
+}
+/* ================== FIM: MODAL DE PROJETO ================== */
+
+/* ================== INÍCIO: CARD DE PROJETOS ================== */
+.project-card {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+  text-align: center;
+
+  h2 {
+    color: var(--primary);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .pagination-indicator {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    color: var(--text-secondary);
+  }
+
+  .project-table {
+    width: 100%;
+    overflow-x: auto;
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      margin-top: 1rem;
+
+      th, td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      th {
+        color: var(--primary);
+        font-weight: bold;
+      }
+
+      tr:hover {
+        background-color: var(--hover-bg);
+        cursor: pointer;
+      }
+
+      .view-btn {
+        background-color: var(--primary);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s ease;
+
+        &:hover {
+          background-color: var(--hover-primary);
+        }
+      }
+    }
+  }
+
+  .stepper-buttons {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+
+    button {
+      padding: 0.8rem 1.5rem;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+
+      &:disabled {
+        background-color: var(--border-color);
+        cursor: not-allowed;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: var(--hover-primary);
+      }
+    }
+  }
+}
+/* ================== FIM: CARD DE PROJETOS ================== */
+
+/* ================== INÍCIO: STEP DE PROJETOS ================== */
+.project-card {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+  text-align: center;
+
+  h2 {
+    color: var(--primary);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .pagination-indicator {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    color: var(--text-secondary);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+
+    th, td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    tr:hover {
+      background-color: var(--hover-bg);
+      cursor: pointer;
+    }
+
+    .view-btn {
+      background-color: var(--primary);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+
+      &:hover {
+        background-color: var(--hover-primary);
+      }
+    }
+  }
+
+  .stepper-buttons {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+
+    button {
+      padding: 0.8rem 1.5rem;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+
+      &:disabled {
+        background-color: var(--border-color);
+        cursor: not-allowed;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: var(--hover-primary);
+      }
+    }
+  }
+}
+/* ================== FIM: STEP DE PROJETOS ================== */

@@ -1,11 +1,104 @@
 <div class="dashboard-container">
-    <h1>Painel Administrativo</h1>
-    <p>Bem-vindo ao painel administrativo. Aqui você pode gerenciar usuários, projetos e atividades.</p>
-    
-    <div class="dashboard-actions">
-      <button class="btn">Gerenciar Usuários</button>
-      <button class="btn">Gerenciar Projetos</button>
-      <button class="btn">Relatórios</button>
+  <h1>Painel Administrativo</h1>
+  <p>Bem-vindo ao painel administrativo. Aqui você pode gerenciar usuários, projetos e atividades.</p>
+
+  <!-- Cards de Atividades -->
+  <div class="activity-cards">
+    <div class="card" (click)="abrirAtividades('ABERTA')">
+      <h3>Atividades Abertas</h3>
+      <p class="value">{{ atividadesAbertas.length }}</p>
+      <p class="status positivo">+12% ↑</p>
+    </div>
+    <div class="card" (click)="abrirAtividades('EM_ANDAMENTO')">
+      <h3>Atividades em Andamento</h3>
+      <p class="value">{{ atividadesEmAndamento.length }}</p>
+      <p class="status positivo">+8% ↑</p>
+    </div>
+    <div class="card" (click)="abrirAtividades('CONCLUIDA')">
+      <h3>Atividades Concluídas</h3>
+      <p class="value">{{ atividadesConcluidas.length }}</p>
+      <p class="status positivo">+20% ↑</p>
+    </div>
+    <div class="card" (click)="abrirAtividades('PAUSADA')">
+      <h3>Atividades Pausadas</h3>
+      <p class="value">{{ atividadesPausadas.length }}</p>
+      <p class="status negativo">-5% ↓</p>
     </div>
   </div>
-  
+
+  <!-- Exibição dos Projetos -->
+  <div class="projects-section">
+    <h2>Projetos</h2>
+    <!-- ================== INÍCIO: SEÇÃO DE PROJETOS ================== -->
+    <div class="project-card">
+      <h2>Projetos</h2>
+
+      <div class="pagination-indicator">
+        Página {{ stepIndex + 1 }} de {{ projetosPaginados.length }}
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Nome do Projeto</th>
+            <th>Status</th>
+            <th>Prioridade</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let projeto of projetosPaginados[stepIndex]">
+            <td>{{ projeto.nome }}</td>
+            <td>{{ projeto.status }}</td>
+            <td>{{ projeto.prioridade }}</td>
+            <td>
+              <button class="view-btn" (click)="abrirProjeto(projeto)">🔍</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Botões de navegação para alternar entre as seções -->
+      <div class="stepper-buttons">
+        <button (click)="voltarStep()" [disabled]="stepIndex === 0">← Voltar</button>
+        <button (click)="avancarStep()" [disabled]="stepIndex === projetosPaginados.length - 1">Avançar →</button>
+      </div>
+    </div>
+    <!-- ================== FIM: SEÇÃO DE PROJETOS ================== -->
+
+
+    <!-- ================== INÍCIO: MODAL DE PROJETO ================== -->
+    <div class="custom-modal-overlay" *ngIf="projetoDialogVisivel">
+      <div class="custom-modal">
+        <h2>Detalhes do Projeto</h2>
+        <div class="modal-body">
+          <label for="nome">Nome:</label>
+          <input id="nome" type="text" [(ngModel)]="projetoSelecionado.nome">
+
+          <label for="status">Status:</label>
+          <select id="status" [(ngModel)]="projetoSelecionado.status">
+            <option value="PLANEJAMENTO">Planejamento</option>
+            <option value="EM_ANDAMENTO">Em Andamento</option>
+            <option value="CONCLUIDO">Concluído</option>
+            <option value="CANCELADO">Cancelado</option>
+          </select>
+
+          <label for="descricao">Descrição:</label>
+          <textarea id="descricao" [(ngModel)]="projetoSelecionado.descricao"></textarea>
+
+          <div class="modal-buttons">
+            <button (click)="salvarProjeto()">Salvar</button>
+            <button (click)="fecharDialog()">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ================== FIM: MODAL DE PROJETO ================== -->
+
+
+    <!-- Gráfico de Status dos Projetos -->
+    <div class="data-section">
+      <h2>Status dos Projetos</h2>
+      <canvas id="graficoStatusProjetos"></canvas>
+    </div>
+  </div>
