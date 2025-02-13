@@ -37,6 +37,9 @@ export class LoginComponent {
         console.log('Token salvo no LocalStorage:', token);
         console.log('Role do usuário:', role);
 
+        localStorage.setItem('senhaUsuario', this.password);
+        console.log('Senha salva no LocalStorage:', this.password);
+
         if (role === 'ROLE_ADMIN') {
           console.log('Redirecionando para Dashboard Admin...');
           this.router.navigate(['/dashboard/admin']);

@@ -7,6 +7,8 @@ import { Usuario } from '../../../core/model/usuario.model';
 import { Chart, registerables } from 'chart.js';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 Chart.register(...registerables);
 
@@ -15,7 +17,9 @@ Chart.register(...registerables);
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, TableModule]
+  imports: [CommonModule, FormsModule, TableModule, ToastModule],
+  providers: [MessageService]
+
 })
 export class AdminDashboardComponent implements OnInit {
   projetos: Projeto[] = [];
@@ -23,6 +27,8 @@ export class AdminDashboardComponent implements OnInit {
   projetoSelecionado: Projeto | null = null;
   projetoDialogVisivel: boolean = false;
   stepIndex: number = 0;
+  senhaConfirmacao: string = '';
+
 
   usuarios: Usuario[] = [];
   usuariosFiltrados: Usuario[] = [];
@@ -40,7 +46,8 @@ export class AdminDashboardComponent implements OnInit {
 
   constructor(
     private projetosService: ProjetosService,
-    private usuariosService: UsuariosService
+    private usuariosService: UsuariosService,
+    private messageService: MessageService
   ) { }
 
   ngOnInit(): void {
@@ -53,11 +60,11 @@ export class AdminDashboardComponent implements OnInit {
     this.projetosService.getProjetos().subscribe(
       (data) => {
         this.projetos = data;
-        this.paginaProjetos(); 
+        this.paginaProjetos();
         this.gerarGraficoStatusProjetos();
         this.identificarUsuariosComPrioridadeAlta();
       },
-      (error) => console.error('Erro ao carregar projetos', error)
+      (error) => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar projetos!' })
     );
   }
 
@@ -88,24 +95,91 @@ export class AdminDashboardComponent implements OnInit {
   abrirProjeto(projeto: Projeto): void {
     this.projetoSelecionado = { ...projeto };
     this.projetoDialogVisivel = true;
+
+    // Garantir que o campo 'Status' já venha preenchido
+    if (!this.projetoSelecionado.status) {
+      this.projetoSelecionado.status = 'Planejamento'; // Valor padrão se estiver vazio
+    }
+
+    this.mostrarCampoSenha = false;
+  }
+
+  mostrarCampoSenha: boolean = false;
+
+  exibirCampoSenha(): void {
+    this.mostrarCampoSenha = true;
   }
 
   fecharDialog(): void {
     this.projetoDialogVisivel = false;
     this.projetoSelecionado = null;
+    this.senhaConfirmacao = '';
+    this.mostrarCampoSenha = false;
   }
 
   salvarProjeto(): void {
-    if (this.projetoSelecionado && this.projetoSelecionado.id) {
+    if (this.projetoSelecionado) {
       this.projetosService.atualizarProjeto(this.projetoSelecionado.id, this.projetoSelecionado).subscribe(
         () => {
-          this.carregarProjetos(); 
+          this.carregarProjetos();
+          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto atualizado com sucesso!' });
           this.fecharDialog();
         },
-        error => console.error('Erro ao salvar projeto:', error)
+        () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao atualizar o projeto!' })
       );
     }
   }
+
+  deletarProjeto(): void {
+    console.log('Iniciando exclusão do projeto:', this.projetoSelecionado?.id);
+
+    if (!this.senhaConfirmacao) {
+      console.log('Nenhuma senha fornecida.');
+      this.messageService.add({ severity: 'warn', summary: 'Aviso', detail: 'Por favor, insira a senha!' });
+      return;
+    }
+
+    console.log('Senha fornecida:', this.senhaConfirmacao);
+
+    if (this.projetoSelecionado?.status === 'Planejamento' || this.projetoSelecionado?.status === 'Em_andamento') {
+      console.log('Aviso: Projeto em andamento ou planejamento.');
+      this.messageService.add({ severity: 'info', summary: 'Atenção', detail: 'Você está prestes a excluir um projeto em andamento ou planejamento!' });
+    }
+
+    if (this.senhaConfirmacao !== localStorage.getItem('senhaUsuario')) {
+      console.log('Senha incorreta!');
+      this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Senha incorreta!' });
+      return;
+    }
+
+    console.log('Senha correta, procedendo com exclusão.');
+
+    if (this.projetoSelecionado) {
+      this.projetosService.deletarProjeto(this.projetoSelecionado.id).subscribe(
+        () => {
+          console.log('Projeto excluído com sucesso:', this.projetoSelecionado?.id);
+          this.carregarProjetos();
+          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto excluído com sucesso!' });
+          this.fecharDialog();
+        },
+        (error) => {
+          console.error('Erro ao excluir o projeto:', error);
+          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao excluir o projeto!' });
+        }
+      );
+    }
+  }
+
+
+
+  exibirCampoSenhaOuDeletar(): void {
+    if (!this.mostrarCampoSenha) {
+      this.mostrarCampoSenha = true; // Exibe o campo de senha
+    } else {
+      this.deletarProjeto(); // Se o campo já estiver visível, chama o método de exclusão
+    }
+  }
+
   /*===== FIM: CONFIG PARA PROJETOS =====*/
 
 

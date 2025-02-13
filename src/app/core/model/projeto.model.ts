@@ -4,7 +4,7 @@ export interface Projeto {
     id: number;
     nome: string;
     descricao: string;
-    status: 'Em andamento' | 'Concluído' | 'Pendente';
+    status: 'Em_andamento' | 'Concluído' | 'Cancelado' | 'Planejamento';
     dataInicio: Date;
     dataFim?: Date;
   }

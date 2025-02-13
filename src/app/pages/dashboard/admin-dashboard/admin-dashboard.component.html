@@ -83,11 +83,26 @@
             <option value="CANCELADO">Cancelado</option>
           </select>
 
+          <label for="prioridade">Prioridade:</label>
+          <select id="prioridade" [(ngModel)]="projetoSelecionado.prioridade">
+            <option value="ALTA">Alta</option>
+            <option value="MEDIA">Média</option>
+            <option value="BAIXA">Baixa</option>
+          </select>
+
           <label for="descricao">Descrição:</label>
           <textarea id="descricao" [(ngModel)]="projetoSelecionado.descricao"></textarea>
 
+          <!-- Campo de Senha só aparece após o clique -->
+          <div *ngIf="mostrarCampoSenha">
+            <label for="senha">Confirme sua senha:</label>
+            <input id="senha" type="password" [(ngModel)]="senhaConfirmacao">
+          </div>
+
           <div class="modal-buttons">
             <button (click)="salvarProjeto()">Salvar</button>
+            <button *ngIf="!mostrarCampoSenha" (click)="mostrarCampoSenha = true">Excluir</button>
+            <button *ngIf="mostrarCampoSenha" (click)="deletarProjeto()">Confirmar Exclusão</button>
             <button (click)="fecharDialog()">Fechar</button>
           </div>
         </div>
