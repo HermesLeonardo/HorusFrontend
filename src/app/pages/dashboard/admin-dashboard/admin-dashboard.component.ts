@@ -69,7 +69,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   paginaProjetos(): void {
-    const tamanhoPagina = 10;
+    const tamanhoPagina = 6;
     this.projetosPaginados = [];
 
     for (let i = 0; i < this.projetos.length; i += tamanhoPagina) {
