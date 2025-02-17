@@ -1,53 +1,68 @@
 .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 65px;
+  background-color: var(--header-bg);
+  z-index: 1000;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
-  background-color: var(--header-bg);
-  transition: margin-left 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease-in-out;
 
-  &.collapsed {
-    margin-left: 70px; // Quando o sidebar estiver retraído
+  /* Quando Sidebar Expandida */
+  &.sidebar-expanded {
+    .header-left {
+      margin-left: 240px; /* Ajuste para acompanhar sidebar expandida */
+    }
+  }
+
+  /* Quando Sidebar Colapsada */
+  &.sidebar-collapsed {
+    .header-left {
+      margin-left: 70px; /* Ajuste para sidebar retraída */
+    }
   }
 
   .header-left {
     display: flex;
     align-items: center;
+    transition: margin-left 0.3s ease;
 
     .menu-toggle {
       background: none;
       border: none;
       cursor: pointer;
       font-size: 1.5rem;
+      margin-right: 15px;
     }
 
-    .logo {
-      margin-left: 15px;
+    .page-title {
       font-size: 1.5rem;
       font-weight: bold;
+      color: var(--text-primary);
     }
   }
 
   .header-right {
     display: flex;
     align-items: center;
-  
-    app-theme-toggle {
-      margin-right: 15px; 
-    }
-  
+    gap: 15px;
+
     .search-input {
-      margin: 0 10px;
-      padding: 5px 10px;
+      padding: 6px 12px;
+      border-radius: 6px;
       border: 1px solid var(--surface-border);
-      border-radius: 5px;
     }
-  
-    .profile-icon {
-      font-size: 1.5rem;
-      cursor: pointer;
+
+    .profile-image {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
     }
   }
-  
 }

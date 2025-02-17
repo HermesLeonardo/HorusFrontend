@@ -1,6 +1,4 @@
-<div class="dashboard-container">
-  <h1>Painel Administrativo</h1>
-  <p>Bem-vindo ao painel administrativo. Aqui você pode gerenciar usuários, projetos e atividades.</p>
+<div class="dashboard-container" [ngClass]="{ 'expanded': !isCollapsed, 'collapsed': isCollapsed }">
 
   <!-- Cards de Atividades -->
   <div class="activity-cards">
@@ -26,17 +24,58 @@
     </div>
   </div>
 
-  <!-- Exibição dos Projetos -->
-  <div class="projects-section">
-    <h2>Projetos</h2>
-    <!-- ================== INÍCIO: SEÇÃO DE PROJETOS ================== -->
+  <!-- ================== INÍCIO: MODAL DE PROJETO ================== -->
+  <div class="custom-modal-overlay" *ngIf="projetoDialogVisivel">
+    <div class="custom-modal">
+      <h2>Detalhes do Projeto</h2>
+      <div class="modal-body">
+        <label for="nome">Nome:</label>
+        <input id="nome" type="text" [(ngModel)]="projetoSelecionado.nome">
+
+        <label for="status">Status:</label>
+        <select id="status" [(ngModel)]="projetoSelecionado.status">
+          <option value="PLANEJAMENTO">Planejamento</option>
+          <option value="EM_ANDAMENTO">Em Andamento</option>
+          <option value="CONCLUIDO">Concluído</option>
+          <option value="CANCELADO">Cancelado</option>
+        </select>
+
+        <label for="prioridade">Prioridade:</label>
+        <select id="prioridade" [(ngModel)]="projetoSelecionado.prioridade">
+          <option value="ALTA">Alta</option>
+          <option value="MEDIA">Média</option>
+          <option value="BAIXA">Baixa</option>
+        </select>
+
+        <label for="descricao">Descrição:</label>
+        <textarea id="descricao" [(ngModel)]="projetoSelecionado.descricao"></textarea>
+
+        <!-- Campo de Senha só aparece após o clique -->
+        <div *ngIf="mostrarCampoSenha">
+          <label for="senha">Confirme sua senha:</label>
+          <input id="senha" type="password" [(ngModel)]="senhaConfirmacao">
+        </div>
+
+        <div class="modal-buttons">
+          <button (click)="salvarProjeto()">Salvar</button>
+          <button *ngIf="!mostrarCampoSenha" (click)="mostrarCampoSenha = true">Excluir</button>
+          <button *ngIf="mostrarCampoSenha" (click)="deletarProjeto()">Confirmar Exclusão</button>
+          <button (click)="fecharDialog()">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ================== FIM: MODAL DE PROJETO ================== -->
+
+
+  <!-- ================== INÍCIO: SEÇÃO DE PROJETOS COM GRÁFICO ================== -->
+  <div class="projects-and-chart">
+    <!-- Card de Projetos Atualizado -->
     <div class="project-card">
       <h2>Projetos</h2>
-
       <div class="pagination-indicator">
         Página {{ stepIndex + 1 }} de {{ projetosPaginados.length }}
       </div>
-
       <table>
         <thead>
           <tr>
@@ -57,63 +96,19 @@
           </tr>
         </tbody>
       </table>
-
-      <!-- Botões de navegação para alternar entre as seções -->
       <div class="stepper-buttons">
         <button (click)="voltarStep()" [disabled]="stepIndex === 0">← Voltar</button>
         <button (click)="avancarStep()" [disabled]="stepIndex === projetosPaginados.length - 1">Avançar →</button>
       </div>
     </div>
-    <!-- ================== FIM: SEÇÃO DE PROJETOS ================== -->
 
-
-    <!-- ================== INÍCIO: MODAL DE PROJETO ================== -->
-    <div class="custom-modal-overlay" *ngIf="projetoDialogVisivel">
-      <div class="custom-modal">
-        <h2>Detalhes do Projeto</h2>
-        <div class="modal-body">
-          <label for="nome">Nome:</label>
-          <input id="nome" type="text" [(ngModel)]="projetoSelecionado.nome">
-
-          <label for="status">Status:</label>
-          <select id="status" [(ngModel)]="projetoSelecionado.status">
-            <option value="PLANEJAMENTO">Planejamento</option>
-            <option value="EM_ANDAMENTO">Em Andamento</option>
-            <option value="CONCLUIDO">Concluído</option>
-            <option value="CANCELADO">Cancelado</option>
-          </select>
-
-          <label for="prioridade">Prioridade:</label>
-          <select id="prioridade" [(ngModel)]="projetoSelecionado.prioridade">
-            <option value="ALTA">Alta</option>
-            <option value="MEDIA">Média</option>
-            <option value="BAIXA">Baixa</option>
-          </select>
-
-          <label for="descricao">Descrição:</label>
-          <textarea id="descricao" [(ngModel)]="projetoSelecionado.descricao"></textarea>
-
-          <!-- Campo de Senha só aparece após o clique -->
-          <div *ngIf="mostrarCampoSenha">
-            <label for="senha">Confirme sua senha:</label>
-            <input id="senha" type="password" [(ngModel)]="senhaConfirmacao">
-          </div>
-
-          <div class="modal-buttons">
-            <button (click)="salvarProjeto()">Salvar</button>
-            <button *ngIf="!mostrarCampoSenha" (click)="mostrarCampoSenha = true">Excluir</button>
-            <button *ngIf="mostrarCampoSenha" (click)="deletarProjeto()">Confirmar Exclusão</button>
-            <button (click)="fecharDialog()">Fechar</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- ================== FIM: MODAL DE PROJETO ================== -->
-
-
-    <!-- Gráfico de Status dos Projetos -->
-    <div class="data-section">
+    <!-- Gráfico de Status Atualizado -->
+    <div class="status-chart-section">
       <h2>Status dos Projetos</h2>
       <canvas id="graficoStatusProjetos"></canvas>
     </div>
   </div>
+  <!-- ================== FIM: SEÇÃO DE PROJETOS COM GRÁFICO ================== -->
+
+
+</div>

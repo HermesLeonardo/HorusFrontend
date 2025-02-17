@@ -1,51 +1,55 @@
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--bg-color);
-    color: var(--text-color);
-    transition: background 0.3s ease-in-out;
-  }
-  
-  :host {
-    display: block;
-    width: 100vw;
-    height: 100vh;
-  }
-  
-  .container {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  position: relative;
+}
 
-  .main-content {
-    margin-left: 250px;
-    transition: margin-left 0.3s ease;
-  
-    &.collapsed {
-      margin-left: 70px;
-    }
-  }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-  .main-content {
-    margin-left: 250px;
-    transition: margin-left 0.3s ease;
-  
-    &.collapsed {
-      margin-left: 0; // Remove a margem quando está na página de login
-    }
+:host {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main-content {
+  margin-left: 250px;
+  transition: margin-left 0.3s ease;
+
+  &.collapsed {
+    margin-left: 70px;
   }
-  
-  .login-theme-toggle {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 1000; // Garante que o botão fique visível na frente de outros elementos
+}
+
+.main-content {
+  margin-left: 250px;
+  transition: margin-left 0.3s ease;
+
+  &.collapsed {
+    margin-left: 0; // Remove a margem quando está na página de login
   }
-  
-  
-  
+}
+
+.login-theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1000; // Garante que o botão fique visível na frente de outros elementos
+}

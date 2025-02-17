@@ -43,6 +43,7 @@ export class AdminDashboardComponent implements OnInit {
 
   statusAtividadeSelecionado: string = '';
   filtroUsuario: string = '';
+  isCollapsed: any;
 
   constructor(
     private projetosService: ProjetosService,
@@ -54,6 +55,69 @@ export class AdminDashboardComponent implements OnInit {
     this.carregarProjetos();
     this.carregarUsuarios();
   }
+
+
+  /*===== COMEÇO: CONFIG PARA USUÁRIOS =====*/
+
+  carregarUsuarios(): void {
+    this.usuariosService.getUsuarios().subscribe(
+      (data) => {
+        this.usuarios = data;
+        this.usuariosFiltrados = [...this.usuarios];
+      },
+      (error) => console.error('Erro ao carregar usuários', error)
+    );
+  }
+
+  abrirUsuario(usuario: Usuario): void {
+    this.usuarioSelecionado = usuario;
+  }
+
+  abrirAtividades(status: string): void {
+    this.statusAtividadeSelecionado = status;
+    switch (status) {
+      case 'ABERTA':
+        this.atividadesSelecionadas = this.atividadesAbertas;
+        break;
+      case 'EM_ANDAMENTO':
+        this.atividadesSelecionadas = this.atividadesEmAndamento;
+        break;
+      case 'CONCLUIDA':
+        this.atividadesSelecionadas = this.atividadesConcluidas;
+        break;
+      case 'PAUSADA':
+        this.atividadesSelecionadas = this.atividadesPausadas;
+        break;
+    }
+  }
+
+  fecharModal(): void {
+    this.projetoSelecionado = null;
+    this.usuarioSelecionado = null;
+    this.atividadesSelecionadas = [];
+  }
+
+  atualizarFiltro(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.filtroUsuario = inputElement.value;
+    this.filtrarUsuarios();
+  }
+
+  filtrarUsuarios(): void {
+    const filtro = this.filtroUsuario.toLowerCase();
+    this.usuariosFiltrados = this.usuarios.filter(usuario =>
+      usuario.nome.toLowerCase().includes(filtro) || usuario.email.toLowerCase().includes(filtro)
+    );
+  }
+
+  identificarUsuariosComPrioridadeAlta(): void {
+    this.usuariosPrioridadeAlta = this.usuarios.filter(usuario =>
+      usuario.projetos?.some(projeto => projeto.prioridade === 'ALTA')
+    );
+  }
+
+  /*===== FIM: CONFIG PARA USUÁRIOS =====*/
+
 
   /*===== COMEÇO: CONFIG PARA PROJETOS =====*/
   carregarProjetos(): void {
@@ -183,64 +247,9 @@ export class AdminDashboardComponent implements OnInit {
   /*===== FIM: CONFIG PARA PROJETOS =====*/
 
 
-
-
-  carregarUsuarios(): void {
-    this.usuariosService.getUsuarios().subscribe(
-      (data) => {
-        this.usuarios = data;
-        this.usuariosFiltrados = [...this.usuarios];
-      },
-      (error) => console.error('Erro ao carregar usuários', error)
-    );
-  }
-
-  abrirUsuario(usuario: Usuario): void {
-    this.usuarioSelecionado = usuario;
-  }
-
-  abrirAtividades(status: string): void {
-    this.statusAtividadeSelecionado = status;
-    switch (status) {
-      case 'ABERTA':
-        this.atividadesSelecionadas = this.atividadesAbertas;
-        break;
-      case 'EM_ANDAMENTO':
-        this.atividadesSelecionadas = this.atividadesEmAndamento;
-        break;
-      case 'CONCLUIDA':
-        this.atividadesSelecionadas = this.atividadesConcluidas;
-        break;
-      case 'PAUSADA':
-        this.atividadesSelecionadas = this.atividadesPausadas;
-        break;
-    }
-  }
-
-  fecharModal(): void {
-    this.projetoSelecionado = null;
-    this.usuarioSelecionado = null;
-    this.atividadesSelecionadas = [];
-  }
-
-  atualizarFiltro(event: Event): void {
-    const inputElement = event.target as HTMLInputElement;
-    this.filtroUsuario = inputElement.value;
-    this.filtrarUsuarios();
-  }
-
-  filtrarUsuarios(): void {
-    const filtro = this.filtroUsuario.toLowerCase();
-    this.usuariosFiltrados = this.usuarios.filter(usuario =>
-      usuario.nome.toLowerCase().includes(filtro) || usuario.email.toLowerCase().includes(filtro)
-    );
-  }
-
-  identificarUsuariosComPrioridadeAlta(): void {
-    this.usuariosPrioridadeAlta = this.usuarios.filter(usuario =>
-      usuario.projetos?.some(projeto => projeto.prioridade === 'ALTA')
-    );
-  }
+  
+  /*===== INÍCIO: CONFIG PARA GRÁFICO DE STATUS =====*/
+  graficoStatusProjetos: Chart | null = null;
 
   gerarGraficoStatusProjetos(): void {
     const statusCounts = {
@@ -250,13 +259,20 @@ export class AdminDashboardComponent implements OnInit {
       CANCELADO: 0
     };
 
+    // Contabilizar o status dos projetos
     this.projetos.forEach(projeto => {
       if (statusCounts[projeto.status as keyof typeof statusCounts] !== undefined) {
         statusCounts[projeto.status as keyof typeof statusCounts]++;
       }
     });
 
-    new Chart('graficoStatusProjetos', {
+    // Destruir gráfico antigo se já existir 
+    if (this.graficoStatusProjetos) {
+      this.graficoStatusProjetos.destroy();
+    }
+
+    // Criar novo gráfico
+    this.graficoStatusProjetos = new Chart('graficoStatusProjetos', {
       type: 'pie',
       data: {
         labels: ['Planejamento', 'Em Andamento', 'Concluído', 'Cancelado'],
@@ -267,9 +283,37 @@ export class AdminDashboardComponent implements OnInit {
             statusCounts.CONCLUIDO,
             statusCounts.CANCELADO
           ],
-          backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#EF5350']
+          backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#EF5350'],
+          hoverBackgroundColor: ['#64B5F6', '#81C784', '#FFB74D', '#E57373'],
+          borderWidth: 1
         }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'bottom',
+            labels: {
+              font: {
+                size: 12,
+                family: 'Arial'
+              }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: (tooltipItem: any) => {
+                return `${tooltipItem.label}: ${tooltipItem.raw} projetos`;
+              }
+            }
+          }
+        }
       }
     });
   }
+  /*===== FIM: CONFIG PARA GRÁFICO DE STATUS =====*/
+
+
+
 }

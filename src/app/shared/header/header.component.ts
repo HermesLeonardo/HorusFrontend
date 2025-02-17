@@ -1,18 +1,49 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
 import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
+import { CommonModule } from '@angular/common'; // ✅ IMPORTANTE: Adicione isso!
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
   standalone: true,
-  imports: [ThemeToggleComponent]
+  imports: [CommonModule, ThemeToggleComponent] // ✅ Adicione CommonModule aqui!
 })
-export class HeaderComponent {
-  @Input() isSidebarCollapsed: boolean = false;  // Recebe o estado do sidebar
-  @Output() toggleSidebar = new EventEmitter<void>();  // Emite o evento para alternar o sidebar
+export class HeaderComponent implements OnInit {
+  @Input() isSidebarCollapsed: boolean = false;
+  @Output() toggleSidebar = new EventEmitter<void>();
+
+  paginaAtual: string = '';
+
+  constructor(private router: Router) {}
+
+  ngOnInit(): void {
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.definirPaginaAtual(event.urlAfterRedirects);
+      }
+    });
+  }
+
+  definirPaginaAtual(url: string): void {
+    const rota = url.split('/')[1]; 
+    switch (rota) {
+      case 'dashboard':
+        this.paginaAtual = 'DASHBOARD';
+        break;
+      case 'projetos':
+        this.paginaAtual = 'Projetos';
+        break;
+      case 'atividades':
+        this.paginaAtual = 'Atividades';
+        break;
+      default:
+        this.paginaAtual = 'Página Inicial';
+    }
+  }
 
   onToggleSidebar(): void {
-    this.toggleSidebar.emit();  // Dispara o evento para o AppComponent
+    this.toggleSidebar.emit();
   }
 }

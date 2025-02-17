@@ -1,13 +1,13 @@
-<header class="header" [class.collapsed]="isSidebarCollapsed">
+<header class="header" [ngClass]="{ 'sidebar-expanded': !isSidebarCollapsed, 'sidebar-collapsed': isSidebarCollapsed }">
   <div class="header-left">
     <button class="menu-toggle" (click)="onToggleSidebar()">
       <i class="pi pi-bars"></i>
     </button>
-    <h1 class="logo">Hórus</h1>
+    <p class="page-title">{{ paginaAtual }}</p>
   </div>
   <div class="header-right">
-    <app-theme-toggle></app-theme-toggle>  <!-- Agora está corretamente posicionado -->
+    <app-theme-toggle></app-theme-toggle>
     <input type="text" placeholder="Buscar projetos..." class="search-input">
-    <i class="pi pi-user profile-icon"></i>
+    <img src="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png" alt="Perfil" class="profile-image">
   </div>
 </header>
