@@ -247,11 +247,24 @@ export class AdminDashboardComponent implements OnInit {
   /*===== FIM: CONFIG PARA PROJETOS =====*/
 
 
-  
+
+  /* ===== NOVA FUNÇÃO: RETRAIR/EXIBIR GRÁFICO ===== */
+mostrarGrafico: boolean = true;
+
+alternarGrafico(): void {
+  this.mostrarGrafico = !this.mostrarGrafico;
+  if (this.mostrarGrafico) {
+    setTimeout(() => {
+      this.gerarGraficoStatusProjetos(true);
+    }, 300); // Delay para reaparecer suavemente
+  }
+}
+  /* ===== FIM: NOVA FUNÇÃO: RETRAIR/EXIBIR GRÁFICO ===== */
+
+
   /*===== INÍCIO: CONFIG PARA GRÁFICO DE STATUS =====*/
   graficoStatusProjetos: Chart | null = null;
-
-  gerarGraficoStatusProjetos(): void {
+  gerarGraficoStatusProjetos(recriar: boolean = false): void {
     const statusCounts = {
       PLANEJAMENTO: 0,
       EM_ANDAMENTO: 0,
@@ -259,19 +272,25 @@ export class AdminDashboardComponent implements OnInit {
       CANCELADO: 0
     };
 
-    // Contabilizar o status dos projetos
+    // Contabilizar os status corretamente
     this.projetos.forEach(projeto => {
-      if (statusCounts[projeto.status as keyof typeof statusCounts] !== undefined) {
-        statusCounts[projeto.status as keyof typeof statusCounts]++;
+      const statusNormalizado = projeto.status?.toUpperCase().replace(/\s+/g, '_');
+      if (statusCounts[statusNormalizado as keyof typeof statusCounts] !== undefined) {
+        statusCounts[statusNormalizado as keyof typeof statusCounts]++;
       }
     });
 
-    // Destruir gráfico antigo se já existir 
+    // Se o gráfico já existe, destruir antes de recriar
     if (this.graficoStatusProjetos) {
       this.graficoStatusProjetos.destroy();
+      this.graficoStatusProjetos = null;
     }
 
-    // Criar novo gráfico
+    if (!recriar && !this.mostrarGrafico) {
+      return;
+    }
+
+    // Criar um novo gráfico
     this.graficoStatusProjetos = new Chart('graficoStatusProjetos', {
       type: 'pie',
       data: {
@@ -293,27 +312,11 @@ export class AdminDashboardComponent implements OnInit {
         plugins: {
           legend: {
             display: true,
-            position: 'bottom',
-            labels: {
-              font: {
-                size: 12,
-                family: 'Arial'
-              }
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: (tooltipItem: any) => {
-                return `${tooltipItem.label}: ${tooltipItem.raw} projetos`;
-              }
-            }
+            position: 'bottom'
           }
         }
       }
     });
   }
   /*===== FIM: CONFIG PARA GRÁFICO DE STATUS =====*/
-
-
-
 }

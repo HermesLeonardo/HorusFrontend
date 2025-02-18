@@ -67,48 +67,52 @@
   </div>
   <!-- ================== FIM: MODAL DE PROJETO ================== -->
 
+<!-- ================== SEÇÃO DE PROJETOS COM GRÁFICO ================== -->
+<div class="projects-and-chart" [ngClass]="{ 'expand': mostrarGrafico, 'collapsed': !mostrarGrafico }">
+  <!-- CARD DE PROJETOS -->
+  <div class="project-card">
+    <!-- Botão de Toggle: Dentro do Card -->
+    <button class="toggle-chart-btn" (click)="alternarGrafico()"
+      [title]="mostrarGrafico ? 'Ocultar Gráfico' : 'Mostrar Gráfico'">
+      {{ mostrarGrafico ? '➡' : '⬅' }}
+    </button>
 
-  <!-- ================== INÍCIO: SEÇÃO DE PROJETOS COM GRÁFICO ================== -->
-  <div class="projects-and-chart">
-    <!-- Card de Projetos Atualizado -->
-    <div class="project-card">
-      <h2>Projetos</h2>
-      <div class="pagination-indicator">
-        Página {{ stepIndex + 1 }} de {{ projetosPaginados.length }}
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Nome do Projeto</th>
-            <th>Status</th>
-            <th>Prioridade</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let projeto of projetosPaginados[stepIndex]">
-            <td>{{ projeto.nome }}</td>
-            <td>{{ projeto.status }}</td>
-            <td>{{ projeto.prioridade }}</td>
-            <td>
-              <button class="view-btn" (click)="abrirProjeto(projeto)">🔍</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="stepper-buttons">
-        <button (click)="voltarStep()" [disabled]="stepIndex === 0">← Voltar</button>
-        <button (click)="avancarStep()" [disabled]="stepIndex === projetosPaginados.length - 1">Avançar →</button>
-      </div>
+    <h2>Projetos</h2>
+    <div class="pagination-indicator">
+      Página {{ stepIndex + 1 }} de {{ projetosPaginados.length }}
     </div>
-
-    <!-- Gráfico de Status Atualizado -->
-    <div class="status-chart-section">
-      <h2>Status dos Projetos</h2>
-      <canvas id="graficoStatusProjetos"></canvas>
-    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Nome do Projeto</th>
+          <th>Status</th>
+          <th>Prioridade</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let projeto of projetosPaginados[stepIndex]">
+          <td>{{ projeto.nome }}</td>
+          <td>{{ projeto.status }}</td>
+          <td>{{ projeto.prioridade }}</td>
+          <td>
+            <button class="view-btn" (click)="abrirProjeto(projeto)">🔍</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
-  <!-- ================== FIM: SEÇÃO DE PROJETOS COM GRÁFICO ================== -->
+
+  <!-- GRÁFICO -->
+  <div class="status-chart-section" [ngClass]="{ 'oculto': !mostrarGrafico }">
+    <h2>Status dos Projetos</h2>
+    <canvas id="graficoStatusProjetos"></canvas>
+  </div>
+</div>
+<!-- ================== FIM: SEÇÃO DE PROJETOS COM GRÁFICO ================== -->
+
+
+
 
 
 </div>

@@ -3,14 +3,14 @@
   padding-top: 80px;
   padding-left: 20px;
   padding-right: 20px;
-  transition: margin-left 0.3s ease; 
+  transition: margin-left 0.3s ease;
 
   &.expanded {
-    margin-left: 5px; 
+    margin-left: 5px;
   }
 
   &.collapsed {
-    margin-left: 2px; 
+    margin-left: 2px;
   }
 
   h1 {
@@ -366,23 +366,24 @@
 
 /* ================== INÍCIO: CARD DE PROJETOS ================== */
 .project-card {
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-top: 2rem;
-  text-align: center;
+  background-color: var(--surface-card);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-color);
+  height: 100%;
+  min-width: 500px;
 
   h2 {
+    font-size: 1.6rem;
     color: var(--primary);
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
   }
 
   .pagination-indicator {
-    margin-bottom: 1rem;
     font-size: 1rem;
+    font-weight: 500;
     color: var(--text-secondary);
+    margin-bottom: 1rem;
   }
 
   .project-table {
@@ -540,44 +541,162 @@
 
 /* ================== FIM: STEP DE PROJETOS ================== */
 
-//* ================== INÍCIO: SEÇÃO PROJETOS COM GRÁFICO ================== */
+/* ================== SEÇÃO PROJETOS COM GRÁFICO ================== */
 .projects-and-chart {
   display: flex;
-  justify-content: space-between;
+  gap: 1.5rem;
   align-items: flex-start;
-  gap: 1.5rem; /* Espaço entre o card de projetos e o gráfico */
-  margin-top: 2rem;
+  transition: all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+  position: relative;
+  align-items: stretch;
+  margin-top: auto;
 
+  /* Card de Projetos */
   .project-card {
-    flex: 2;
-    min-width: 400px;
-    padding: 1rem;
-    border-radius: 12px;
+    flex: 3;
+    transition:
+      flex 0.6s cubic-bezier(0.4, 0.0, 0.2, 1),
+      max-width 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+    position: relative;
+    max-width: 100%;
   }
 
+  /* Gráfico */
   .status-chart-section {
     flex: 1;
-    max-width: 300px;
-    padding: 1rem;
-    border-radius: 12px;
+    max-width: 25%;
+    transition:
+      max-width 0.6s cubic-bezier(0.4, 0.0, 0.2, 1),
+      opacity 0.4s ease-in-out,
+      transform 0.5s ease-in-out;
+    min-height: 100%;
+    justify-content: flex-start;
+    height: 500px;
 
-    canvas {
-      max-width: 250px;
-      height: 250px;
+    background-color: #0f1522;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color);
+  }
+
+  .status-chart-section h2 {
+    font-size: 1.6rem;
+    color: var(--primary); /* Mesma cor do título de projetos */
+    font-weight: bold;
+    text-align: left;
+    align-self: flex-start; /* Alinha à esquerda */
+    margin-bottom: 1rem;
+  }
+
+  /* Botão de Alternância */
+  .toggle-chart-btn {
+    position: absolute;
+    top: 1rem;
+    right: 4.5rem;
+    z-index: 15;
+    padding: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    background-color: var(--primary);
+    color: white;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out, background-color 0.3s;
+
+    &:hover {
+      background-color: var(--hover-primary);
+      transform: scale(1.1);
+    }
+  }
+
+  /* ===================== ESTADOS DE EXPANSÃO ===================== */
+
+  /* Estado Expandido (Gráfico visível) */
+  &.expand {
+    .project-card {
+      flex: 3;
+      max-width: 75%;
+      transition: flex 0.6s ease-in-out, max-width 0.6s ease-in-out;
+    }
+
+    .status-chart-section {
+      flex: 1;
+      max-width: 25%;
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+  }
+
+  /* Estado Colapsado (Gráfico oculto) */
+  &.collapsed {
+    .project-card {
+      flex: 4;
+      max-width: 100%;
+      transition: flex 0.6s ease-in-out, max-width 0.6s ease-in-out;
+    }
+
+    .status-chart-section {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(20px);
+      max-width: 0;
+      flex: 0;
     }
   }
 }
 
-/* Responsividade para telas menores */
+/* Responsividade */
 @media (max-width: 1024px) {
   .projects-and-chart {
     flex-direction: column;
-    align-items: center;
 
-    .status-chart-section {
-      margin-top: 1.5rem;
+    .project-card {
+      max-width: 100%;
+    }
+
+    .toggle-chart-btn {
+      right: 1rem;
     }
   }
 }
-/* ================== FIM: SEÇÃO PROJETOS COM GRÁFICO ================== */
 
+@media (max-width: 768px) {
+  .projects-and-chart {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .status-chart-section {
+    display: block;
+    /* Mostra como bloco (ocupa 100%) */
+    width: 100px;
+    /* Ocupar toda a largura */
+    height: 100px;
+    /* Altura ajustável */
+    margin: 1.5rem 0;
+    /* Espaçamento entre os cards */
+    padding: 1.5rem;
+    /* Respiro interno */
+    background-color: var(--surface-card);
+    /* Fundo igual ao card de projetos */
+    border-radius: 12px;
+    /* Cantos arredondados */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Sombra suave */
+  }
+
+  .status-chart-section h2 {
+    color: var(--primary);
+    /* Cor do título igual ao card de projetos */
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+
+}
