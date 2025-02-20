@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sidebar',
@@ -9,9 +10,9 @@ import { Component, Input } from '@angular/core';
 export class SidebarComponent {
   @Input() isCollapsed: boolean = false;
 
-  // Apenas as rotas funcionais estão habilitadas
-  atividadesDisponivel = false;
-  horasDisponivel = false;
-  relatoriosDisponivel = false;
-  usuariosDisponivel = false;
+  constructor(private router: Router) {}
+
+ navegar(rota: string): void {
+    this.router.navigate([rota]);
+  }
 }
