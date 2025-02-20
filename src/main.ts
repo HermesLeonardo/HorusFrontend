@@ -10,6 +10,6 @@ bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes),
     provideHttpClient(),
-    importProvidersFrom(FormsModule)  // Importando o FormsModule para toda a aplicação
+    importProvidersFrom(FormsModule)  
   ]
 }).catch(err => console.error(err));

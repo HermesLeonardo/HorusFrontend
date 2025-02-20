@@ -7,5 +7,11 @@ import { Component, Input } from '@angular/core';
   standalone: true
 })
 export class SidebarComponent {
-  @Input() isCollapsed: boolean = false;  
+  @Input() isCollapsed: boolean = false;
+
+  // Apenas as rotas funcionais estão habilitadas
+  atividadesDisponivel = false;
+  horasDisponivel = false;
+  relatoriosDisponivel = false;
+  usuariosDisponivel = false;
 }

@@ -66,3 +66,32 @@ nav ul {
     }
   }
 }
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+
+  li {
+    padding: 10px;
+    cursor: pointer;
+
+    a {
+      text-decoration: none;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+
+      span {
+        color: gray;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+    }
+  }
+}

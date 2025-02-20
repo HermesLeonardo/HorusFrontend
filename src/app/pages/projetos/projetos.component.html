@@ -1,1 +1,72 @@
-<p>projetos works!</p>
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="projetos-container">
+  <h2>Gerenciamento de Projetos</h2>
+
+  <button pButton label="Novo Projeto" icon="pi pi-plus" (click)="abrirDialog()"></button>
+
+  <p-table [value]="projetos" [paginator]="true" [rows]="5" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nome</th>
+        <th>Status</th>
+        <th>Prioridade</th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-projeto>
+      <tr>
+        <td>{{ projeto.nome }}</td>
+        <td>{{ formatarStatus(projeto.status) }}</td>
+        <td>{{ projeto.prioridade }}</td>
+        <td>
+          <button pButton icon="pi pi-pencil" class="p-button-text" (click)="abrirDialog(projeto)"></button>
+          <button pButton icon="pi pi-trash" class="p-button-danger p-button-text" (click)="confirmarExclusao(projeto)"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-dialog [(visible)]="exibirDialog" header="Projeto" [modal]="true" [closable]="false">
+    <div class="form-container">
+      <label>Nome:</label>
+      <input pInputText [(ngModel)]="projetoSelecionado!.nome" />
+
+      <label>Descrição:</label>
+      <textarea pInputTextarea [(ngModel)]="projetoSelecionado!.descricao"></textarea>
+
+      <label>Data Início:</label>
+      <input type="date" pInputText [(ngModel)]="projetoSelecionado!.dataInicio" />
+
+      <label>Data Fim:</label>
+      <input type="date" pInputText [(ngModel)]="projetoSelecionado!.dataFim" />
+
+      <label>Status:</label>
+      <p-dropdown 
+        [options]="[
+          { label: 'Planejamento', value: 'Planejamento' },
+          { label: 'Em andamento', value: 'Em_andamento' },
+          { label: 'Concluído', value: 'Concluído' },
+          { label: 'Cancelado', value: 'Cancelado' }
+        ]" 
+        [(ngModel)]="projetoSelecionado!.status" optionLabel="label" optionValue="value">
+      </p-dropdown>
+
+      <label>Prioridade:</label>
+      <p-dropdown 
+        [options]="[
+          { label: 'Alta', value: 'ALTA' },
+          { label: 'Média', value: 'MEDIA' },
+          { label: 'Baixa', value: 'BAIXA' }
+        ]" 
+        [(ngModel)]="projetoSelecionado!.prioridade" optionLabel="label" optionValue="value">
+      </p-dropdown>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button pButton label="Salvar" icon="pi pi-check" (click)="salvarProjeto()"></button>
+      <button pButton label="Cancelar" icon="pi pi-times" (click)="exibirDialog = false"></button>
+    </ng-template>
+  </p-dialog>
+</div>

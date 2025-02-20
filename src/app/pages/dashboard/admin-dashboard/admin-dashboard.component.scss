@@ -545,54 +545,64 @@
 .projects-and-chart {
   display: flex;
   gap: 1.5rem;
-  align-items: flex-start;
+  align-items: stretch; 
   transition: all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
   position: relative;
-  align-items: stretch;
   margin-top: auto;
 
-  /* Card de Projetos */
+  .project-card,
+  .status-chart-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%; 
+  }
+
   .project-card {
     flex: 3;
-    transition:
-      flex 0.6s cubic-bezier(0.4, 0.0, 0.2, 1),
-      max-width 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transition: flex 0.6s cubic-bezier(0.4, 0.0, 0.2, 1), max-width 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
     position: relative;
     max-width: 100%;
   }
 
-  /* Gráfico */
   .status-chart-section {
     flex: 1;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    height: 100% !important;
     max-width: 25%;
-    transition:
-      max-width 0.6s cubic-bezier(0.4, 0.0, 0.2, 1),
-      opacity 0.4s ease-in-out,
-      transform 0.5s ease-in-out;
-    min-height: 100%;
-    justify-content: flex-start;
-    height: 500px;
-
+    padding: 1rem 1rem 1.5rem;
+    transition: max-width 0.6s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.4s ease-in-out, transform 0.5s ease-in-out;
     background-color: #0f1522;
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     border: 1px solid var(--border-color);
   }
 
-  .status-chart-section h2 {
-    font-size: 1.6rem;
-    color: var(--primary); /* Mesma cor do título de projetos */
-    font-weight: bold;
-    text-align: left;
-    align-self: flex-start; /* Alinha à esquerda */
+  canvas {
+    flex-grow: 0;
+    max-height: 90%;
+    width: auto;
+    display: block;
+    margin: auto; 
     margin-bottom: 1rem;
   }
 
-  /* Botão de Alternância */
+  .status-chart-section h2 {
+    font-size: 1.6rem;
+    color: var(--primary);
+    font-weight: bold;
+    text-align: left;
+    align-self: flex-start;
+    margin-bottom: -3rem;
+  }
+
   .toggle-chart-btn {
     position: absolute;
     top: 1rem;
-    right: 4.5rem;
+    right: 1rem;
     z-index: 15;
     padding: 0.5rem;
     width: 2.5rem;
@@ -613,9 +623,6 @@
     }
   }
 
-  /* ===================== ESTADOS DE EXPANSÃO ===================== */
-
-  /* Estado Expandido (Gráfico visível) */
   &.expand {
     .project-card {
       flex: 3;
@@ -623,16 +630,20 @@
       transition: flex 0.6s ease-in-out, max-width 0.6s ease-in-out;
     }
 
+    /*Tämanho do card de graficos enquanto expandido*/
     .status-chart-section {
       flex: 1;
       max-width: 25%;
       opacity: 1;
       visibility: visible;
-      transform: translateX(0);
+      transform: translate(0px, 48px);
+      max-height: 630px;
+
+      flex-direction: column; 
+      justify-content: flex-start; 
     }
   }
 
-  /* Estado Colapsado (Gráfico oculto) */
   &.collapsed {
     .project-card {
       flex: 4;
@@ -649,6 +660,8 @@
     }
   }
 }
+
+
 
 /* Responsividade */
 @media (max-width: 1024px) {
@@ -673,21 +686,13 @@
 
   .status-chart-section {
     display: block;
-    /* Mostra como bloco (ocupa 100%) */
     width: 100px;
-    /* Ocupar toda a largura */
     height: 100px;
-    /* Altura ajustável */
     margin: 1.5rem 0;
-    /* Espaçamento entre os cards */
     padding: 1.5rem;
-    /* Respiro interno */
     background-color: var(--surface-card);
-    /* Fundo igual ao card de projetos */
     border-radius: 12px;
-    /* Cantos arredondados */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    /* Sombra suave */
   }
 
   .status-chart-section h2 {
@@ -698,5 +703,273 @@
     margin-bottom: 1rem;
   }
 
-
 }
+
+/* ===================== FIM: ESTADOS DE EXPANSÃO ===================== */
+
+
+
+/* ================== SEÇÃO DE USUÁRIOS COM ÚLTIMOS LOGINS ================== */
+
+.projects-and-chart {
+  margin-bottom: 2rem;
+  align-items: stretch;
+}
+
+.users-and-logins {
+  display: flex;
+  gap: 1.5rem;
+  align-items: stretch;
+  justify-content: space-between;
+  min-height: 400px;
+
+  /*Card principal do ULTIMOS LOGINS*/
+  .recent-users-card {
+    flex: 3 !important;
+
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    height: auto;
+    max-height: 450px;
+  }
+
+  .last-logins-card {
+    flex: 1 !important;
+
+    max-height: 450px; 
+  }
+  
+
+  /* Expandido (Usuários Recentes visíveis) */
+  .users-and-logins.expand {
+    .recent-users-card {
+      flex: 3;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .last-logins-card {
+      flex: 1;
+    }
+  }
+
+  /* Colapsado (Últimos Logins ocupando tudo) */
+  .users-and-logins.collapsed {
+    .recent-users-card {
+      flex: 0;
+      opacity: 0;
+      visibility: hidden;
+
+    }
+
+    .last-logins-card {
+      flex: 4;
+      width: 100%;
+
+    }
+  }
+
+  .recent-users-card,
+  .last-logins-card {
+    position: relative !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    min-height: 450px;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+
+    
+
+
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    /* Garante que ambos os cards tenham a mesma altura */
+    height: auto;
+    /* Ajusta conforme o conteúdo */
+
+
+    h2 {
+      font-size: 1.6rem;
+      color: var(--primary);
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    .search-bar {
+      display: flex;
+      margin-bottom: 1rem;
+      position: relative;
+
+      input {
+        flex: 1;
+        padding: 0.8rem;
+        border-radius: 8px 0 0 8px;
+        border: 1px solid var(--border-color);
+      }
+
+      button {
+        padding: 0.8rem;
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 0 8px 8px 0;
+        cursor: pointer;
+
+        &:hover {
+          background-color: var(--hover-primary);
+        }
+      }
+    }
+
+    .user-list {
+      list-style: none;
+      padding: 0;
+      max-height: 250px;
+      overflow-y: auto;
+      
+
+      li {
+        padding: 0.8rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        
+
+        .view-btn {
+          padding: 0.5rem;
+          border-radius: 8px;
+          background-color: var(--primary);
+          color: white;
+          cursor: pointer;
+
+          &:hover {
+            background-color: var(--hover-primary);
+          }
+        }
+      }
+    }
+  }
+
+  .last-logins-card {
+    flex: 2;
+    padding: 1.5rem;
+    background-color: var(--surface-card);
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+
+
+    h2 {
+      font-size: 1.6rem;
+      color: var(--primary);
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    .priority-user-list {
+      list-style: none;
+      padding: 0;
+      max-height: 250px;
+      overflow-y: auto;
+
+      li {
+        padding: 0.8rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .toggle-users-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    background-color: var(--primary);
+    color: white;
+    border: 2px solid var(--primary);
+    border: none;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out, background-color 0.3s;
+
+    &:hover {
+      background-color: var(--hover-primary);
+      transform: scale(1.1);
+    }
+  }
+
+  /* 🔥 FORÇA A VISIBILIDADE DO BOTÃO */
+  .toggle-users-btn {
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 1000;
+  }
+
+
+  /* 🔥 FORÇA O POSICIONAMENTO PARA EVITAR SOBREPOSIÇÕES */
+  .users-and-logins {
+    position: relative;
+  }
+
+
+
+
+
+  &.expand {
+    .recent-users-card {
+      flex: 3;
+      margin-bottom: 2rem;
+    }
+
+    .last-logins-card {
+      flex: 2;
+    }
+  }
+
+  &.collapsed {
+    .recent-users-card {
+      flex: 0;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .last-logins-card {
+      flex: 1;
+      width: 100%;
+    }
+  }
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .users-and-logins {
+    flex-direction: column;
+
+    .recent-users-card,
+    .last-logins-card {
+      flex: 1;
+      max-width: 100%;
+    }
+  }
+}
+
+/* ================== FIM: SEÇÃO DE USUÁRIOS COM ÚLTIMOS LOGINS ================== */

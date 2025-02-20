@@ -6,6 +6,7 @@ export interface Usuario {
     email: string;
     role: 'ADMIN' | 'USER';
     ativo: boolean;
+    ultimoLogin: Date;
     projetos?: Projeto[];
   }
   

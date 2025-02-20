@@ -67,52 +67,99 @@
   </div>
   <!-- ================== FIM: MODAL DE PROJETO ================== -->
 
-<!-- ================== SEÇÃO DE PROJETOS COM GRÁFICO ================== -->
-<div class="projects-and-chart" [ngClass]="{ 'expand': mostrarGrafico, 'collapsed': !mostrarGrafico }">
-  <!-- CARD DE PROJETOS -->
-  <div class="project-card">
-    <!-- Botão de Toggle: Dentro do Card -->
-    <button class="toggle-chart-btn" (click)="alternarGrafico()"
-      [title]="mostrarGrafico ? 'Ocultar Gráfico' : 'Mostrar Gráfico'">
-      {{ mostrarGrafico ? '➡' : '⬅' }}
-    </button>
+  <!-- ================== SEÇÃO DE PROJETOS COM GRÁFICO ================== -->
+  <div class="projects-and-chart" [ngClass]="{ 'expand': mostrarGrafico, 'collapsed': !mostrarGrafico }">
+    <!-- CARD DE PROJETOS -->
+    <div class="project-card">
+      <!-- Botão de Toggle: Dentro do Card -->
+      <button class="toggle-chart-btn" (click)="alternarGrafico()"
+        [title]="mostrarGrafico ? 'Ocultar Gráfico' : 'Mostrar Gráfico'">
+        {{ mostrarGrafico ? '➡' : '⬅' }}
+      </button>
 
-    <h2>Projetos</h2>
-    <div class="pagination-indicator">
-      Página {{ stepIndex + 1 }} de {{ projetosPaginados.length }}
+      <h2>Projetos</h2>
+      <div class="pagination-indicator">
+        Página {{ stepIndex + 1 }} de {{ projetosPaginados.length }}
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Nome do Projeto</th>
+            <th>Status</th>
+            <th>Prioridade</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let projeto of projetosPaginados[stepIndex]">
+            <td>{{ projeto.nome }}</td>
+            <td>{{ projeto.status }}</td>
+            <td>{{ projeto.prioridade }}</td>
+            <td>
+              <button class="view-btn" (click)="abrirProjeto(projeto)">🔍</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="stepper-buttons">
+        <button (click)="voltarStep()" [disabled]="stepIndex === 0">⬅</button>
+        <button (click)="avancarStep()" [disabled]="stepIndex >= projetosPaginados.length - 1">➡</button>
+      </div>
+
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Nome do Projeto</th>
-          <th>Status</th>
-          <th>Prioridade</th>
-          <th>Ação</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let projeto of projetosPaginados[stepIndex]">
-          <td>{{ projeto.nome }}</td>
-          <td>{{ projeto.status }}</td>
-          <td>{{ projeto.prioridade }}</td>
-          <td>
-            <button class="view-btn" (click)="abrirProjeto(projeto)">🔍</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+
+    <!-- GRÁFICO -->
+    <div class="status-chart-section" [ngClass]="{ 'oculto': !mostrarGrafico }">
+      <h2>Status dos Projetos</h2>
+      <canvas id="graficoStatusProjetos"></canvas>
+    </div>
   </div>
+  <!-- ================== FIM: SEÇÃO DE PROJETOS COM GRÁFICO ================== -->
 
-  <!-- GRÁFICO -->
-  <div class="status-chart-section" [ngClass]="{ 'oculto': !mostrarGrafico }">
-    <h2>Status dos Projetos</h2>
-    <canvas id="graficoStatusProjetos"></canvas>
+  <!-- ================== SEÇÃO DE USUÁRIOS COM ÚLTIMOS LOGINS ================== -->
+  <div class="users-and-logins" [ngClass]="{ 'expand': mostrarUsuarios, 'collapsed': !mostrarUsuarios }">
+
+    <!-- CARD DE USUÁRIOS RECENTES -->
+    <div class="recent-users-card">
+      <button class="toggle-users-btn" (click)="alternarUsuarios()"
+        [title]="mostrarUsuarios ? 'Ocultar Usuários' : 'Mostrar Últimos Logins'">
+        {{ mostrarUsuarios ? '➡' : '⬅' }}
+      </button>
+      <h2>Usuários Recentes</h2>
+
+      <!-- Barra de Pesquisa sem ngModel -->
+      <div class="search-bar">
+        <input type="text" placeholder="Buscar usuário..." #usuarioFiltro
+          (input)="atualizarFiltro(usuarioFiltro.value)" />
+        <button (click)="filtrarUsuarios()">🔍</button>
+      </div>
+
+      <!-- Lista de Usuários Filtrados -->
+      <ul class="user-list">
+        <li *ngFor="let usuario of usuariosFiltrados">
+          <div class="user-info">
+            <span><strong>{{ usuario.nome }}</strong></span>
+            <span>{{ usuario.email }}</span>
+          </div>
+          <button class="view-btn" (click)="abrirUsuario(usuario)">🔍</button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CARD DE ÚLTIMOS LOGINS -->
+    <div class="last-logins-card">
+      <h2>Últimos Logins</h2>
+      <ul class="user-list">
+        <li *ngFor="let usuario of usuariosLoginsRecentes">
+          <div class="user-info">
+            <span><strong>{{ usuario.nome }}</strong></span>
+            <span>Último Login: {{ usuario.ultimoLogin | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </li>
+      </ul>
+    </div>
   </div>
-</div>
-<!-- ================== FIM: SEÇÃO DE PROJETOS COM GRÁFICO ================== -->
-
-
-
-
+  <!-- ================== FIM: SEÇÃO DE USUÁRIOS COM ÚLTIMOS LOGINS ================== -->
 
 </div>

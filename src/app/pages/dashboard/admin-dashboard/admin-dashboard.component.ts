@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProjetosService } from '../../../core/services/projetos.service';
 import { UsuariosService } from '../../../core/services/usuarios.service';
@@ -18,7 +18,8 @@ Chart.register(...registerables);
   styleUrls: ['./admin-dashboard.component.scss'],
   standalone: true,
   imports: [CommonModule, FormsModule, TableModule, ToastModule],
-  providers: [MessageService]
+  providers: [MessageService],
+  encapsulation: ViewEncapsulation.Emulated
 
 })
 export class AdminDashboardComponent implements OnInit {
@@ -45,6 +46,7 @@ export class AdminDashboardComponent implements OnInit {
   filtroUsuario: string = '';
   isCollapsed: any;
 
+
   constructor(
     private projetosService: ProjetosService,
     private usuariosService: UsuariosService,
@@ -54,6 +56,8 @@ export class AdminDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.carregarProjetos();
     this.carregarUsuarios();
+
+    this.carregarUsuariosLogins();
   }
 
 
@@ -95,19 +99,6 @@ export class AdminDashboardComponent implements OnInit {
     this.projetoSelecionado = null;
     this.usuarioSelecionado = null;
     this.atividadesSelecionadas = [];
-  }
-
-  atualizarFiltro(event: Event): void {
-    const inputElement = event.target as HTMLInputElement;
-    this.filtroUsuario = inputElement.value;
-    this.filtrarUsuarios();
-  }
-
-  filtrarUsuarios(): void {
-    const filtro = this.filtroUsuario.toLowerCase();
-    this.usuariosFiltrados = this.usuarios.filter(usuario =>
-      usuario.nome.toLowerCase().includes(filtro) || usuario.email.toLowerCase().includes(filtro)
-    );
   }
 
   identificarUsuariosComPrioridadeAlta(): void {
@@ -249,16 +240,16 @@ export class AdminDashboardComponent implements OnInit {
 
 
   /* ===== NOVA FUNÇÃO: RETRAIR/EXIBIR GRÁFICO ===== */
-mostrarGrafico: boolean = true;
+  mostrarGrafico: boolean = true;
 
-alternarGrafico(): void {
-  this.mostrarGrafico = !this.mostrarGrafico;
-  if (this.mostrarGrafico) {
-    setTimeout(() => {
-      this.gerarGraficoStatusProjetos(true);
-    }, 300); // Delay para reaparecer suavemente
+  alternarGrafico(): void {
+    this.mostrarGrafico = !this.mostrarGrafico;
+    if (this.mostrarGrafico) {
+      setTimeout(() => {
+        this.gerarGraficoStatusProjetos(true);
+      }, 300); // Delay para reaparecer suavemente
+    }
   }
-}
   /* ===== FIM: NOVA FUNÇÃO: RETRAIR/EXIBIR GRÁFICO ===== */
 
 
@@ -302,21 +293,66 @@ alternarGrafico(): void {
             statusCounts.CONCLUIDO,
             statusCounts.CANCELADO
           ],
-          backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#EF5350'],
-          hoverBackgroundColor: ['#64B5F6', '#81C784', '#FFB74D', '#E57373'],
+          backgroundColor: ['#5A50FF', '#4772E6', '#8347E6', '#47A4E6'],
+          hoverBackgroundColor: ['#5A50FF', '#4772E6', '#8347E6', '#47A4E6'],
           borderWidth: 1
         }]
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: {
             display: true,
-            position: 'bottom'
+            position: 'bottom', // Alternativa: 'left' se preferir
+            align: 'center', // Garante que as opções fiquem alinhadas na esquerda
+            labels: {
+              boxWidth: 15, // Ajusta o tamanho do quadrado colorido da legenda
+              padding: 10 // Adiciona espaçamento entre os itens
+            }
           }
         }
       }
     });
   }
   /*===== FIM: CONFIG PARA GRÁFICO DE STATUS =====*/
+
+
+  /* ================== SEÇÃO DE USUÁRIOS COM ÚLTIMOS LOGINS ================== */
+  mostrarUsuarios: boolean = true;
+  usuariosLoginsRecentes: Usuario[] = [];
+
+
+  carregarUsuariosLogins(): void {
+    this.usuariosService.getUsuarios().subscribe(
+      (data) => {
+        this.usuariosLoginsRecentes = data
+          .filter(usuario => usuario.ultimoLogin)
+          .sort((a, b) => new Date(b.ultimoLogin).getTime() - new Date(a.ultimoLogin).getTime())
+          .slice(0, 6);
+      },
+      (error) => console.error('Erro ao carregar últimos logins:', error)
+    );
+  }
+
+
+  alternarUsuarios(): void {
+    this.mostrarUsuarios = !this.mostrarUsuarios;
+  }
+
+  atualizarFiltro(valor: string): void {
+    this.filtroUsuario = valor.trim().toLowerCase();
+    this.filtrarUsuarios();
+  }
+
+  filtrarUsuarios(): void {
+    this.usuariosFiltrados = this.usuarios.filter(usuario =>
+      usuario.nome.toLowerCase().includes(this.filtroUsuario) ||
+      usuario.email.toLowerCase().includes(this.filtroUsuario)
+    );
+  }
+  /* ================== FIM: SEÇÃO DE USUÁRIOS COM ÚLTIMOS LOGINS ================== */
+
+
+
 }
