@@ -1,10 +1,188 @@
 .projetos-container {
-    padding: 20px;
+  padding: 20px;
+  margin: 50px auto;
+  max-width: 90%;
+  /* Limita a largura máxima */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+}
+
+.topo-projetos {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding-right: 20px;
+}
+
+.novo-projeto-btn {
+  background-color: #007ad9;
+  color: white;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-weight: bold;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #005bb5;
   }
-  
-  .form-container {
+}
+
+.filtros-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  background: #1e1e2d;
+  border-radius: 8px;
+}
+
+.filtro-btn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #2563eb;
+  }
+}
+
+.limpar {
+  background-color: #ef4444;
+
+  &:hover {
+    background-color: #dc2626;
+  }
+}
+
+.projetos-card {
+  padding: 15px;
+  background: var(--card-background);
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px var(--card-shadow);
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+
+  ::ng-deep .p-datatable {
+    background: transparent;
+    border-radius: 8px;
+  }
+
+  ::ng-deep .p-datatable-header {
+    background-color: var(--table-header);
+    color: var(--text-color);
+    font-weight: bold;
+  }
+
+  ::ng-deep .p-datatable-thead > tr > th {
+    background-color: var(--table-header);
+    color: var(--text-color);
+  }
+
+  ::ng-deep .p-datatable-tbody > tr {
+    background-color: var(--table-row-background);
+    color: var(--text-color); // Adicionando cor ao texto no modo claro
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  }
+
+  ::ng-deep .p-datatable-tbody > tr:hover {
+    background-color: var(--hover-background);
+  }
+
+  ::ng-deep .p-datatable-tbody td {
+    color: var(--text-color); // Aplicar cor correta ao texto
+  }
+  ::ng-deep .filtros-container{
+    background-color: #005bb5;
+  }
+}
+
+
+.acao-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  font-size: 1.2rem;
+}
+
+.visualizar {
+  color: #4ade80;
+}
+
+.editar {
+  color: #facc15;
+}
+
+.excluir {
+  color: #ef4444;
+}
+
+@media (max-width: 768px) {
+  .projetos-container {
+    padding: 10px;
+  }
+}
+
+
+
+/* ================== MODAL DE PROJETO ================== */
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+  .form-group {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 5px;
+
+    label {
+      font-weight: bold;
+      color: var(--text-color);
+    }
+
+    input, textarea, p-dropdown, p-multiselect {
+      background: var(--input-bg);
+      color: var(--text-color);
+      border-radius: 5px;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+    }
   }
-  
+}
+
+p-dialog {
+  background: var(--card-background);
+  color: var(--text-color);
+}
+
+body.dark-mode {
+  --card-background: #2a2a3b;
+  --text-color: #fff;
+  --input-bg: #1e1e2d;
+  --border-color: #3b3b3b;
+}
+
+body:not(.dark-mode) {
+  --card-background: #fff;
+  --text-color: #000;
+  --input-bg: #f9f9f9;
+  --border-color: #ccc;
+}
+
+
+
+/* ================== FIM: MODAL DE PROJETO ================== */

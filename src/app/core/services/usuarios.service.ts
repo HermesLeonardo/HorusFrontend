@@ -13,26 +13,25 @@ export class UsuariosService {
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');  
-    console.log('Token enviado no cabeçalho:', token);  // Verificação do token
+    console.log('Token enviado no cabeçalho:', token);  // 🔍 Log para depuração
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
   }
-  
 
   getUsuarios(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(this.apiUrl, { headers: this.getAuthHeaders() });
+    return this.http.get<Usuario[]>(this.apiUrl, { headers: this.getAuthHeaders() });  
   }
 
   criarUsuario(usuario: Usuario): Observable<Usuario> {
-    return this.http.post<Usuario>(this.apiUrl, usuario, { headers: this.getAuthHeaders() });
+    return this.http.post<Usuario>(this.apiUrl, usuario, { headers: this.getAuthHeaders() }); 
   }
 
   atualizarUsuario(id: number, usuario: Usuario): Observable<Usuario> {
-    return this.http.put<Usuario>(`${this.apiUrl}/${id}`, usuario, { headers: this.getAuthHeaders() });
+    return this.http.put<Usuario>(`${this.apiUrl}/${id}`, usuario, { headers: this.getAuthHeaders() });  
   }
 
   deletarUsuario(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });  
   }
 }

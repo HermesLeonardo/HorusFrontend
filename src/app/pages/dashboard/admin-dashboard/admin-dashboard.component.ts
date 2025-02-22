@@ -326,14 +326,26 @@ export class AdminDashboardComponent implements OnInit {
   carregarUsuariosLogins(): void {
     this.usuariosService.getUsuarios().subscribe(
       (data) => {
+        console.log('Usuários recebidos:', data);
+  
+        if (!Array.isArray(data)) {
+          console.error('🚨 Erro: A resposta da API não é um array:', data);
+          return;
+        }
+  
         this.usuariosLoginsRecentes = data
           .filter(usuario => usuario.ultimoLogin)
           .sort((a, b) => new Date(b.ultimoLogin).getTime() - new Date(a.ultimoLogin).getTime())
           .slice(0, 6);
       },
-      (error) => console.error('Erro ao carregar últimos logins:', error)
+      (error) => {
+        console.error(' Erro ao carregar últimos logins:', error);
+      }
     );
   }
+  
+  
+  
 
 
   alternarUsuarios(): void {

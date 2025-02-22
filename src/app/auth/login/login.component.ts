@@ -29,7 +29,7 @@ export class LoginComponent {
         console.log('Resposta da API:', response);
 
         const token = response.token;
-        const role = response.roles[0].authority;
+        const role = response.role;  // Pegando a role diretamente do backend
 
         localStorage.setItem('token', token);
         localStorage.setItem('userRole', role);
@@ -40,7 +40,7 @@ export class LoginComponent {
         localStorage.setItem('senhaUsuario', this.password);
         console.log('Senha salva no LocalStorage:', this.password);
 
-        if (role === 'ROLE_ADMIN') {
+        if (role === 'ADMIN') {
           console.log('Redirecionando para Dashboard Admin...');
           this.router.navigate(['/dashboard/admin']);
         } else {
