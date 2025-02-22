@@ -183,6 +183,27 @@ body:not(.dark-mode) {
   --border-color: #ccc;
 }
 
+::ng-deep .p-dialog-mask {
+  background-color: rgba(0, 0, 0, 0.8) !important; // Deixa o fundo mais visível
+}
+
+::ng-deep .p-dialog {
+  opacity: 1 !important;
+  transform: scale(1) !important; // Evita que fique escondido
+  z-index: 1050 !important;
+}
+
+::ng-deep .p-dialog .p-dialog-content {
+  background-color: var(--card-background) !important;
+  color: var(--text-color) !important;
+}
+
+::ng-deep .p-dialog .p-dialog-header {
+  background-color: var(--card-background) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+
 
 
 /* ================== FIM: MODAL DE PROJETO ================== */

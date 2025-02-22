@@ -5,7 +5,7 @@ export interface Projeto {
     descricao: string;
     status: 'Em_andamento' | 'Concluído' | 'Cancelado' | 'Planejamento';
     prioridade: 'ALTA' | 'MEDIA' | 'BAIXA';
-    idUsuarioResponsavel: number;
+    idUsuarioResponsavel: number[];
     dataInicio: Date;
     dataFim?: Date;
   }

@@ -7,12 +7,12 @@ import { Usuario } from '../model/usuario.model';
   providedIn: 'root'
 })
 export class UsuariosService {
-  private apiUrl = 'http://localhost:8080/api/usuarios';  
+  private apiUrl = 'http://localhost:8080/api/usuarios';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');  
+    const token = localStorage.getItem('token');
     console.log('Token enviado no cabeçalho:', token);  // 🔍 Log para depuração
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`
@@ -20,18 +20,19 @@ export class UsuariosService {
   }
 
   getUsuarios(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(this.apiUrl, { headers: this.getAuthHeaders() });  
+    return this.http.get<Usuario[]>(this.apiUrl, { headers: this.getAuthHeaders() });
   }
 
+
   criarUsuario(usuario: Usuario): Observable<Usuario> {
-    return this.http.post<Usuario>(this.apiUrl, usuario, { headers: this.getAuthHeaders() }); 
+    return this.http.post<Usuario>(this.apiUrl, usuario, { headers: this.getAuthHeaders() });
   }
 
   atualizarUsuario(id: number, usuario: Usuario): Observable<Usuario> {
-    return this.http.put<Usuario>(`${this.apiUrl}/${id}`, usuario, { headers: this.getAuthHeaders() });  
+    return this.http.put<Usuario>(`${this.apiUrl}/${id}`, usuario, { headers: this.getAuthHeaders() });
   }
 
   deletarUsuario(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });  
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
   }
 }

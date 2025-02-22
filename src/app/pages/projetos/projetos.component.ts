@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { Projeto } from '../../core/model/projeto.model';
 import { ProjetosService } from '../../core/services/projetos.service';
+import { UsuariosService } from '../../core/services/usuarios.service';
+import { Usuario } from '../../core/model/usuario.model';
 import { TableModule } from 'primeng/table';
 import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule } from '@angular/forms';
@@ -11,6 +13,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MultiSelectModule } from 'primeng/multiselect';
+
 
 
 @Component({
@@ -28,19 +31,22 @@ import { MultiSelectModule } from 'primeng/multiselect';
     ConfirmDialogModule,
     ButtonModule,
     ToastModule,
-    MultiSelectModule
+    MultiSelectModule,
+    
   ]
 })
 export class ProjetosComponent implements OnInit {
   projetos: Projeto[] = [];
   projetosFiltrados: Projeto[] = [];
-  projetoSelecionado: Projeto = this.novoProjeto(); 
+  projetoSelecionado: Projeto = this.novoProjeto();
+  usuariosOptions: { label: string; value: number }[] = [];
   exibirDialog: boolean = false;
+  usuarios: Usuario[] = [];
+
 
   filtro = { nome: '', status: null, prioridade: null };
 
   statusOptions = [
-    { label: 'Todos', value: null },
     { label: 'Planejamento', value: 'Planejamento' },
     { label: 'Em andamento', value: 'Em_andamento' },
     { label: 'Concluído', value: 'Concluído' },
@@ -48,37 +54,42 @@ export class ProjetosComponent implements OnInit {
   ];
 
   prioridadeOptions = [
-    { label: 'Todos', value: null },
     { label: 'Alta', value: 'ALTA' },
     { label: 'Média', value: 'MEDIA' },
     { label: 'Baixa', value: 'BAIXA' }
   ];
-usuariosOptions: any;
 
-
-  constructor(private projetosService: ProjetosService, private messageService: MessageService) { }
+  constructor(
+    private projetosService: ProjetosService,
+    private usuariosService: UsuariosService,
+    private messageService: MessageService
+  ) { }
 
   ngOnInit(): void {
     this.carregarProjetos();
+    this.carregarUsuarios();
   }
 
   abrirDialog(projeto?: Projeto): void {
     this.projetoSelecionado = projeto ? { ...projeto } : this.novoProjeto();
-    this.exibirDialog = true;
+    
+    setTimeout(() => {
+      this.exibirDialog = true;
+    }, 10); // Pequeno delay para garantir que o Angular reconheça a mudança no estado
+  }
+  
+  fecharDialog(): void {
+    this.exibirDialog = false;
   }  
+  
 
   salvarProjeto(): void {
-    if (!this.projetoSelecionado) {
-      this.messageService.add({ severity: 'warn', summary: 'Aviso', detail: 'Nenhum projeto selecionado!' });
-      return;
-    }
-
     if (!this.projetoSelecionado.nome || !this.projetoSelecionado.descricao) {
       this.messageService.add({ severity: 'warn', summary: 'Aviso', detail: 'Preencha todos os campos obrigatórios!' });
       return;
     }
 
-    this.projetosService.salvarProjeto(this.projetoSelecionado!).subscribe(
+    this.projetosService.salvarProjeto(this.projetoSelecionado).subscribe(
       () => {
         this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto salvo com sucesso!' });
         this.exibirDialog = false;
@@ -90,29 +101,40 @@ usuariosOptions: any;
     );
   }
 
-
-
   carregarProjetos(): void {
     this.projetosService.getProjetos().subscribe(
       (data) => {
-        console.log('Projetos recebidos:', data);
         this.projetos = data;
-        this.filtrarProjetos(); // Aplica os filtros assim que os dados chegam
+        this.filtrarProjetos();
       },
-      (error) => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar projetos!' })
+      () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar projetos!' })
     );
   }
 
-  filtrarProjetos(): void {
-    console.log('Filtros aplicados:', this.filtro);
 
+  carregarUsuarios(): void {
+    this.usuariosService.getUsuarios().subscribe(
+      (usuarios) => {
+        this.usuarios = usuarios; // Mantém a lista completa de usuários
+        this.usuariosOptions = usuarios.map(user => ({
+          label: user.nome,  // Exibição do nome no dropdown
+          value: user.id     // Armazena apenas o ID do usuário
+        }));
+      },
+      () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar usuários!' })
+    );
+  }
+  
+
+
+
+
+  filtrarProjetos(): void {
     this.projetosFiltrados = this.projetos.filter(p =>
       (this.filtro.nome ? p.nome.toLowerCase().includes(this.filtro.nome.toLowerCase()) : true) &&
       (this.filtro.status !== null ? p.status === this.filtro.status : true) &&
       (this.filtro.prioridade !== null ? p.prioridade === this.filtro.prioridade : true)
     );
-
-    console.log('Projetos filtrados:', this.projetosFiltrados);
   }
 
   resetarFiltros(): void {
@@ -128,7 +150,7 @@ usuariosOptions: any;
       descricao: '',
       status: 'Planejamento',
       prioridade: 'MEDIA',
-      idUsuarioResponsavel: 0,
+      idUsuarioResponsavel: [],
       dataInicio: new Date(),
       dataFim: undefined
     };
