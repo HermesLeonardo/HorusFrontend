@@ -13,7 +13,7 @@ export class ProjetosService {
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
-    console.log('Token de usuarios enviado no cabeçalho:', token);  // 🔍 Log para verificar o token
+    console.log('Token de usuarios enviado no cabeçalho:', token);  // Log para verificar o token
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -24,8 +24,28 @@ export class ProjetosService {
   }
 
   salvarProjeto(projeto: Projeto): Observable<Projeto> {
-    return this.http.post<Projeto>(this.apiUrl, projeto, { headers: this.getAuthHeaders() });  
+    const headers = this.getAuthHeaders();
+    
+    const projetoFormatado = {
+      ...projeto,
+      prioridade: typeof projeto.prioridade === 'object' ? projeto.prioridade.value : projeto.prioridade,
+      status: typeof projeto.status === 'object' 
+        ? projeto.status.value.toUpperCase().replace(/\s+/g, '_') 
+        : projeto.status.toUpperCase().replace(/\s+/g, '_'),
+      idUsuarioResponsavel: projeto.idUsuarioResponsavel ? projeto.idUsuarioResponsavel.map(id => id) : [], // ✅ Evita erro de null
+      dataInicio: projeto.dataInicio ? new Date(projeto.dataInicio).toISOString() : null,
+      dataFim: projeto.dataFim ? new Date(projeto.dataFim).toISOString() : null
+    };
+  
+    console.log("📢 JSON corrigido antes do envio:", projetoFormatado);
+  
+    return this.http.post<Projeto>(this.apiUrl, projetoFormatado, { headers });
   }
+  
+  
+  
+  
+  
 
   atualizarProjeto(id: number, projeto: Projeto): Observable<Projeto> {
     return this.http.put<Projeto>(`${this.apiUrl}/${id}`, projeto, { headers: this.getAuthHeaders() });
@@ -36,15 +56,15 @@ export class ProjetosService {
   }
 
   listarProjetos(): Observable<Projeto[]> {
-    return this.http.get<Projeto[]>(this.apiUrl, { headers: this.getAuthHeaders() });  // 🔥 Token adicionado
+    return this.http.get<Projeto[]>(this.apiUrl, { headers: this.getAuthHeaders() });  
   }
 
   criarProjeto(projeto: Projeto): Observable<Projeto> {
-    return this.http.post<Projeto>(this.apiUrl, projeto, { headers: this.getAuthHeaders() });  // 🔥 Token adicionado
+    return this.http.post<Projeto>(this.apiUrl, projeto, { headers: this.getAuthHeaders() }); 
   }
 
   editarProjeto(projeto: Projeto): Observable<Projeto> {
-    return this.http.put<Projeto>(`${this.apiUrl}/${projeto.id}`, projeto, { headers: this.getAuthHeaders() });  // 🔥 Token adicionado
+    return this.http.put<Projeto>(`${this.apiUrl}/${projeto.id}`, projeto, { headers: this.getAuthHeaders() });
   }
 
   excluirProjeto(id: number): Observable<void> {

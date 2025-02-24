@@ -265,8 +265,10 @@ export class AdminDashboardComponent implements OnInit {
 
     // Contabilizar os status corretamente
     this.projetos.forEach(projeto => {
-      const statusNormalizado = projeto.status?.toUpperCase().replace(/\s+/g, '_');
-      if (statusCounts[statusNormalizado as keyof typeof statusCounts] !== undefined) {
+      const statusNormalizado = (typeof projeto.status === 'object' ? projeto.status.value : projeto.status)
+      ?.toUpperCase()
+      .replace(/\s+/g, '_');
+          if (statusCounts[statusNormalizado as keyof typeof statusCounts] !== undefined) {
         statusCounts[statusNormalizado as keyof typeof statusCounts]++;
       }
     });

@@ -54,53 +54,53 @@
     </p-table>
   </div>
 
-  <!-- modal para adicionar novo projeto -->
+  <!-- ================== INÍCIO: MODAL DE NOVO PROJETO ================== -->
+  <div class="custom-modal-overlay" *ngIf="exibirDialog">
+    <div class="custom-modal">
+      <h2>{{ projetoSelecionado.id ? 'Editar Projeto' : 'Novo Projeto' }}</h2>
 
-  <p-dialog [(visible)]="exibirDialog" [modal]="true" [dismissableMask]="true"
-    [header]="projetoSelecionado.id ? 'Editar Projeto' : 'Novo Projeto'" [style]="{ width: '50vw', maxWidth: '600px' }">
+      <div class="modal-body">
 
-    <div class="modal-content">
-      <div class="form-group">
-        <label for="nome">Nome do Projeto</label>
-        <input id="nome" type="text" pInputText [(ngModel)]="projetoSelecionado.nome"
-          placeholder="Digite o nome do projeto">
-      </div>
+        <label for="nome">Nome do Projeto:</label>
+        <input id="nome" type="text" [(ngModel)]="projetoSelecionado.nome" placeholder="Digite o nome do projeto">
 
-      <div class="form-group">
-        <label for="descricao">Descrição</label>
-        <textarea id="descricao" rows="3" pInputTextarea [(ngModel)]="projetoSelecionado.descricao"
-          placeholder="Descreva o projeto"></textarea>
-      </div>
+        <label for="status">Status:</label>
+        <p-dropdown class="custom-dropdown" [options]="statusOptions" [(ngModel)]="projetoSelecionado.status"
+          optionLabel="label" placeholder="Selecione o Status">
+        </p-dropdown>
 
-      <div class="form-group">
-        <label for="status">Status</label>
-        <p-dropdown id="status" [options]="statusOptions" [(ngModel)]="projetoSelecionado.status" optionLabel="label"
-          placeholder="Selecione o Status"></p-dropdown>
-      </div>
+        <label for="prioridade">Prioridade:</label>
+        <p-dropdown class="custom-dropdown" [options]="prioridadeOptions" [(ngModel)]="projetoSelecionado.prioridade"
+          optionLabel="label" placeholder="Selecione a Prioridade">
+        </p-dropdown>
 
-      <div class="form-group">
-        <label for="prioridade">Prioridade</label>
-        <p-dropdown id="prioridade" [options]="prioridadeOptions" [(ngModel)]="projetoSelecionado.prioridade"
-          optionLabel="label" placeholder="Selecione a Prioridade"></p-dropdown>
-      </div>
+        <label for="dataInicio">Data de Início:</label>
+        <input id="dataInicio" type="date" [(ngModel)]="projetoSelecionado.dataInicio">
 
-      <div class="form-group">
-        <label for="usuarios">Usuários Responsáveis</label>
-        <p-multiSelect id="usuarios" [options]="usuariosOptions" [(ngModel)]="projetoSelecionado.idUsuarioResponsavel"
+        <label for="dataFim">Data de Fim:</label>
+        <input id="dataFim" type="date" [(ngModel)]="projetoSelecionado.dataFim">
+
+
+        <label for="descricao_projeto">Descrição do Projeto:</label>
+        <textarea id="descricao_projeto" [(ngModel)]="projetoSelecionado.descricao" rows="5" cols="30"
+          style="resize: none" class="h-full w-full" placeholder="Descreva o projeto"></textarea>
+
+        <!-- MultiSelect de Usuários Responsáveis -->
+        <label for="usuarios">Usuários Responsáveis:</label>
+        <p-multiSelect [options]="usuariosOptions" [(ngModel)]="projetoSelecionado.idUsuarioResponsavel"
           optionLabel="label" placeholder="Selecione os responsáveis" [maxSelectedLabels]="3">
         </p-multiSelect>
+
+
+        <div class="modal-buttons">
+          <button (click)="salvarProjeto()">Salvar</button>
+          <button (click)="fecharDialog()">Cancelar</button>
+        </div>
       </div>
-      <button pButton label="Cancelar" icon="pi pi-times" (click)="fecharDialog()" class="p-button-text"></button>
     </div>
+  </div>
+  <!-- ================== FIM: MODAL DE NOVO PROJETO ================== -->
 
-    <ng-template pTemplate="footer">
-      <button pButton label="Cancelar" icon="pi pi-times" (click)="exibirDialog = false" class="p-button-text"></button>
-      <button pButton label="Salvar" icon="pi pi-check" (click)="salvarProjeto()" class="p-button-primary"></button>
-    </ng-template>
-  </p-dialog>
-
-
-  <!-- fim modal adicionar projeto -->
 
 
 

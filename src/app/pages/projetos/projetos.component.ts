@@ -31,7 +31,7 @@ import { MultiSelectModule } from 'primeng/multiselect';
     ConfirmDialogModule,
     ButtonModule,
     ToastModule,
-    MultiSelectModule,
+    MultiSelectModule,  
     
   ]
 })
@@ -39,18 +39,17 @@ export class ProjetosComponent implements OnInit {
   projetos: Projeto[] = [];
   projetosFiltrados: Projeto[] = [];
   projetoSelecionado: Projeto = this.novoProjeto();
-  usuariosOptions: { label: string; value: number }[] = [];
+  usuariosOptions: { label: string; value: number }[] = []; // Lista de usuários para o MultiSelect
   exibirDialog: boolean = false;
   usuarios: Usuario[] = [];
-
 
   filtro = { nome: '', status: null, prioridade: null };
 
   statusOptions = [
-    { label: 'Planejamento', value: 'Planejamento' },
-    { label: 'Em andamento', value: 'Em_andamento' },
-    { label: 'Concluído', value: 'Concluído' },
-    { label: 'Cancelado', value: 'Cancelado' }
+    { label: 'Planejamento', value: 'PLANEJADO' },
+    { label: 'Em andamento', value: 'EM_ANDAMENTO' },
+    { label: 'Concluído', value: 'CONCLUIDO' },
+    { label: 'Cancelado', value: 'CANCELADO' }
   ];
 
   prioridadeOptions = [
@@ -70,18 +69,27 @@ export class ProjetosComponent implements OnInit {
     this.carregarUsuarios();
   }
 
+  carregarUsuarios(): void {
+    this.usuariosService.getUsuarios().subscribe(
+      (usuarios) => {
+        this.usuarios = usuarios; // Mantém a lista completa de usuários
+        this.usuariosOptions = usuarios.map(user => ({
+          label: user.nome,  // Nome do usuário exibido no MultiSelect
+          value: user.id    
+        }));
+      },
+      () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar usuários!' })
+    );
+  }
+
   abrirDialog(projeto?: Projeto): void {
     this.projetoSelecionado = projeto ? { ...projeto } : this.novoProjeto();
-    
-    setTimeout(() => {
-      this.exibirDialog = true;
-    }, 10); // Pequeno delay para garantir que o Angular reconheça a mudança no estado
+    this.exibirDialog = true;
   }
-  
+
   fecharDialog(): void {
     this.exibirDialog = false;
-  }  
-  
+  }
 
   salvarProjeto(): void {
     if (!this.projetoSelecionado.nome || !this.projetoSelecionado.descricao) {
@@ -111,24 +119,6 @@ export class ProjetosComponent implements OnInit {
     );
   }
 
-
-  carregarUsuarios(): void {
-    this.usuariosService.getUsuarios().subscribe(
-      (usuarios) => {
-        this.usuarios = usuarios; // Mantém a lista completa de usuários
-        this.usuariosOptions = usuarios.map(user => ({
-          label: user.nome,  // Exibição do nome no dropdown
-          value: user.id     // Armazena apenas o ID do usuário
-        }));
-      },
-      () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar usuários!' })
-    );
-  }
-  
-
-
-
-
   filtrarProjetos(): void {
     this.projetosFiltrados = this.projetos.filter(p =>
       (this.filtro.nome ? p.nome.toLowerCase().includes(this.filtro.nome.toLowerCase()) : true) &&
@@ -150,7 +140,7 @@ export class ProjetosComponent implements OnInit {
       descricao: '',
       status: 'Planejamento',
       prioridade: 'MEDIA',
-      idUsuarioResponsavel: [],
+      idUsuarioResponsavel: [], // Armazena IDs dos usuários responsáveis
       dataInicio: new Date(),
       dataFim: undefined
     };

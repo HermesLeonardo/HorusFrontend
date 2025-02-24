@@ -85,25 +85,26 @@
     font-weight: bold;
   }
 
-  ::ng-deep .p-datatable-thead > tr > th {
+  ::ng-deep .p-datatable-thead>tr>th {
     background-color: var(--table-header);
     color: var(--text-color);
   }
 
-  ::ng-deep .p-datatable-tbody > tr {
+  ::ng-deep .p-datatable-tbody>tr {
     background-color: var(--table-row-background);
     color: var(--text-color); // Adicionando cor ao texto no modo claro
     transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
   }
 
-  ::ng-deep .p-datatable-tbody > tr:hover {
+  ::ng-deep .p-datatable-tbody>tr:hover {
     background-color: var(--hover-background);
   }
 
   ::ng-deep .p-datatable-tbody td {
     color: var(--text-color); // Aplicar cor correta ao texto
   }
-  ::ng-deep .filtros-container{
+
+  ::ng-deep .filtros-container {
     background-color: #005bb5;
   }
 }
@@ -136,73 +137,138 @@
 }
 
 
-
-/* ================== MODAL DE PROJETO ================== */
-
-.modal-content {
+/* ================== MODAL CUSTOMIZADO ================== */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6); /* Fundo escurecido */
   display: flex;
-  flex-direction: column;
-  gap: 15px;
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-
-    label {
-      font-weight: bold;
-      color: var(--text-color);
-    }
-
-    input, textarea, p-dropdown, p-multiselect {
-      background: var(--input-bg);
-      color: var(--text-color);
-      border-radius: 5px;
-      padding: 10px;
-      border: 1px solid var(--border-color);
-    }
-  }
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
 
-p-dialog {
-  background: var(--card-background);
-  color: var(--text-color);
+.custom-modal {
+  background-color: var(--modal-bg, #1e1e2d); /* Adicionando um valor padrão */
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  width: 45%;
+  max-width: 600px;
+  border: 2px solid var(--border-color, #5a5a5a); /* Valor padrão para evitar problemas */
 }
 
+/* Garantindo que as variáveis CSS sejam aplicadas corretamente */
 body.dark-mode {
-  --card-background: #2a2a3b;
-  --text-color: #fff;
-  --input-bg: #1e1e2d;
-  --border-color: #3b3b3b;
+  --modal-bg: #1e1e2d; /* Fundo escuro */
+  --text-color: #ffffff;
+  --input-bg: #2a2a3b;
+  --border-color: #5a5a5a;
 }
 
 body:not(.dark-mode) {
-  --card-background: #fff;
-  --text-color: #000;
+  --modal-bg: #ffffff; /* Fundo branco */
+  --text-color: #000000;
   --input-bg: #f9f9f9;
   --border-color: #ccc;
 }
 
-::ng-deep .p-dialog-mask {
-  background-color: rgba(0, 0, 0, 0.8) !important; // Deixa o fundo mais visível
+/* Formatação dos campos do modal */
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+  label {
+    font-weight: bold;
+    color: var(--text-color);
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--text-color);
+  }
 }
 
-::ng-deep .p-dialog {
-  opacity: 1 !important;
-  transform: scale(1) !important; // Evita que fique escondido
-  z-index: 1050 !important;
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+
+  button {
+    padding: 12px 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  button:nth-child(1) {
+    background-color: #3b82f6;
+    color: white;
+  }
+
+  button:nth-child(2) {
+    background-color: #ef4444;
+    color: white;
+  }
 }
 
-::ng-deep .p-dialog .p-dialog-content {
-  background-color: var(--card-background) !important;
-  color: var(--text-color) !important;
+/* ================== Ajustando a largura do MultiSelect ================== */
+::ng-deep .p-multiselect {
+  width: 100% !important; /* Faz o multiselect ocupar toda a largura do container */
 }
 
-::ng-deep .p-dialog .p-dialog-header {
-  background-color: var(--card-background) !important;
-  border-bottom: 1px solid var(--border-color) !important;
+::ng-deep .p-multiselect-panel {
+  width: 300px !important; /* Ajusta a largura do dropdown */
 }
 
+::ng-deep .custom-dropdown {
+  width: 100% !important; /* Faz os dropdowns ocuparem toda a largura disponível */
+  max-width: 550px; /* Maior largura para melhor alinhamento */
+}
+
+::ng-deep .custom-modal .p-dropdown,
+.custom-modal .p-multiselect {
+  width: 100% !important;
+  max-width: 550px;
+}
+
+
+/* ================== Estilização para os Inputs ================== */
+.custom-modal input,
+.custom-modal textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color, #424b57);
+  border-radius: 6px;
+  background-color: #111827;
+  color: var(--text-color, #ffffff);
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.custom-modal input:focus,
+.custom-modal textarea:focus {
+  border-color: #3b82f6; /* Azul destaque */
+  outline: none;
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+}
+
+.custom-modal textarea {
+  min-height: 120px; 
+  font-family: inherit;
+  background-color: #111827;
+  border: 1px solid var(--border-color, #424b57);
+
+}
 
 
 
