@@ -60,7 +60,6 @@
       <h2>{{ projetoSelecionado.id ? 'Editar Projeto' : 'Novo Projeto' }}</h2>
 
       <div class="modal-body">
-
         <label for="nome">Nome do Projeto:</label>
         <input id="nome" type="text" [(ngModel)]="projetoSelecionado.nome" placeholder="Digite o nome do projeto">
 
@@ -74,16 +73,22 @@
           optionLabel="label" placeholder="Selecione a Prioridade">
         </p-dropdown>
 
-        <label for="dataInicio">Data de Início:</label>
-        <input id="dataInicio" type="date" [(ngModel)]="projetoSelecionado.dataInicio">
-
-        <label for="dataFim">Data de Fim:</label>
-        <input id="dataFim" type="date" [(ngModel)]="projetoSelecionado.dataFim">
-
+        <!-- Agrupando os campos de Data lado a lado -->
+        <div class="data-container">
+          <div>
+            <label for="dataInicio">Data de Início:</label>
+            <input id="dataInicio" type="date" [(ngModel)]="projetoSelecionado.dataInicio">
+          </div>
+          <div>
+            <label for="dataFim">Data de Fim:</label>
+            <input id="dataFim" type="date" [(ngModel)]="projetoSelecionado.dataFim">
+          </div>
+        </div>
 
         <label for="descricao_projeto">Descrição do Projeto:</label>
-        <textarea id="descricao_projeto" [(ngModel)]="projetoSelecionado.descricao" rows="5" cols="30"
-          style="resize: none" class="h-full w-full" placeholder="Descreva o projeto"></textarea>
+        <textarea id="descricao_projeto" [(ngModel)]="projetoSelecionado.descricao" rows="3" cols="30"
+          class="h-full w-full" style="resize: none; min-height: 80px;" placeholder="Descreva o projeto"></textarea>
+
 
         <!-- MultiSelect de Usuários Responsáveis -->
         <label for="usuarios">Usuários Responsáveis:</label>
@@ -91,12 +96,12 @@
           optionLabel="label" placeholder="Selecione os responsáveis" [maxSelectedLabels]="3">
         </p-multiSelect>
 
-
         <div class="modal-buttons">
           <button (click)="salvarProjeto()">Salvar</button>
           <button (click)="fecharDialog()">Cancelar</button>
         </div>
       </div>
+
     </div>
   </div>
   <!-- ================== FIM: MODAL DE NOVO PROJETO ================== -->

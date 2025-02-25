@@ -152,13 +152,34 @@
 }
 
 .custom-modal {
-  background-color: var(--modal-bg, #1e1e2d); /* Adicionando um valor padrão */
-  padding: 25px;
+  background-color: var(--modal-bg, #1e1e2d);
+  padding: 20px; 
   border-radius: 10px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  width: 45%;
-  max-width: 600px;
-  border: 2px solid var(--border-color, #5a5a5a); /* Valor padrão para evitar problemas */
+  width: 55%; 
+  max-width: 800px;
+  border: 2px solid var(--border-color, #5a5a5a);
+}
+
+.data-container {
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+
+  div {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+  }
+
+  input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--input-bg);
+      color: var(--text-color);
+  }
 }
 
 /* Garantindo que as variáveis CSS sejam aplicadas corretamente */
@@ -179,8 +200,8 @@ body:not(.dark-mode) {
 /* Formatação dos campos do modal */
 .modal-body {
   display: flex;
-  flex-direction: column;
-  gap: 15px;
+    flex-direction: column;
+    gap: 12px; 
 
   label {
     font-weight: bold;
@@ -195,6 +216,25 @@ body:not(.dark-mode) {
     background: var(--input-bg);
     color: var(--text-color);
   }
+}
+
+/* Ajuste no container de datas */
+.data-container {
+  display: flex;
+  gap: 10px; /* 🔹 Reduz espaço entre os inputs */
+  justify-content: space-between;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px; /* 🔹 Reduzindo espaço acima dos botões */
+}
+
+input, select, textarea {
+  padding: 8px; /* 🔹 Reduz o preenchimento interno */
+  font-size: 14px;
+  border-radius: 5px;
 }
 
 .modal-buttons {

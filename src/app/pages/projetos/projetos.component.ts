@@ -96,8 +96,21 @@ export class ProjetosComponent implements OnInit {
       this.messageService.add({ severity: 'warn', summary: 'Aviso', detail: 'Preencha todos os campos obrigatórios!' });
       return;
     }
-
-    this.projetosService.salvarProjeto(this.projetoSelecionado).subscribe(
+  
+    const projeto = {
+      nome: this.projetoSelecionado.nome,
+      descricao: this.projetoSelecionado.descricao,
+      status: typeof this.projetoSelecionado.status === 'object' ? this.projetoSelecionado.status.value : this.projetoSelecionado.status,
+      prioridade: typeof this.projetoSelecionado.prioridade === 'object' ? this.projetoSelecionado.prioridade.value : this.projetoSelecionado.prioridade,
+      dataInicio: this.projetoSelecionado.dataInicio ? new Date(this.projetoSelecionado.dataInicio).toISOString() : null,
+      dataFim: this.projetoSelecionado.dataFim ? new Date(this.projetoSelecionado.dataFim).toISOString() : null
+    };
+  
+    const usuariosIds = this.projetoSelecionado.idUsuarioResponsavel || [];
+  
+    console.log("📢 JSON correto antes do envio:", { projeto, usuariosIds });
+  
+    this.projetosService.salvarProjeto({ projeto, usuariosIds }).subscribe(
       () => {
         this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto salvo com sucesso!' });
         this.exibirDialog = false;
@@ -108,6 +121,8 @@ export class ProjetosComponent implements OnInit {
       }
     );
   }
+  
+  
 
   carregarProjetos(): void {
     this.projetosService.getProjetos().subscribe(

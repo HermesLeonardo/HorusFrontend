@@ -23,28 +23,29 @@ export class ProjetosService {
     return this.http.get<Projeto[]>(this.apiUrl, { headers: this.getAuthHeaders() });  
   }
 
-  salvarProjeto(projeto: Projeto): Observable<Projeto> {
+  salvarProjeto(projeto: { projeto: any; usuariosIds: number[] }): Observable<Projeto> {
     const headers = this.getAuthHeaders();
-    
-    const projetoFormatado = {
-      ...projeto,
-      prioridade: typeof projeto.prioridade === 'object' ? projeto.prioridade.value : projeto.prioridade,
-      status: typeof projeto.status === 'object' 
-        ? projeto.status.value.toUpperCase().replace(/\s+/g, '_') 
-        : projeto.status.toUpperCase().replace(/\s+/g, '_'),
-      idUsuarioResponsavel: projeto.idUsuarioResponsavel ? projeto.idUsuarioResponsavel.map(id => id) : [], // ✅ Evita erro de null
-      dataInicio: projeto.dataInicio ? new Date(projeto.dataInicio).toISOString() : null,
-      dataFim: projeto.dataFim ? new Date(projeto.dataFim).toISOString() : null
+  
+    const requestBody = {
+      projeto: {
+        nome: projeto.projeto.nome,
+        descricao: projeto.projeto.descricao,
+        status: typeof projeto.projeto.status === 'object' ? projeto.projeto.status.value : projeto.projeto.status,
+        prioridade: typeof projeto.projeto.prioridade === 'object' ? projeto.projeto.prioridade.value : projeto.projeto.prioridade,
+        dataInicio: projeto.projeto.dataInicio ? new Date(projeto.projeto.dataInicio).toISOString() : null,
+        dataFim: projeto.projeto.dataFim ? new Date(projeto.projeto.dataFim).toISOString() : null
+      },
+      usuariosIds: projeto.usuariosIds || []
     };
   
-    console.log("📢 JSON corrigido antes do envio:", projetoFormatado);
+    console.log("📢 JSON corrigido antes do envio:", requestBody);
   
-    return this.http.post<Projeto>(this.apiUrl, projetoFormatado, { headers });
+    return this.http.post<Projeto>(this.apiUrl, requestBody, { headers });
   }
   
   
   
-  
+
   
 
   atualizarProjeto(id: number, projeto: Projeto): Observable<Projeto> {
