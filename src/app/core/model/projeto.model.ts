@@ -3,9 +3,15 @@ export interface Projeto {
   id: number;
   nome: string;
   descricao: string;
-  status: 'Em_andamento' | 'Concluído' | 'Cancelado' | 'Planejamento' | { value: string; label: string };
-  prioridade: 'ALTA' | 'MEDIA' | 'BAIXA' | { value: string; label: string };
+  status: 'PLANEJADO' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'CANCELADO';
+  prioridade: 'ALTA' | 'MEDIA' | 'BAIXA';
   idUsuarioResponsavel: number[];
-  dataInicio: Date;
-  dataFim?: Date;
+  dataInicio: Date | string;
+  dataFim?: Date | string;
+}
+
+export interface ProjetoVisualizacao extends Projeto {
+  dataInicioFormatada: string;
+  dataFimFormatada: string;
+  nomesUsuariosResponsaveis: string;
 }

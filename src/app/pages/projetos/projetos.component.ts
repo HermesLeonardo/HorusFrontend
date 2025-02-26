@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { Projeto } from '../../core/model/projeto.model';
+import { Projeto, ProjetoVisualizacao } from '../../core/model/projeto.model';
 import { ProjetosService } from '../../core/services/projetos.service';
 import { UsuariosService } from '../../core/services/usuarios.service';
 import { Usuario } from '../../core/model/usuario.model';
@@ -13,8 +13,6 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MultiSelectModule } from 'primeng/multiselect';
-
-
 
 @Component({
   selector: 'app-projetos',
@@ -31,17 +29,33 @@ import { MultiSelectModule } from 'primeng/multiselect';
     ConfirmDialogModule,
     ButtonModule,
     ToastModule,
-    MultiSelectModule,  
-    
+    MultiSelectModule,
   ]
 })
 export class ProjetosComponent implements OnInit {
   projetos: Projeto[] = [];
   projetosFiltrados: Projeto[] = [];
   projetoSelecionado: Projeto = this.novoProjeto();
-  usuariosOptions: { label: string; value: number }[] = []; // Lista de usuários para o MultiSelect
+  usuariosOptions: { label: string; value: number }[] = [];
   exibirDialog: boolean = false;
   usuarios: Usuario[] = [];
+
+  // Utilize o novo tipo de exibição para armazenar campos extras
+  projetoVisualizacao: ProjetoVisualizacao = {
+    projeto: null,
+    id: 0,
+    nome: '',
+    descricao: '',
+    status: 'PLANEJADO',
+    prioridade: 'MEDIA',
+    idUsuarioResponsavel: [],
+    dataInicio: '',
+    dataFim: '',
+    dataInicioFormatada: '',
+    dataFimFormatada: '',
+    nomesUsuariosResponsaveis: ''
+  };
+  exibirVisualizacao: boolean = false;
 
   filtro = { nome: '', status: null, prioridade: null };
 
@@ -72,10 +86,10 @@ export class ProjetosComponent implements OnInit {
   carregarUsuarios(): void {
     this.usuariosService.getUsuarios().subscribe(
       (usuarios) => {
-        this.usuarios = usuarios; // Mantém a lista completa de usuários
+        this.usuarios = usuarios;
         this.usuariosOptions = usuarios.map(user => ({
-          label: user.nome,  // Nome do usuário exibido no MultiSelect
-          value: user.id    
+          label: user.nome,
+          value: user.id
         }));
       },
       () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar usuários!' })
@@ -83,7 +97,17 @@ export class ProjetosComponent implements OnInit {
   }
 
   abrirDialog(projeto?: Projeto): void {
-    this.projetoSelecionado = projeto ? { ...projeto } : this.novoProjeto();
+    if (projeto) {
+      this.projetoSelecionado = { ...projeto };
+      this.projetoSelecionado.dataInicio = projeto.dataInicio 
+        ? new Date(projeto.dataInicio).toISOString().split('T')[0]
+        : '';
+      this.projetoSelecionado.dataFim = projeto.dataFim 
+        ? new Date(projeto.dataFim).toISOString().split('T')[0]
+        : '';
+    } else {
+      this.projetoSelecionado = this.novoProjeto();
+    }
     this.exibirDialog = true;
   }
 
@@ -96,20 +120,23 @@ export class ProjetosComponent implements OnInit {
       this.messageService.add({ severity: 'warn', summary: 'Aviso', detail: 'Preencha todos os campos obrigatórios!' });
       return;
     }
-  
+
     const projeto = {
       nome: this.projetoSelecionado.nome,
       descricao: this.projetoSelecionado.descricao,
-      status: typeof this.projetoSelecionado.status === 'object' ? this.projetoSelecionado.status.value : this.projetoSelecionado.status,
-      prioridade: typeof this.projetoSelecionado.prioridade === 'object' ? this.projetoSelecionado.prioridade.value : this.projetoSelecionado.prioridade,
-      dataInicio: this.projetoSelecionado.dataInicio ? new Date(this.projetoSelecionado.dataInicio).toISOString() : null,
-      dataFim: this.projetoSelecionado.dataFim ? new Date(this.projetoSelecionado.dataFim).toISOString() : null
+      status: this.projetoSelecionado.status,
+      prioridade: this.projetoSelecionado.prioridade,
+      dataInicio: this.projetoSelecionado.dataInicio 
+        ? new Date(this.projetoSelecionado.dataInicio).toISOString() 
+        : null,
+      dataFim: this.projetoSelecionado.dataFim 
+        ? new Date(this.projetoSelecionado.dataFim).toISOString() 
+        : null
     };
-  
     const usuariosIds = this.projetoSelecionado.idUsuarioResponsavel || [];
-  
+
     console.log("📢 JSON correto antes do envio:", { projeto, usuariosIds });
-  
+
     this.projetosService.salvarProjeto({ projeto, usuariosIds }).subscribe(
       () => {
         this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto salvo com sucesso!' });
@@ -121,8 +148,48 @@ export class ProjetosComponent implements OnInit {
       }
     );
   }
+
+  visualizarProjeto(projeto: Projeto): void {
+    console.log("🟢 Abrindo visualização para o projeto:", projeto);
+  
+    // 🔍 Verifica se os IDs vieram corretamente
+    console.log("📌 IDs dos responsáveis recebidos:", projeto.idUsuarioResponsavel);
+  
+    const usuariosIds = projeto.idUsuarioResponsavel || [];
+  
+    const usuariosNomes = this.usuarios
+      .filter(user => usuariosIds.includes(user.id))
+      .map(user => user.nome)
+      .join(', ');
+  
+    console.log("👥 Usuários carregados:", this.usuarios);
+    console.log("✅ IDs dos responsáveis usados:", usuariosIds);
+    console.log("📝 Nomes formatados:", usuariosNomes);
+  
+    this.projetoVisualizacao = {
+      ...projeto,
+      dataInicioFormatada: projeto.dataInicio ? new Date(projeto.dataInicio).toLocaleDateString() : 'Não definido',
+      dataFimFormatada: projeto.dataFim ? new Date(projeto.dataFim).toLocaleDateString() : 'Não definido',
+      nomesUsuariosResponsaveis: usuariosNomes
+    };
+  
+    this.exibirVisualizacao = true;
+    console.log("✅ Modal de visualização aberto!");
+  }
   
   
+
+  fecharVisualizacao(): void {
+    this.exibirVisualizacao = false;
+  }
+
+  confirmarExclusao(projeto: Projeto): void {
+    if (confirm(`Deseja realmente excluir o projeto "${projeto.nome}"?`)) {
+      this.projetosService.excluirProjeto(projeto.id).subscribe(() => {
+        this.carregarProjetos();
+      });
+    }
+  }
 
   carregarProjetos(): void {
     this.projetosService.getProjetos().subscribe(
@@ -153,9 +220,9 @@ export class ProjetosComponent implements OnInit {
       id: 0,
       nome: '',
       descricao: '',
-      status: 'Planejamento',
+      status: 'PLANEJADO',
       prioridade: 'MEDIA',
-      idUsuarioResponsavel: [], // Armazena IDs dos usuários responsáveis
+      idUsuarioResponsavel: [],
       dataInicio: new Date(),
       dataFim: undefined
     };

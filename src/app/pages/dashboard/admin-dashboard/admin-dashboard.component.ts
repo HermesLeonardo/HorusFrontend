@@ -153,7 +153,7 @@ export class AdminDashboardComponent implements OnInit {
 
     // Garantir que o campo 'Status' já venha preenchido
     if (!this.projetoSelecionado.status) {
-      this.projetoSelecionado.status = 'Planejamento'; // Valor padrão se estiver vazio
+      this.projetoSelecionado.status = 'PLANEJADO'; // Valor padrão se estiver vazio
     }
 
     this.mostrarCampoSenha = false;
@@ -196,7 +196,7 @@ export class AdminDashboardComponent implements OnInit {
 
     console.log('Senha fornecida:', this.senhaConfirmacao);
 
-    if (this.projetoSelecionado?.status === 'Planejamento' || this.projetoSelecionado?.status === 'Em_andamento') {
+    if (this.projetoSelecionado?.status === 'PLANEJADO' || this.projetoSelecionado?.status === 'EM_ANDAMENTO') {
       console.log('Aviso: Projeto em andamento ou planejamento.');
       this.messageService.add({ severity: 'info', summary: 'Atenção', detail: 'Você está prestes a excluir um projeto em andamento ou planejamento!' });
     }
@@ -265,7 +265,7 @@ export class AdminDashboardComponent implements OnInit {
 
     // Contabilizar os status corretamente
     this.projetos.forEach(projeto => {
-      const statusNormalizado = (typeof projeto.status === 'object' ? projeto.status.value : projeto.status)
+      const statusNormalizado = projeto.status
       ?.toUpperCase()
       .replace(/\s+/g, '_');
           if (statusCounts[statusNormalizado as keyof typeof statusCounts] !== undefined) {
