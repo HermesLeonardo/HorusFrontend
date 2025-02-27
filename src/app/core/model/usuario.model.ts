@@ -5,7 +5,7 @@ export interface Usuario {
     nome: string;
     email: string;
     senha?: string;
-    perfil: 'ADMIN' | 'USUARIO'; 
+    perfil: 'ADMIN' | 'USUARIO' | { label: string; value: string } | string;
     ativo: boolean;
     ultimoLogin: string | Date;  
     projetos?: Projeto[]; 

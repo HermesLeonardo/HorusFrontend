@@ -25,14 +25,18 @@ export class UsuariosService {
 
 
   criarUsuario(usuario: Usuario): Observable<Usuario> {
+    console.log("📤 Enviando JSON para API:", usuario); // 🔍 Log para depuração
     return this.http.post<Usuario>(this.apiUrl, usuario, { headers: this.getAuthHeaders() });
   }
+  
 
   atualizarUsuario(id: number, usuario: Usuario): Observable<Usuario> {
     return this.http.put<Usuario>(`${this.apiUrl}/${id}`, usuario, { headers: this.getAuthHeaders() });
   }
 
   deletarUsuario(id: number): Observable<void> {
+    console.warn(`🚨 Tentativa de deletar usuário com ID: ${id}`);
     return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
   }
+  
 }

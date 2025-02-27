@@ -47,6 +47,11 @@ export class UsuariosComponent implements OnInit {
     { label: 'Admin', value: 'ADMIN' },
     { label: 'Usuário', value: 'USUARIO' }
   ];
+  confirmationService: any;
+  exibirVisualizacao: any;
+
+  usuarioVisualizacao: Usuario | null = null;
+
 
   constructor(
     private usuariosService: UsuariosService,
@@ -69,7 +74,7 @@ export class UsuariosComponent implements OnInit {
   mostrarUsuariosDesativados(): void {
     this.usuariosFiltrados = this.usuarios.filter(usuario => !usuario.ativo);
   }
-  
+
 
   ngOnInit(): void {
     this.carregarUsuarios();
@@ -99,49 +104,61 @@ export class UsuariosComponent implements OnInit {
   }
 
   visualizarUsuario(usuario: Usuario): void {
-    this.usuarioSelecionado = { ...usuario };
-    console.log("👀Visualizando usuário:", this.usuarioSelecionado);
-    this.exibirDialog = true;
-  }
-  
+    this.usuarioVisualizacao = { ...usuario };
+    console.log("👀 Visualizando usuário:", this.usuarioVisualizacao);
+    this.exibirVisualizacao = true; // Agora abre o modal correto!
+}
+
+fecharVisualizacao(): void {
+  this.exibirVisualizacao = false;
+  this.usuarioVisualizacao = null;
+}
+
 
   fecharDialog(): void {
     this.exibirDialog = false;
   }
-
   salvarUsuario(): void {
-    if (this.usuarioSelecionado.id) {
-      this.usuariosService.atualizarUsuario(this.usuarioSelecionado.id, this.usuarioSelecionado).subscribe(() => {
-        this.carregarUsuarios();
-        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Usuário atualizado com sucesso!' });
-        this.fecharDialog();
-      });
-    } else {
-      this.usuariosService.criarUsuario(this.usuarioSelecionado).subscribe(() => {
+    const usuarioFormatado: Usuario = {
+        id: this.usuarioSelecionado.id || 0,
+        nome: this.usuarioSelecionado.nome,
+        email: this.usuarioSelecionado.email,
+        senha: this.usuarioSelecionado.senha ? this.usuarioSelecionado.senha : "senha123", // Garante que a senha não seja nula
+        perfil: typeof this.usuarioSelecionado.perfil === 'object' ? this.usuarioSelecionado.perfil.value : this.usuarioSelecionado.perfil, // 🛠️ Corrige o perfil para string
+        ativo: true,
+        dataCriacao: new Date(),
+        ultimoLogin: new Date()
+    };
+
+    console.log("📤 JSON Enviado para API:", usuarioFormatado); // 🔍 Debugging
+
+    this.usuariosService.criarUsuario(usuarioFormatado).subscribe(() => {
         this.carregarUsuarios();
         this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Usuário criado com sucesso!' });
         this.fecharDialog();
-      });
-    }
-  }
+    });
+}
+
+
+
 
   confirmarExclusao(usuario: Usuario): void {
-    this.usuariosService.deletarUsuario(usuario.id).subscribe(
-      () => {
-        console.log("✅ Usuário excluído:", usuario);
-        this.carregarUsuarios();
-      },
-      (error) => {
-        console.error("❌ Erro ao excluir usuário:", error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erro',
-          detail: error.error?.message || 'Erro ao excluir usuário!'
+    this.confirmationService.confirm({
+      message: `Tem certeza que deseja excluir ${usuario.nome}? Esta ação não pode ser desfeita!`,
+      accept: () => {
+        this.usuariosService.deletarUsuario(usuario.id).subscribe(() => {
+          this.carregarUsuarios();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Usuário excluído com sucesso!'
+          });
         });
       }
-    );
+    });
   }
-  
+
+
 
   novoUsuario(): Usuario {
     return { id: 0, nome: '', email: '', senha: '', perfil: 'USUARIO', ativo: true, dataCriacao: new Date(), ultimoLogin: new Date() };
@@ -150,20 +167,18 @@ export class UsuariosComponent implements OnInit {
 
 
   desativarUsuario(usuario: Usuario): void {
-    usuario.ativo = false; // Definimos como desativado
-    this.usuariosService.atualizarUsuario(usuario.id, usuario).subscribe(
-      () => {
-        console.log("🔴 Usuário desativado:", usuario);
-        this.carregarUsuarios();
-        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Usuário desativado!' });
-      },
-      (error) => {
-        console.error("❌ Erro ao desativar usuário:", error);
-        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao desativar usuário!' });
-      }
-    );
+    usuario.ativo = false;
+    this.usuariosService.atualizarUsuario(usuario.id, usuario).subscribe(() => {
+      this.carregarUsuarios();
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Usuário desativado',
+        detail: 'O usuário foi desativado, mas ainda pode ser reativado.'
+      });
+    });
   }
-  
+
+
 
 
 
