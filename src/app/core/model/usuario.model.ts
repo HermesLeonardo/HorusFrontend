@@ -4,9 +4,10 @@ export interface Usuario {
     id: number;
     nome: string;
     email: string;
-    role: 'ADMIN' | 'USER';
+    senha?: string;
+    perfil: 'ADMIN' | 'USUARIO'; 
     ativo: boolean;
-    ultimoLogin: Date;
-    projetos?: Projeto[];
-  }
-  
+    ultimoLogin: string | Date;  
+    projetos?: Projeto[]; 
+    dataCriacao: string | Date;
+}

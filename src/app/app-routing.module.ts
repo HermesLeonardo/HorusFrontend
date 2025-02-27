@@ -19,7 +19,7 @@ export const routes: Routes = [
   { path: 'atividades', component: AtividadesComponent },
   { path: 'lancamento-horas', component: LancamentoHorasComponent },
   { path: 'relatorios', component: RelatoriosComponent },
-  { path: 'usuarios', component: UsuariosComponent },
+  { path: 'usuarios', loadComponent: () => import('./pages/usuarios/usuarios.component').then(m => m.UsuariosComponent) },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
 

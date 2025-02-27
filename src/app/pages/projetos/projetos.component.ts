@@ -13,6 +13,9 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { ListboxModule } from 'primeng/listbox';
+import { CardModule } from 'primeng/card';
+
 
 @Component({
   selector: 'app-projetos',
@@ -30,6 +33,8 @@ import { MultiSelectModule } from 'primeng/multiselect';
     ButtonModule,
     ToastModule,
     MultiSelectModule,
+    ListboxModule,
+    CardModule,
   ]
 })
 export class ProjetosComponent implements OnInit {
@@ -84,100 +89,146 @@ export class ProjetosComponent implements OnInit {
   }
 
   carregarUsuarios(): void {
+    console.log("📢 Buscando usuários...");
+  
     this.usuariosService.getUsuarios().subscribe(
       (usuarios) => {
+        console.log("✅ Usuários carregados com sucesso:", usuarios);
+        
         this.usuarios = usuarios;
         this.usuariosOptions = usuarios.map(user => ({
           label: user.nome,
           value: user.id
         }));
+  
+        // Adicionando um log para ver se os usuários estão sendo corretamente formatados
+        console.log("🎯 Opções de usuários formatadas:", this.usuariosOptions);
       },
-      () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar usuários!' })
+      (error) => {
+        console.error("❌ Erro ao carregar usuários:", error);
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar usuários!' });
+      }
     );
   }
+  
 
   abrirDialog(projeto?: Projeto): void {
     if (projeto) {
       this.projetoSelecionado = { ...projeto };
-      this.projetoSelecionado.dataInicio = projeto.dataInicio 
+
+      this.projetoSelecionado.dataInicio = projeto.dataInicio
         ? new Date(projeto.dataInicio).toISOString().split('T')[0]
         : '';
-      this.projetoSelecionado.dataFim = projeto.dataFim 
+      this.projetoSelecionado.dataFim = projeto.dataFim
         ? new Date(projeto.dataFim).toISOString().split('T')[0]
         : '';
+
+      this.projetoSelecionado.idUsuarioResponsavel = projeto.usuarios
+        ? projeto.usuarios.map(user => user.id)
+        : [];
+
+      console.log("📌 Usuários vinculados carregados:", this.projetoSelecionado.idUsuarioResponsavel);
     } else {
       this.projetoSelecionado = this.novoProjeto();
     }
     this.exibirDialog = true;
   }
 
+
+
   fecharDialog(): void {
     this.exibirDialog = false;
   }
 
   salvarProjeto(): void {
-    if (!this.projetoSelecionado.nome || !this.projetoSelecionado.descricao) {
-      this.messageService.add({ severity: 'warn', summary: 'Aviso', detail: 'Preencha todos os campos obrigatórios!' });
-      return;
+    if (!this.projetoSelecionado) {
+        console.error("🚨 Nenhum projeto foi selecionado!");
+        return;
     }
 
-    const projeto = {
-      nome: this.projetoSelecionado.nome,
-      descricao: this.projetoSelecionado.descricao,
-      status: this.projetoSelecionado.status,
-      prioridade: this.projetoSelecionado.prioridade,
-      dataInicio: this.projetoSelecionado.dataInicio 
-        ? new Date(this.projetoSelecionado.dataInicio).toISOString() 
-        : null,
-      dataFim: this.projetoSelecionado.dataFim 
-        ? new Date(this.projetoSelecionado.dataFim).toISOString() 
-        : null
-    };
     const usuariosIds = this.projetoSelecionado.idUsuarioResponsavel || [];
 
-    console.log("📢 JSON correto antes do envio:", { projeto, usuariosIds });
+    if (this.projetoSelecionado.id) {
+      // Aqui devemos chamar ATUALIZAR PROJETO
+      this.projetosService.atualizarProjeto(
+        this.projetoSelecionado.id, // Passamos o ID para atualização
+        {
+          ...this.projetoSelecionado,
+          status: typeof this.projetoSelecionado.status === 'object' && 'value' in this.projetoSelecionado.status ? this.projetoSelecionado.status.value : this.projetoSelecionado.status,
+          prioridade: typeof this.projetoSelecionado.prioridade === 'object' && 'value' in this.projetoSelecionado.prioridade ? this.projetoSelecionado.prioridade.value : this.projetoSelecionado.prioridade
+        },
+        usuariosIds
+      ).subscribe(
+        () => {
+          this.carregarProjetos();
+          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto atualizado com sucesso!' });
+          this.fecharDialog();
+        },
+        (error) => {
+          console.error("❌ Erro ao atualizar o projeto:", error);
+          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao atualizar o projeto!' });
+        }
+      );
+    } else {
+      // Se o projeto NÃO TEM ID, então estamos criando um novo
+      this.projetosService.salvarProjeto({
+          projeto: {
+              ...this.projetoSelecionado,
+              status: typeof this.projetoSelecionado.status === 'object' && 'value' in this.projetoSelecionado.status ? this.projetoSelecionado.status.value : this.projetoSelecionado.status,
+              prioridade: typeof this.projetoSelecionado.prioridade === 'object' && 'value' in this.projetoSelecionado.prioridade ? this.projetoSelecionado.prioridade.value : this.projetoSelecionado.prioridade
+          },
+          usuariosIds: usuariosIds
+      }).subscribe(
+          () => {
+              this.carregarProjetos();
+              this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto salvo com sucesso!' });
+              this.fecharDialog();
+          },
+          (error) => {
+              console.error("❌ Erro ao salvar o projeto:", error);
+              this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao salvar o projeto!' });
+          }
+      );
+    }
+}
 
-    this.projetosService.salvarProjeto({ projeto, usuariosIds }).subscribe(
-      () => {
-        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto salvo com sucesso!' });
-        this.exibirDialog = false;
-        this.carregarProjetos();
-      },
-      () => {
-        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao salvar o projeto!' });
-      }
-    );
-  }
+
+
+
+
 
   visualizarProjeto(projeto: Projeto): void {
     console.log("🟢 Abrindo visualização para o projeto:", projeto);
-  
+
     // 🔍 Verifica se os IDs vieram corretamente
     console.log("📌 IDs dos responsáveis recebidos:", projeto.idUsuarioResponsavel);
-  
+
     const usuariosIds = projeto.idUsuarioResponsavel || [];
-  
+
+    // 🔹 Filtra os usuários com base nos IDs e gera os nomes corretamente
     const usuariosNomes = this.usuarios
       .filter(user => usuariosIds.includes(user.id))
       .map(user => user.nome)
       .join(', ');
-  
+
     console.log("👥 Usuários carregados:", this.usuarios);
     console.log("✅ IDs dos responsáveis usados:", usuariosIds);
     console.log("📝 Nomes formatados:", usuariosNomes);
-  
+
     this.projetoVisualizacao = {
       ...projeto,
       dataInicioFormatada: projeto.dataInicio ? new Date(projeto.dataInicio).toLocaleDateString() : 'Não definido',
       dataFimFormatada: projeto.dataFim ? new Date(projeto.dataFim).toLocaleDateString() : 'Não definido',
-      nomesUsuariosResponsaveis: usuariosNomes
+      nomesUsuariosResponsaveis: usuariosNomes,
+      usuarios: projeto.usuarios || []  // 🔹 Agora os usuários serão passados corretamente para o HTML
     };
-  
+
     this.exibirVisualizacao = true;
     console.log("✅ Modal de visualização aberto!");
   }
-  
-  
+
+
+
 
   fecharVisualizacao(): void {
     this.exibirVisualizacao = false;

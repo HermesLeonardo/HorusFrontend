@@ -173,17 +173,48 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   salvarProjeto(): void {
-    if (this.projetoSelecionado) {
-      this.projetosService.atualizarProjeto(this.projetoSelecionado.id, this.projetoSelecionado).subscribe(
+    if (!this.projetoSelecionado) {
+      console.error("🚨 Nenhum projeto foi selecionado!");
+      return;
+    }
+
+    const usuariosIds = this.projetoSelecionado.idUsuarioResponsavel || [];
+
+    if (this.projetoSelecionado.id) {
+      this.projetosService.atualizarProjeto(
+        this.projetoSelecionado.id,
+        this.projetoSelecionado,
+        usuariosIds
+      ).subscribe(
         () => {
           this.carregarProjetos();
           this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto atualizado com sucesso!' });
           this.fecharDialog();
         },
-        () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao atualizar o projeto!' })
+        (error) => {
+          console.error("❌ Erro ao atualizar o projeto:", error);
+          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao atualizar o projeto!' });
+        }
       );
+    } else {
+      this.projetosService.salvarProjeto({
+        projeto: this.projetoSelecionado, // ✅ Agora enviando dentro do objeto esperado
+        usuariosIds: usuariosIds
+      }).subscribe(
+        () => {
+          this.carregarProjetos();
+          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto salvo com sucesso!' });
+          this.fecharDialog();
+        },
+        (error) => {
+          console.error("❌ Erro ao salvar o projeto:", error);
+          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao salvar o projeto!' });
+        }
+      );
+
     }
   }
+
 
   deletarProjeto(): void {
     console.log('Iniciando exclusão do projeto:', this.projetoSelecionado?.id);
@@ -265,13 +296,18 @@ export class AdminDashboardComponent implements OnInit {
 
     // Contabilizar os status corretamente
     this.projetos.forEach(projeto => {
-      const statusNormalizado = projeto.status
-      ?.toUpperCase()
-      .replace(/\s+/g, '_');
-          if (statusCounts[statusNormalizado as keyof typeof statusCounts] !== undefined) {
+      // Garantindo que status seja uma string antes de chamar .toUpperCase()
+      const status = typeof projeto.status === 'object' && 'value' in projeto.status
+        ? projeto.status.value
+        : projeto.status;
+
+      const statusNormalizado = status?.toUpperCase().replace(/\s+/g, '_');
+
+      if (statusCounts[statusNormalizado as keyof typeof statusCounts] !== undefined) {
         statusCounts[statusNormalizado as keyof typeof statusCounts]++;
       }
     });
+
 
     // Se o gráfico já existe, destruir antes de recriar
     if (this.graficoStatusProjetos) {
@@ -329,12 +365,12 @@ export class AdminDashboardComponent implements OnInit {
     this.usuariosService.getUsuarios().subscribe(
       (data) => {
         console.log('Usuários recebidos:', data);
-  
+
         if (!Array.isArray(data)) {
           console.error('🚨 Erro: A resposta da API não é um array:', data);
           return;
         }
-  
+
         this.usuariosLoginsRecentes = data
           .filter(usuario => usuario.ultimoLogin)
           .sort((a, b) => new Date(b.ultimoLogin).getTime() - new Date(a.ultimoLogin).getTime())
@@ -345,9 +381,9 @@ export class AdminDashboardComponent implements OnInit {
       }
     );
   }
-  
-  
-  
+
+
+
 
 
   alternarUsuarios(): void {

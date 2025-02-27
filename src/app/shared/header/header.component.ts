@@ -38,6 +38,9 @@ export class HeaderComponent implements OnInit {
       case 'atividades':
         this.paginaAtual = 'Atividades';
         break;
+      case 'usuarios':
+        this.paginaAtual = 'Usuários';
+        break;
       default:
         this.paginaAtual = 'Página Inicial';
     }

@@ -2,11 +2,9 @@
   padding: 20px;
   margin: 50px auto;
   max-width: 90%;
-  /* Limita a largura máxima */
   display: flex;
   flex-direction: column;
   gap: 20px;
-
 }
 
 .topo-projetos {
@@ -28,6 +26,7 @@
   align-items: center;
   gap: 8px;
   cursor: pointer;
+  transition: background 0.3s ease;
 
   &:hover {
     background-color: #005bb5;
@@ -53,6 +52,7 @@
   align-items: center;
   gap: 5px;
   cursor: pointer;
+  transition: background 0.3s ease;
 
   &:hover {
     background-color: #2563eb;
@@ -72,43 +72,8 @@
   background: var(--card-background);
   border-radius: 8px;
   box-shadow: 0px 4px 6px var(--card-shadow);
-  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
-
-  ::ng-deep .p-datatable {
-    background: transparent;
-    border-radius: 8px;
-  }
-
-  ::ng-deep .p-datatable-header {
-    background-color: var(--table-header);
-    color: var(--text-color);
-    font-weight: bold;
-  }
-
-  ::ng-deep .p-datatable-thead>tr>th {
-    background-color: var(--table-header);
-    color: var(--text-color);
-  }
-
-  ::ng-deep .p-datatable-tbody>tr {
-    background-color: var(--table-row-background);
-    color: var(--text-color); // Adicionando cor ao texto no modo claro
-    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
-  }
-
-  ::ng-deep .p-datatable-tbody>tr:hover {
-    background-color: var(--hover-background);
-  }
-
-  ::ng-deep .p-datatable-tbody td {
-    color: var(--text-color); // Aplicar cor correta ao texto
-  }
-
-  ::ng-deep .filtros-container {
-    background-color: #005bb5;
-  }
+  transition: background 0.3s ease, color 0.3s ease;
 }
-
 
 .acao-btn {
   background: none;
@@ -136,7 +101,6 @@
   }
 }
 
-
 /* ================== MODAL CUSTOMIZADO ================== */
 .custom-modal-overlay {
   position: fixed;
@@ -144,7 +108,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6); /* Fundo escurecido */
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -153,62 +117,31 @@
 
 .custom-modal {
   background-color: var(--modal-bg, #1e1e2d);
-  padding: 20px; 
+  padding: 25px;
   border-radius: 10px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  width: 55%; 
+  width: 55%;
   max-width: 800px;
   border: 2px solid var(--border-color, #5a5a5a);
-}
-
-.data-container {
   display: flex;
+  flex-direction: column;
   gap: 15px;
-  justify-content: space-between;
-
-  div {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-  }
-
-  input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      background: var(--input-bg);
-      color: var(--text-color);
-  }
+  position: relative;
 }
 
-/* Garantindo que as variáveis CSS sejam aplicadas corretamente */
-body.dark-mode {
-  --modal-bg: #1e1e2d; /* Fundo escuro */
-  --text-color: #ffffff;
-  --input-bg: #2a2a3b;
-  --border-color: #5a5a5a;
-}
-
-body:not(.dark-mode) {
-  --modal-bg: #ffffff; /* Fundo branco */
-  --text-color: #000000;
-  --input-bg: #f9f9f9;
-  --border-color: #ccc;
-}
-
-/* Formatação dos campos do modal */
 .modal-body {
   display: flex;
-    flex-direction: column;
-    gap: 12px; 
+  flex-direction: column;
+  gap: 12px;
 
   label {
     font-weight: bold;
     color: var(--text-color);
   }
 
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     width: 100%;
     padding: 10px;
     border: 1px solid var(--border-color);
@@ -218,71 +151,84 @@ body:not(.dark-mode) {
   }
 }
 
-/* Ajuste no container de datas */
+/* Ajuste no container de Status e Prioridade */
+.status-prioridade-container {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+
+  .p-dropdown {
+    flex: 1;
+  }
+}
+
+/* Ajuste nos inputs de Data */
 .data-container {
   display: flex;
-  gap: 10px; /* 🔹 Reduz espaço entre os inputs */
+  gap: 15px;
   justify-content: space-between;
+
+  div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--text-color);
+  }
 }
 
+/* Ajuste nos botões */
 .modal-buttons {
   display: flex;
-  justify-content: space-between;
-  margin-top: 10px; /* 🔹 Reduzindo espaço acima dos botões */
-}
-
-input, select, textarea {
-  padding: 8px; /* 🔹 Reduz o preenchimento interno */
-  font-size: 14px;
-  border-radius: 5px;
-}
-
-.modal-buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
+  justify-content: flex-end;
+  gap: 10px;
 
   button {
-    padding: 12px 18px;
+    padding: 10px 18px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
+    transition: background 0.3s ease;
+
+    &:first-child {
+      background-color: #3b82f6;
+      color: white;
+    }
+
+    &:first-child:hover {
+      background-color: #2563eb;
+    }
+
+    &:last-child {
+      background-color: #6b7280;
+      color: white;
+    }
+
+    &:last-child:hover {
+      background-color: #52525b;
+    }
   }
-
-  button:nth-child(1) {
-    background-color: #3b82f6;
-    color: white;
-  }
-
-  button:nth-child(2) {
-    background-color: #ef4444;
-    color: white;
-  }
 }
 
-/* ================== Ajustando a largura do MultiSelect ================== */
-::ng-deep .p-multiselect {
-  width: 100% !important; /* Faz o multiselect ocupar toda a largura do container */
-}
-
-::ng-deep .p-multiselect-panel {
-  width: 300px !important; /* Ajusta a largura do dropdown */
-}
-
-::ng-deep .custom-dropdown {
-  width: 100% !important; /* Faz os dropdowns ocuparem toda a largura disponível */
-  max-width: 550px; /* Maior largura para melhor alinhamento */
-}
-
-::ng-deep .custom-modal .p-dropdown,
-.custom-modal .p-multiselect {
-  width: 100% !important;
+/* Ajustando o ListBox no modal */
+.custom-modal .p-listbox {
+  width: 100%;
   max-width: 550px;
+  background: var(--input-bg);
+  border-radius: 6px;
+  padding: 8px;
+  color: var(--text-color);
 }
 
-
-/* ================== Estilização para os Inputs ================== */
+/* Ajuste nos inputs e textarea */
 .custom-modal input,
 .custom-modal textarea {
   width: 100%;
@@ -297,19 +243,42 @@ input, select, textarea {
 
 .custom-modal input:focus,
 .custom-modal textarea:focus {
-  border-color: #3b82f6; /* Azul destaque */
+  border-color: #3b82f6;
   outline: none;
   box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
 }
 
-.custom-modal textarea {
-  min-height: 120px; 
-  font-family: inherit;
-  background-color: #111827;
-  border: 1px solid var(--border-color, #424b57);
-
+/* ================== DARK MODE ================== */
+body.dark-mode {
+  --modal-bg: #1e1e2d;
+  --text-color: #ffffff;
+  --input-bg: #2a2a3b;
+  --border-color: #5a5a5a;
 }
 
+body:not(.dark-mode) {
+  --modal-bg: #ffffff;
+  --text-color: #000000;
+  --input-bg: #f9f9f9;
+  --border-color: #ccc;
+}
 
+/* Ajustando a largura do MultiSelect */
+::ng-deep .p-multiselect {
+  width: 100% !important;
+}
 
-/* ================== FIM: MODAL DE PROJETO ================== */
+::ng-deep .p-multiselect-panel {
+  width: 300px !important;
+}
+
+::ng-deep .custom-dropdown {
+  width: 100% !important;
+  max-width: 550px;
+}
+
+::ng-deep .custom-modal .p-dropdown,
+.custom-modal .p-multiselect {
+  width: 100% !important;
+  max-width: 550px;
+}

@@ -99,21 +99,53 @@
   <!-- ================== MODAL DE VISUALIZAÇÃO ================== -->
   <div class="custom-modal-overlay" *ngIf="exibirVisualizacao">
     <div class="custom-modal">
-      <h2>Visualizar Projeto</h2>
-      <div class="modal-body">
-        <p><strong>Nome:</strong> {{ projetoVisualizacao.nome }}</p>
-        <p><strong>Status:</strong> {{ projetoVisualizacao.status }}</p>
-        <p><strong>Prioridade:</strong> {{ projetoVisualizacao.prioridade }}</p>
-        <p><strong>Data de Início:</strong> {{ projetoVisualizacao.dataInicio }}</p>
-        <p><strong>Data de Fim:</strong> {{ projetoVisualizacao.dataFim }}</p>
-        <p><strong>Descrição:</strong> {{ projetoVisualizacao.descricao }}</p>
-        <p><strong>Usuários Responsáveis:</strong> {{ projetoVisualizacao.nomesUsuariosResponsaveis }}</p>
-
-        <div class="modal-buttons">
-          <button (click)="fecharVisualizacao()">Fechar</button>
-        </div>
+      <p-card class="custom-card">
+        <ng-template pTemplate="title"> 
+          {{ projetoVisualizacao.nome }}
+        </ng-template>
+      
+        <ng-template pTemplate="content">
+          <div class="info-container">
+            <div class="info-group">
+              <p><strong>Status:</strong> {{ projetoVisualizacao.status }}</p>
+              <p><strong>Prioridade:</strong> {{ projetoVisualizacao.prioridade }}</p>
+            </div>
+  
+            <div class="info-group">
+              <p><strong>Data de Início:</strong> {{ projetoVisualizacao.dataInicioFormatada }}</p>
+              <p><strong>Data de Fim:</strong> {{ projetoVisualizacao.dataFimFormatada }}</p>
+            </div>
+  
+            <p><strong>Descrição:</strong> {{ projetoVisualizacao.descricao }}</p>
+          </div>
+  
+          <!-- ListBox para Usuários -->
+          <p><strong>Usuários Responsáveis:</strong></p>
+          <p-listbox 
+            [options]="projetoVisualizacao.usuarios" 
+            optionLabel="nome" 
+            [filter]="true" 
+            class="w-full md:w-56">
+            <ng-template let-user pTemplate="item">
+              <div class="flex align-items-center">
+                <i class="pi pi-user" style="font-size: 1.2rem; margin-right: 8px;"></i>
+                <div>
+                  <span class="font-bold">{{ user.nome }}</span>
+                  <br>
+                  <small class="text-gray-500">{{ user.email }}</small>
+                </div>
+              </div>
+            </ng-template>
+          </p-listbox>
+        </ng-template>
+      </p-card>
+  
+      <!-- ✅ Botão de Fechar Ajustado -->
+      <div class="modal-buttons">
+        <button pButton label="Fechar" icon="pi pi-times" class="p-button-secondary" (click)="fecharVisualizacao()"></button>
       </div>
+  
     </div>
   </div>
-
-</div>
+  
+  

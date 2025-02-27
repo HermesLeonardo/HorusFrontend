@@ -11,9 +11,10 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  login(email: string, senha: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/login`, { email, senha });
+  login(email: string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/login`, { email, senha: password });
   }
+  
 
   logout(): void {
     localStorage.removeItem('token');

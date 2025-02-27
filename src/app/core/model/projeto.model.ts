@@ -1,14 +1,19 @@
+import { Usuario } from './usuario.model';
+
 export interface Projeto {
   projeto: any;
   id: number;
   nome: string;
   descricao: string;
-  status: 'PLANEJADO' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'CANCELADO';
-  prioridade: 'ALTA' | 'MEDIA' | 'BAIXA';
-  idUsuarioResponsavel: number[];
+  status: "PLANEJADO" | "EM_ANDAMENTO" | "CONCLUIDO" | "CANCELADO" | { label: string; value: string } | string;
+  prioridade: "ALTA" | "MEDIA" | "BAIXA" | { label: string; value: string } | string;  
   dataInicio: Date | string;
   dataFim?: Date | string;
+  idUsuarioResponsavel?: number[];
+  usuarios?: Usuario[];
 }
+
+
 
 export interface ProjetoVisualizacao extends Projeto {
   dataInicioFormatada: string;
