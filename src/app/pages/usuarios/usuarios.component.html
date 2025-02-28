@@ -1,5 +1,5 @@
 <p-toast></p-toast>
-<p-confirmDialog></p-confirmDialog>
+<p-confirmDialog header="Atenção" icon="pi pi-exclamation-triangle"></p-confirmDialog>
 
 <div class="usuarios-container">
     <div class="topo-usuarios">
@@ -12,12 +12,10 @@
     <!-- FILTROS -->
     <div class="filtros-container">
         <input pInputText [(ngModel)]="filtro.nome" placeholder="Buscar Usuário..." />
-        <p-dropdown [options]="perfis" [(ngModel)]="filtro.perfil" optionLabel="label"
-            placeholder="Perfil"></p-dropdown>
+        <p-dropdown [options]="perfis" [(ngModel)]="filtro.perfil" optionLabel="label" placeholder="Perfil"></p-dropdown>
         <button class="filtro-btn" (click)="filtrarUsuarios()"><i class="pi pi-filter"></i> Filtrar</button>
         <button class="filtro-btn limpar" (click)="resetarFiltros()"><i class="pi pi-times"></i> Limpar</button>
-        <button class="filtro-btn" (click)="mostrarUsuariosDesativados()"><i class="pi pi-user-minus"></i> Usuários
-            Desativados</button>
+        <button class="filtro-btn" (click)="mostrarUsuariosDesativados()"><i class="pi pi-user-minus"></i> Usuários Desativados</button>
     </div>
 
     <!-- TABELA DE USUÁRIOS -->
@@ -40,11 +38,10 @@
                         <button class="acao-btn visualizar" (click)="visualizarUsuario(usuario)">
                             <i class="pi pi-eye"></i>
                         </button>
-                        
                         <button class="acao-btn editar" (click)="abrirDialog(usuario)">
                             <i class="pi pi-pencil"></i>
                         </button>
-                        <button class="acao-btn excluir" (click)="confirmarExclusao(usuario)">
+                        <button class="acao-btn excluir" (click)="mostrarPopupErro('Usuário não pode ser excluído pois possui registros de horas ou projetos vinculados.', usuario)">
                             <i class="pi pi-trash"></i>
                         </button>
                         <button class="acao-btn desativar" (click)="desativarUsuario(usuario)">
@@ -72,9 +69,7 @@
                 <input id="senha" type="password" [(ngModel)]="usuarioSelecionado.senha" placeholder="Digite a senha">
 
                 <label for="perfil">Perfil:</label>
-                <p-dropdown class="custom-dropdown" [options]="perfis" [(ngModel)]="usuarioSelecionado.perfil"
-                    optionLabel="label" placeholder="Selecione o Perfil">
-                </p-dropdown>
+                <p-dropdown class="custom-dropdown" [options]="perfis" [(ngModel)]="usuarioSelecionado.perfil" optionLabel="label" placeholder="Selecione o Perfil"></p-dropdown>
 
                 <div class="modal-buttons">
                     <button (click)="salvarUsuario()">Salvar</button>
@@ -84,41 +79,30 @@
         </div>
     </div>
 
-    <!-- ================== MODAL DE VISUALIZAÇÃO ================== -->
+    <!-- MODAL DE VISUALIZAÇÃO -->
     <div class="custom-modal-overlay" *ngIf="exibirVisualizacao">
         <div class="custom-modal">
             <p-card class="custom-card">
                 <ng-template pTemplate="title">
                     {{ usuarioVisualizacao.nome }}
                 </ng-template>
-
                 <ng-template pTemplate="content">
                     <div class="info-container">
                         <div class="info-group">
                             <p><strong>Email:</strong> {{ usuarioVisualizacao.email }}</p>
                             <p><strong>Perfil:</strong> {{ usuarioVisualizacao.perfil.value ? usuarioVisualizacao.perfil.value : usuarioVisualizacao.perfil }}</p>
                         </div>
-
                         <div class="info-group">
                             <p><strong>Status:</strong> {{ usuarioVisualizacao.ativo ? 'Ativo' : 'Inativo' }}</p>
-                            <p><strong>Último Login:</strong> {{ usuarioVisualizacao.ultimoLogin | date:'dd/MM/yyyy
-                                HH:mm' }}</p>
+                            <p><strong>Último Login:</strong> {{ usuarioVisualizacao.ultimoLogin | date:'dd/MM/yyyy HH:mm' }}</p>
                         </div>
-
-                        <p><strong>Data de Criação:</strong> {{ usuarioVisualizacao.dataCriacao | date:'dd/MM/yyyy
-                            HH:mm' }}</p>
+                        <p><strong>Data de Criação:</strong> {{ usuarioVisualizacao.dataCriacao | date:'dd/MM/yyyy HH:mm' }}</p>
                     </div>
                 </ng-template>
             </p-card>
-
             <div class="modal-buttons">
-                <button pButton label="Fechar" icon="pi pi-times" class="p-button-secondary"
-                    (click)="fecharVisualizacao()"></button>
+                <button pButton label="Fechar" icon="pi pi-times" class="p-button-secondary" (click)="fecharVisualizacao()"></button>
             </div>
         </div>
     </div>
-
-
-
-
 </div>

@@ -47,7 +47,6 @@ export class UsuariosComponent implements OnInit {
     { label: 'Admin', value: 'ADMIN' },
     { label: 'Usuário', value: 'USUARIO' }
   ];
-  confirmationService: any;
   exibirVisualizacao: any;
 
   usuarioVisualizacao: Usuario | null = null;
@@ -55,9 +54,10 @@ export class UsuariosComponent implements OnInit {
 
   constructor(
     private usuariosService: UsuariosService,
-    private messageService: MessageService
-
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService // 🔹 Adicionando corretamente
   ) { console.log('🚀 UsuariosComponent CONSTRUTOR chamado!'); }
+
 
   filtrarUsuarios(): void {
     this.usuariosFiltrados = this.usuarios.filter(usuario =>
@@ -107,12 +107,12 @@ export class UsuariosComponent implements OnInit {
     this.usuarioVisualizacao = { ...usuario };
     console.log("👀 Visualizando usuário:", this.usuarioVisualizacao);
     this.exibirVisualizacao = true; // Agora abre o modal correto!
-}
+  }
 
-fecharVisualizacao(): void {
-  this.exibirVisualizacao = false;
-  this.usuarioVisualizacao = null;
-}
+  fecharVisualizacao(): void {
+    this.exibirVisualizacao = false;
+    this.usuarioVisualizacao = null;
+  }
 
 
   fecharDialog(): void {
@@ -120,39 +120,48 @@ fecharVisualizacao(): void {
   }
   salvarUsuario(): void {
     const usuarioFormatado: Usuario = {
-        id: this.usuarioSelecionado.id || 0,
-        nome: this.usuarioSelecionado.nome,
-        email: this.usuarioSelecionado.email,
-        senha: this.usuarioSelecionado.senha ? this.usuarioSelecionado.senha : "senha123", // Garante que a senha não seja nula
-        perfil: typeof this.usuarioSelecionado.perfil === 'object' ? this.usuarioSelecionado.perfil.value : this.usuarioSelecionado.perfil, // 🛠️ Corrige o perfil para string
-        ativo: true,
-        dataCriacao: new Date(),
-        ultimoLogin: new Date()
+      id: this.usuarioSelecionado.id || 0,
+      nome: this.usuarioSelecionado.nome,
+      email: this.usuarioSelecionado.email,
+      senha: this.usuarioSelecionado.senha ? this.usuarioSelecionado.senha : "senha123", // Garante que a senha não seja nula
+      perfil: typeof this.usuarioSelecionado.perfil === 'object' ? this.usuarioSelecionado.perfil.value : this.usuarioSelecionado.perfil, // 🛠️ Corrige o perfil para string
+      ativo: true,
+      dataCriacao: new Date(),
+      ultimoLogin: new Date()
     };
 
     console.log("📤 JSON Enviado para API:", usuarioFormatado); // 🔍 Debugging
 
     this.usuariosService.criarUsuario(usuarioFormatado).subscribe(() => {
-        this.carregarUsuarios();
-        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Usuário criado com sucesso!' });
-        this.fecharDialog();
+      this.carregarUsuarios();
+      this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Usuário criado com sucesso!' });
+      this.fecharDialog();
     });
-}
-
-
+  }
 
 
   confirmarExclusao(usuario: Usuario): void {
+    if (!this.confirmationService) {
+      console.error("❌ Erro: ConfirmationService não está definido.");
+      return;
+    }
+
     this.confirmationService.confirm({
       message: `Tem certeza que deseja excluir ${usuario.nome}? Esta ação não pode ser desfeita!`,
       accept: () => {
-        this.usuariosService.deletarUsuario(usuario.id).subscribe(() => {
-          this.carregarUsuarios();
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Sucesso',
-            detail: 'Usuário excluído com sucesso!'
-          });
+        this.usuariosService.deletarUsuario(usuario.id).subscribe({
+          next: () => {
+            this.carregarUsuarios();
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Sucesso',
+              detail: 'Usuário excluído com sucesso!'
+            });
+          },
+          error: (erro) => {
+            console.error("Erro ao excluir usuário:", erro);
+            this.mostrarPopupErro(erro.message, usuario);
+          }
         });
       }
     });
@@ -177,6 +186,24 @@ fecharVisualizacao(): void {
       });
     });
   }
+
+
+  mostrarPopupErro(mensagemErro: string, usuario: Usuario): void {
+    if (!this.confirmationService) {
+        console.error("❌ Erro: ConfirmationService não está definido.");
+        return;
+    }
+
+    this.confirmationService.confirm({
+        message: `${mensagemErro} Deseja desativar o usuário em vez de excluir?`,
+        acceptLabel: "Desativar Usuário",
+        rejectLabel: "Cancelar",
+        accept: () => {
+            this.desativarUsuario(usuario);
+        }
+    });
+}
+
 
 
 

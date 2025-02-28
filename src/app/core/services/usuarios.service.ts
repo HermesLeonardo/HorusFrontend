@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable, throwError } from 'rxjs';
 import { Usuario } from '../model/usuario.model';
 
 @Injectable({
@@ -36,7 +36,13 @@ export class UsuariosService {
 
   deletarUsuario(id: number): Observable<void> {
     console.warn(`🚨 Tentativa de deletar usuário com ID: ${id}`);
-    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
-  }
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() }).pipe(
+        catchError((error) => {
+            console.error("❌ Erro ao excluir usuário:", error);
+            return throwError(() => new Error(error.error));
+        })
+    );
+}
+
   
 }
