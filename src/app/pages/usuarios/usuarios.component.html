@@ -41,9 +41,12 @@
                         <button class="acao-btn editar" (click)="abrirDialog(usuario)">
                             <i class="pi pi-pencil"></i>
                         </button>
-                        <button class="acao-btn excluir" (click)="mostrarPopupErro('Usuário não pode ser excluído pois possui registros de horas ou projetos vinculados.', usuario)">
-                            <i class="pi pi-trash"></i>
-                        </button>
+                        <button class="acao-btn excluir" 
+                        (click)="confirmarExclusao(usuario)" 
+                        [disabled]="usuario.temVinculacoes">
+                    <i class="pi pi-trash"></i>
+                </button>
+                
                         <button class="acao-btn desativar" (click)="desativarUsuario(usuario)">
                             <i class="pi pi-ban"></i>
                         </button>

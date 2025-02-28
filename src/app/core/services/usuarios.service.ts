@@ -44,5 +44,9 @@ export class UsuariosService {
     );
 }
 
+verificarVinculacoes(id: number): Observable<boolean> {
+  return this.http.get<boolean>(`${this.apiUrl}/${id}/tem-vinculacoes`, { headers: this.getAuthHeaders() });
+}
+
   
 }

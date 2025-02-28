@@ -80,7 +80,8 @@ export class ProjetosComponent implements OnInit {
   constructor(
     private projetosService: ProjetosService,
     private usuariosService: UsuariosService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService 
   ) { }
 
   ngOnInit(): void {
@@ -195,8 +196,6 @@ export class ProjetosComponent implements OnInit {
 
 
 
-
-
   visualizarProjeto(projeto: Projeto): void {
     console.log("🟢 Abrindo visualização para o projeto:", projeto);
 
@@ -235,12 +234,32 @@ export class ProjetosComponent implements OnInit {
   }
 
   confirmarExclusao(projeto: Projeto): void {
-    if (confirm(`Deseja realmente excluir o projeto "${projeto.nome}"?`)) {
-      this.projetosService.excluirProjeto(projeto.id).subscribe(() => {
-        this.carregarProjetos();
-      });
-    }
-  }
+    this.confirmationService.confirm({
+        message: `Tem certeza que deseja excluir o projeto "${projeto.nome}"? Esta ação não pode ser desfeita!`,
+        acceptLabel: "Sim, Excluir",
+        rejectLabel: "Cancelar",
+        icon: "pi pi-exclamation-triangle",
+        accept: () => {
+            this.projetosService.excluirProjeto(projeto.id).subscribe(() => {
+                this.carregarProjetos();
+                this.messageService.add({ 
+                    severity: 'success', 
+                    summary: 'Sucesso', 
+                    detail: 'Projeto excluído com sucesso!' 
+                });
+            },
+            (error) => {
+                console.error("Erro ao excluir projeto:", error);
+                this.messageService.add({ 
+                    severity: 'error', 
+                    summary: 'Erro', 
+                    detail: 'Não foi possível excluir o projeto.' 
+                });
+            });
+        }
+    });
+}
+
 
   carregarProjetos(): void {
     this.projetosService.getProjetos().subscribe(
