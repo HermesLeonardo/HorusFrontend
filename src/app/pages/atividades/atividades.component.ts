@@ -41,6 +41,7 @@ export class AtividadesComponent implements OnInit {
   atividadesFiltradas: Atividade[] = [];
   atividadeSelecionada: Atividade = this.novaAtividade();
   exibirDialog: boolean = false;
+  exibirVisualizacao: boolean = false; // 🔹 Estado para modal de visualização
   filtro = { nome: '', projeto: null };
   projetos: Projeto[] = [];
   usuarios: Usuario[] = [];
@@ -77,45 +78,84 @@ export class AtividadesComponent implements OnInit {
 
   carregarProjetos(): void {
     this.projetosService.getProjetos().subscribe(
-      (data) => {
-        this.projetos = data;
-      }
+      (data) => this.projetos = data
     );
   }
 
   carregarUsuarios(projetoId: number): void {
     if (!projetoId) {
-      this.usuarios = []; // Evita erro caso o projeto não tenha sido selecionado
+      this.usuarios = [];
       return;
     }
     this.usuariosService.getUsuariosPorProjeto(projetoId).subscribe(
-      (data) => {
-        this.usuarios = data;
-      },
+      (data) => this.usuarios = data,
       () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar usuários!' })
     );
   }
 
-
   abrirDialog(atividade?: Atividade): void {
-    if (atividade) {
-      this.atividadeSelecionada = { ...atividade };
-      this.carregarUsuarios(atividade.id_projeto);
-    } else {
-      this.atividadeSelecionada = this.novaAtividade();
-    }
+    this.atividadeSelecionada = atividade ? { ...atividade } : this.novaAtividade();
     this.exibirDialog = true;
   }
+
+  abrirVisualizacao(atividade: Atividade): void {
+    if (atividade) {
+        this.atividadeSelecionada = { ...atividade };
+
+        // Verifica se os projetos e usuários já foram carregados
+        if (!this.projetos.length) {
+            this.carregarProjetos();
+        }
+        if (!this.usuarios.length) {
+            this.carregarUsuarios(atividade.id_projeto);
+        }
+        
+        this.exibirVisualizacao = true;
+    }
+}
+
+getNomeProjeto(idProjeto?: number): string {
+  if (!idProjeto || !this.projetos?.length) {
+    return 'Carregando...';
+  }
+  
+  return this.projetos.find(p => p.id === idProjeto)?.nome || 'Não definido';
+}
+
 
   fecharDialog(): void {
     this.exibirDialog = false;
   }
 
+  fecharVisualizacao(): void {
+    this.exibirVisualizacao = false;
+  }
+
   salvarAtividade(): void {
-    this.atividadesService.criarAtividade(this.atividadeSelecionada).subscribe(() => {
-      this.carregarAtividades();
-      this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Atividade salva com sucesso!' });
-      this.fecharDialog();
+    if (this.atividadeSelecionada.id) {
+      this.atividadesService.atualizarAtividade(this.atividadeSelecionada.id, this.atividadeSelecionada).subscribe(() => {
+        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Atividade atualizada com sucesso!' });
+        this.carregarAtividades();
+        this.fecharDialog();
+      });
+    } else {
+      this.atividadesService.criarAtividade(this.atividadeSelecionada).subscribe(() => {
+        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Atividade criada com sucesso!' });
+        this.carregarAtividades();
+        this.fecharDialog();
+      });
+    }
+  }
+
+  deletarAtividade(atividade: Atividade): void {
+    this.confirmationService.confirm({
+      message: `Tem certeza que deseja excluir a atividade "${atividade.nome}"?`,
+      accept: () => {
+        this.atividadesService.deletarAtividade(atividade.id).subscribe(() => {
+          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Atividade deletada com sucesso!' });
+          this.carregarAtividades();
+        });
+      }
     });
   }
 
@@ -127,11 +167,9 @@ export class AtividadesComponent implements OnInit {
       descricao: '',
       data_inicio: new Date(),
       data_fim: new Date(),
-      status: 'ABERTA',
-      id_usuario_responsavel: 0
+      status: 'ABERTA'
     };
   }
-
 
   resetarFiltros(): void {
     this.filtro = { nome: '', projeto: null };
@@ -143,8 +181,4 @@ export class AtividadesComponent implements OnInit {
     const usuario = this.usuarios.find(u => u.id === id_usuario_responsavel);
     return usuario ? usuario.nome : 'Não definido';
   }
-
-
-
-
 }

@@ -11,12 +11,12 @@
 
     <!-- FILTROS -->
     <div class="filtros-container">
-        <input pInputText [(ngModel)]="filtro.nome" placeholder="Buscar Atividade..." />
         <p-dropdown [options]="projetos" [(ngModel)]="filtro.projeto" optionLabel="nome" placeholder="Projeto"></p-dropdown>
+        <input pInputText [(ngModel)]="filtro.nome" placeholder="Buscar Atividade..." />
         <button class="filtro-btn" (click)="filtrarAtividades()"><i class="pi pi-filter"></i> Filtrar</button>
         <button class="filtro-btn limpar" (click)="resetarFiltros()"><i class="pi pi-times"></i> Limpar</button>
     </div>
-
+    
     <!-- TABELA DE ATIVIDADES -->
     <div class="atividades-card">
         <p-table [value]="atividadesFiltradas" [paginator]="true" [rows]="5" responsiveLayout="scroll">
@@ -24,7 +24,8 @@
                 <tr>
                     <th pSortableColumn="nome">Nome <p-sortIcon field="nome"></p-sortIcon></th>
                     <th pSortableColumn="status">Status <p-sortIcon field="status"></p-sortIcon></th>
-                    <th pSortableColumn="id_usuario_responsavel">Responsável <p-sortIcon field="id_usuario_responsavel"></p-sortIcon></th>
+                    <th pSortableColumn="id_usuario_responsavel">Responsável <p-sortIcon
+                            field="id_usuario_responsavel"></p-sortIcon></th>
                     <th>Ações</th>
                 </tr>
             </ng-template>
@@ -34,6 +35,9 @@
                     <td>{{ atividade.status }}</td>
                     <td>{{ getNomeUsuarioResponsavel(atividade.id_usuario_responsavel) }}</td>
                     <td>
+                        <button class="acao-btn visualizar" (click)="abrirVisualizacao(atividade)">
+                            <i class="pi pi-eye"></i>
+                        </button>
                         <button class="acao-btn editar" (click)="abrirDialog(atividade)">
                             <i class="pi pi-pencil"></i>
                         </button>
@@ -52,32 +56,99 @@
             <h2>{{ atividadeSelecionada.id ? 'Editar Atividade' : 'Nova Atividade' }}</h2>
 
             <div class="modal-body">
+
                 <label for="nome">Nome:</label>
-                <input id="nome" type="text" [(ngModel)]="atividadeSelecionada.nome" placeholder="Digite o nome da atividade">
+                <input id="nome" type="text" [(ngModel)]="atividadeSelecionada.nome"
+                    placeholder="Digite o nome da atividade">
 
                 <label for="descricao">Descrição:</label>
-                <textarea id="descricao" [(ngModel)]="atividadeSelecionada.descricao" placeholder="Digite a descrição"></textarea>
+                <textarea id="descricao" [(ngModel)]="atividadeSelecionada.descricao"
+                    placeholder="Digite a descrição"></textarea>
 
-                <label for="projeto">Projeto:</label>
-                <p-dropdown class="custom-dropdown" [options]="projetos" [(ngModel)]="atividadeSelecionada.id_projeto" optionLabel="nome" placeholder="Selecione o Projeto"></p-dropdown>
+                <!-- Status e Projeto lado a lado -->
+                <div class="row">
+                    <div class="input-group">
+                        <label for="projeto">Projeto:</label>
+                        <p-dropdown [options]="projetos" [(ngModel)]="atividadeSelecionada.id_projeto"
+                            optionLabel="nome" placeholder="Selecione o Projeto"></p-dropdown>
+                    </div>
 
-                <label for="responsavel">Responsável:</label>
-                <p-dropdown class="custom-dropdown" [options]="usuarios" [(ngModel)]="atividadeSelecionada.id_usuario_responsavel" optionLabel="nome" placeholder="Selecione o Responsável"></p-dropdown>
+                    <div class="input-group">
+                        <label for="status">Status:</label>
+                        <p-dropdown [options]="['ABERTA', 'EM_ANDAMENTO', 'CONCLUIDA', 'PAUSADA']"
+                            [(ngModel)]="atividadeSelecionada.status" placeholder="Selecione o Status"></p-dropdown>
+                    </div>
+                </div>
 
-                <label for="status">Status:</label>
-                <p-dropdown class="custom-dropdown" [options]="['ABERTA', 'EM_ANDAMENTO', 'CONCLUIDA', 'PAUSADA']" [(ngModel)]="atividadeSelecionada.status" placeholder="Selecione o Status"></p-dropdown>
 
-                <label for="data_inicio">Data de Início:</label>
-                <input id="data_inicio" type="date" [(ngModel)]="atividadeSelecionada.data_inicio">
 
-                <label for="data_fim">Data de Fim:</label>
-                <input id="data_fim" type="date" [(ngModel)]="atividadeSelecionada.data_fim">
+                <!-- MultiSelect para Responsáveis -->
+                <label for="responsavel">Responsáveis:</label>
+                <p-multiSelect [options]="usuariosOptions" [(ngModel)]="atividadeSelecionada.idUsuariosResponsaveis"
+                    optionLabel="label" placeholder="Selecione os responsáveis">
+                </p-multiSelect>
+
+                <!-- Data de Início e Fim lado a lado e com maior largura -->
+                <div class="row">
+                    <div class="input-group full-width">
+                        <label for="data_inicio">Data de Início:</label>
+                        <input id="data_inicio" type="date" [(ngModel)]="atividadeSelecionada.data_inicio">
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label for="data_fim">Data de Fim:</label>
+                        <input id="data_fim" type="date" [(ngModel)]="atividadeSelecionada.data_fim">
+                    </div>
+                </div>
+
 
                 <div class="modal-buttons">
-                    <button (click)="salvarAtividade()">Salvar</button>
-                    <button (click)="fecharDialog()">Cancelar</button>
+                    <button class="salvar" (click)="salvarAtividade()">Salvar</button>
+                    <button class="cancelar" (click)="fecharDialog()">Cancelar</button>
                 </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL DE VISUALIZAÇÃO -->
+    <div class="custom-modal-overlay" *ngIf="exibirVisualizacao">
+        <div class="custom-modal">
+            <h2>Visualizar Atividade</h2>
+
+            <div class="modal-body">
+                <p><strong>Nome:</strong> {{ atividadeSelecionada?.nome }}</p>
+                <p><strong>Descrição:</strong> {{ atividadeSelecionada?.descricao }}</p>
+
+                <p><strong>Projeto:</strong> {{ getNomeProjeto(atividadeSelecionada?.id_projeto) }}</p>
+
+                <p><strong>Responsável:</strong>
+                    {{ atividadeSelecionada?.id_usuario_responsavel
+                    ? getNomeUsuarioResponsavel(atividadeSelecionada.id_usuario_responsavel)
+                    : 'Não definido' }}
+                </p>
+
+                <p><strong>Data de Início:</strong>
+                    {{ atividadeSelecionada?.data_inicio
+                    ? (atividadeSelecionada.data_inicio | date: 'dd/MM/yyyy')
+                    : 'Não definida' }}
+                </p>
+
+                <p><strong>Data de Fim:</strong>
+                    {{ atividadeSelecionada?.data_fim
+                    ? (atividadeSelecionada.data_fim | date: 'dd/MM/yyyy')
+                    : 'Não definida' }}
+                </p>
+
+            </div>
+
+            <div class="modal-buttons">
+                <button (click)="fecharVisualizacao()">Fechar</button>
             </div>
         </div>
     </div>
+
+
+
+
 </div>

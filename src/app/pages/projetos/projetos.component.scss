@@ -150,6 +150,15 @@
     color: var(--text-color);
   }
 }
+input,
+textarea,
+p-dropdown,
+p-multiSelect {
+  padding: 10px;
+  border-radius: 6px;
+  color: #ffffff;
+  border: none;
+}
 
 /* Ajuste no container de Status e Prioridade */
 .status-prioridade-container {

@@ -11,12 +11,13 @@
 
     <!-- FILTROS -->
     <div class="filtros-container">
-        <input pInputText [(ngModel)]="filtro.nome" placeholder="Buscar Usuário..." />
         <p-dropdown [options]="perfis" [(ngModel)]="filtro.perfil" optionLabel="label" placeholder="Perfil"></p-dropdown>
+        <input pInputText [(ngModel)]="filtro.nome" placeholder="Buscar Usuário..." />
         <button class="filtro-btn" (click)="filtrarUsuarios()"><i class="pi pi-filter"></i> Filtrar</button>
         <button class="filtro-btn limpar" (click)="resetarFiltros()"><i class="pi pi-times"></i> Limpar</button>
         <button class="filtro-btn" (click)="mostrarUsuariosDesativados()"><i class="pi pi-user-minus"></i> Usuários Desativados</button>
     </div>
+    
 
     <!-- TABELA DE USUÁRIOS -->
     <div class="usuarios-card">
