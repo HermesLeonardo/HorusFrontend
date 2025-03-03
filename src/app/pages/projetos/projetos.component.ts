@@ -202,7 +202,7 @@ export class ProjetosComponent implements OnInit {
     // 🔍 Verifica se os IDs vieram corretamente
     console.log("📌 IDs dos responsáveis recebidos:", projeto.idUsuarioResponsavel);
 
-    const usuariosIds = projeto.idUsuarioResponsavel || [];
+    const usuariosIds = projeto.usuarios ? projeto.usuarios.map(user => user.id) : [];
 
     // 🔹 Filtra os usuários com base nos IDs e gera os nomes corretamente
     const usuariosNomes = this.usuarios
@@ -261,15 +261,17 @@ export class ProjetosComponent implements OnInit {
 }
 
 
-  carregarProjetos(): void {
-    this.projetosService.getProjetos().subscribe(
-      (data) => {
-        this.projetos = data;
-        this.filtrarProjetos();
-      },
-      () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar projetos!' })
-    );
-  }
+carregarProjetos(): void {
+  this.projetosService.getProjetos().subscribe(
+    (data) => {
+      console.log("📢 Dados recebidos da API:", data);
+      this.projetos = data;
+      this.filtrarProjetos();
+    },
+    () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar projetos!' })
+  );
+}
+
 
   filtrarProjetos(): void {
     this.projetosFiltrados = this.projetos.filter(p =>

@@ -1,24 +1,25 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { Projeto } from '../model/projeto.model';
+import { Usuario } from '../model/usuario.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjetosService {
   private apiUrl = 'http://localhost:8080/api/projetos';
+  httpHeaders: HttpHeaders | { [header: string]: string | string[]; } | undefined;
 
   constructor(private http: HttpClient) { }
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
-    console.log('📢 Token enviado no cabeçalho:', token); 
+    console.log('Token enviado no cabeçalho:', token);  // 🔍 Log para depuração
     return new HttpHeaders({
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+      'Authorization': `Bearer ${token}`
     });
-}
+  }
 
 
 
@@ -40,27 +41,39 @@ export class ProjetosService {
       },
       usuariosIds: dados.usuariosIds || []
     };
-    
-    
+
+
 
     console.log("📢 JSON corrigido antes do envio:", requestBody);
 
     return this.http.post<Projeto>(this.apiUrl, requestBody, { headers });
-}
+  }
 
 
 
 
-atualizarProjeto(id: number, projeto: Projeto, usuariosIds: number[]): Observable<Projeto> {
-  const headers = this.getAuthHeaders(); // 
+  atualizarProjeto(id: number, projeto: Projeto, usuariosIds: number[]): Observable<Projeto> {
+    const headers = this.getAuthHeaders();
 
-  return this.http.put<Projeto>(`${this.apiUrl}/${id}`, {
-      ...projeto,
-      status: typeof projeto.status === 'object' ? projeto.status : projeto.status,
-      prioridade: typeof projeto.prioridade === 'object' ? projeto.prioridade : projeto.prioridade,
-      usuariosIds: usuariosIds
-  }, { headers }); // Passando os headers corretamente
-}
+    if (!projeto) {
+      console.error("❌ ERRO: O objeto 'projeto' está NULL antes da requisição!");
+      return throwError(() => new Error("Objeto 'projeto' inválido!"));
+    }
+
+    const requestBody = {
+      projeto: {
+        ...projeto,
+        dataInicio: projeto.dataInicio ? projeto.dataInicio : null,
+        dataFim: projeto.dataFim ? projeto.dataFim : null
+      },
+      usuariosIds: usuariosIds || []
+    };
+
+    console.log("📢 JSON enviado na atualização:", JSON.stringify(requestBody, null, 2));
+
+    return this.http.put<Projeto>(`${this.apiUrl}/${id}`, requestBody, { headers });
+  }
+
 
 
 
@@ -68,19 +81,31 @@ atualizarProjeto(id: number, projeto: Projeto, usuariosIds: number[]): Observabl
     return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
   }
 
-listarProjetos(): Observable < Projeto[] > {
-  return this.http.get<Projeto[]>(this.apiUrl, { headers: this.getAuthHeaders() });
-}
+  listarProjetos(): Observable<Projeto[]> {
+    return this.http.get<Projeto[]>(this.apiUrl, { headers: this.getAuthHeaders() });
+  }
 
-criarProjeto(projeto: Projeto): Observable < Projeto > {
-  return this.http.post<Projeto>(this.apiUrl, projeto, { headers: this.getAuthHeaders() });
-}
+  criarProjeto(projeto: Projeto): Observable<Projeto> {
+    return this.http.post<Projeto>(this.apiUrl, projeto, { headers: this.getAuthHeaders() });
+  }
 
-editarProjeto(projeto: Projeto): Observable < Projeto > {
-  return this.http.put<Projeto>(`${this.apiUrl}/${projeto.id}`, projeto, { headers: this.getAuthHeaders() });
-}
+  editarProjeto(projeto: Projeto): Observable<Projeto> {
+    return this.http.put<Projeto>(`${this.apiUrl}/${projeto.id}`, projeto, { headers: this.getAuthHeaders() });
+  }
 
-excluirProjeto(id: number): Observable < void> {
-  return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
-}
+  excluirProjeto(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
+  }
+
+  getUsuariosPorProjeto(projetoId: number) {
+    console.log("🔍 Buscando usuários para o projeto ID:", projetoId);
+    return this.http.get<Usuario[]>(`${this.apiUrl}/${projetoId}/usuarios`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+  
+  
+  
+
+
 }

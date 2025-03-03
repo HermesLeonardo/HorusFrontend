@@ -11,12 +11,13 @@
 
     <!-- FILTROS -->
     <div class="filtros-container">
-        <p-dropdown [options]="projetos" [(ngModel)]="filtro.projeto" optionLabel="nome" placeholder="Projeto"></p-dropdown>
+        <p-dropdown [options]="projetos" [(ngModel)]="filtro.projeto" optionLabel="nome"
+            placeholder="Projeto"></p-dropdown>
         <input pInputText [(ngModel)]="filtro.nome" placeholder="Buscar Atividade..." />
         <button class="filtro-btn" (click)="filtrarAtividades()"><i class="pi pi-filter"></i> Filtrar</button>
         <button class="filtro-btn limpar" (click)="resetarFiltros()"><i class="pi pi-times"></i> Limpar</button>
     </div>
-    
+
     <!-- TABELA DE ATIVIDADES -->
     <div class="atividades-card">
         <p-table [value]="atividadesFiltradas" [paginator]="true" [rows]="5" responsiveLayout="scroll">
@@ -41,7 +42,7 @@
                         <button class="acao-btn editar" (click)="abrirDialog(atividade)">
                             <i class="pi pi-pencil"></i>
                         </button>
-                        <button class="acao-btn excluir" (click)="confirmarExclusao(atividade)">
+                        <button class="acao-btn excluir" (click)="deletarAtividade(atividade)">
                             <i class="pi pi-trash"></i>
                         </button>
                     </td>
@@ -70,22 +71,24 @@
                     <div class="input-group">
                         <label for="projeto">Projeto:</label>
                         <p-dropdown [options]="projetos" [(ngModel)]="atividadeSelecionada.id_projeto"
-                            optionLabel="nome" placeholder="Selecione o Projeto"></p-dropdown>
+                            optionLabel="nome" dataKey="id" placeholder="Selecione o Projeto"
+                            (onChange)="onProjetoSelecionado($event.value)">
+                        </p-dropdown>
+
                     </div>
 
-                    <div class="input-group">
+                    <div class="input-group">     
                         <label for="status">Status:</label>
                         <p-dropdown [options]="['ABERTA', 'EM_ANDAMENTO', 'CONCLUIDA', 'PAUSADA']"
-                            [(ngModel)]="atividadeSelecionada.status" placeholder="Selecione o Status"></p-dropdown>
+                            [(ngModel)]="atividadeSelecionada.status" placeholder="Selecione o Status">
+                        </p-dropdown>
                     </div>
                 </div>
 
-
-
                 <!-- MultiSelect para Responsáveis -->
                 <label for="responsavel">Responsáveis:</label>
-                <p-multiSelect [options]="usuariosOptions" [(ngModel)]="atividadeSelecionada.idUsuariosResponsaveis"
-                    optionLabel="label" placeholder="Selecione os responsáveis">
+                <p-multiSelect [options]="usuariosResponsaveis" [(ngModel)]="atividadeSelecionada.usuariosResponsaveis"
+                    (onChange)="atualizarUsuariosSelecionados($event)" optionLabel="label" optionValue="value">
                 </p-multiSelect>
 
                 <!-- Data de Início e Fim lado a lado e com maior largura -->
@@ -101,15 +104,14 @@
                     </div>
                 </div>
 
-
                 <div class="modal-buttons">
                     <button class="salvar" (click)="salvarAtividade()">Salvar</button>
                     <button class="cancelar" (click)="fecharDialog()">Cancelar</button>
                 </div>
             </div>
-
         </div>
     </div>
+
 
     <!-- MODAL DE VISUALIZAÇÃO -->
     <div class="custom-modal-overlay" *ngIf="exibirVisualizacao">
@@ -129,16 +131,18 @@
                 </p>
 
                 <p><strong>Data de Início:</strong>
-                    {{ atividadeSelecionada?.data_inicio
-                    ? (atividadeSelecionada.data_inicio | date: 'dd/MM/yyyy')
-                    : 'Não definida' }}
+                    {{ atividadeSelecionada?.data_inicio ? (atividadeSelecionada.data_inicio | date: 'dd/MM/yyyy') :
+                    'Não definida' }}
                 </p>
 
                 <p><strong>Data de Fim:</strong>
-                    {{ atividadeSelecionada?.data_fim
-                    ? (atividadeSelecionada.data_fim | date: 'dd/MM/yyyy')
-                    : 'Não definida' }}
+                    {{ atividadeSelecionada?.data_fim ? (atividadeSelecionada.data_fim | date: 'dd/MM/yyyy') : 'Não
+                    definida' }}
                 </p>
+
+
+
+
 
             </div>
 
