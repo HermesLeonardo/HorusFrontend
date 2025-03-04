@@ -125,27 +125,28 @@ export class AtividadesComponent implements OnInit {
 
   abrirVisualizacao(atividade: Atividade): void {
     if (atividade) {
-      console.log("📌 Abrindo modal de visualização com atividade:", atividade);
+        console.log("📌 Abrindo modal de visualização com atividade:", atividade);
 
-      this.atividadeSelecionada = {
-        ...atividade,
-        data_inicio: atividade.data_inicio ? new Date(atividade.data_inicio) : null,
-        data_fim: atividade.data_fim ? new Date(atividade.data_fim) : null
-      };
+        this.atividadeSelecionada = {
+            ...atividade,
+            data_inicio: atividade.data_inicio ? new Date(atividade.data_inicio) : null,
+            data_fim: atividade.data_fim ? new Date(atividade.data_fim) : null,
+            usuariosResponsaveis: atividade.usuariosResponsaveis || []
+        };
 
-      console.log("📌 Atividade Selecionada após conversão:", this.atividadeSelecionada);
+        console.log("📌 Atividade Selecionada após conversão:", this.atividadeSelecionada);
 
-      // Carregar projetos e usuários se necessário
-      if (!this.projetos.length) {
-        this.carregarProjetos();
-      }
-      if (!this.usuarios.length) {
-        this.carregarUsuarios(atividade.id_projeto);
-      }
+        if (!this.projetos.length) {
+            this.carregarProjetos();
+        }
+        if (!this.usuarios.length) {
+            this.carregarUsuarios(atividade.id_projeto);
+        }
 
-      this.exibirVisualizacao = true;
+        this.exibirVisualizacao = true;
     }
-  }
+}
+
 
 
   getNomeProjeto(idProjeto?: number): string {
@@ -252,53 +253,49 @@ export class AtividadesComponent implements OnInit {
 
   onProjetoSelecionado(projetoSelecionado: any) {
     if (!projetoSelecionado || !projetoSelecionado.id) {
-      console.warn("⚠ ID do projeto inválido:", projetoSelecionado);
-      return;
+        console.warn("⚠ ID do projeto inválido:", projetoSelecionado);
+        return;
     }
 
     const projetoId = projetoSelecionado.id;
     console.log("🔄 Projeto selecionado ID:", projetoId);
 
     this.projetosService.getUsuariosPorProjeto(projetoId).subscribe({
-      next: (usuarios) => {
-        console.log("✅ Usuários carregados:", usuarios);
+        next: (usuarios) => {
+            console.log("✅ Usuários carregados:", usuarios);
 
-        // Atualiza a lista de usuários disponíveis para seleção
-        this.usuariosResponsaveis = usuarios.map(user => ({
-          label: user.nome,
-          value: user.id
-        }));
+            this.usuariosResponsaveis = usuarios.map(user => ({
+                label: user.nome,
+                value: user.id
+            }));
 
-        // Se for uma atividade nova, limpa os usuários vinculados
-        if (!this.modoEdicao) {
-          this.atividadeSelecionada.usuariosResponsaveis = [];
-        } else {
-          // Mantemos a referência correta dos usuários na edição
-          const idsSelecionados = this.atividadeSelecionada.usuariosIds || [];
-          this.atividadeSelecionada.usuariosResponsaveis = usuarios.filter(user => idsSelecionados.includes(user.id));
+            if (!this.modoEdicao) {
+                this.atividadeSelecionada.usuariosResponsaveis = [];
+            } else {
+                const idsSelecionados = this.atividadeSelecionada.usuariosResponsaveis?.map(user => user.id) || [];
+                this.atividadeSelecionada.usuariosResponsaveis = usuarios.filter(user => idsSelecionados.includes(user.id));
+            }
+
+            console.log("✅ Usuários pré-selecionados:", this.atividadeSelecionada.usuariosResponsaveis);
+        },
+        error: (err) => {
+            console.error("❌ Erro ao carregar usuários do projeto", err);
+            this.usuariosResponsaveis = [];
         }
-
-        console.log("✅ Usuários pré-selecionados:", this.atividadeSelecionada.usuariosResponsaveis);
-      },
-      error: (err) => {
-        console.error("❌ Erro ao carregar usuários do projeto", err);
-        this.usuariosResponsaveis = [];
-      }
     });
-  }
+}
 
 
 
   atualizarUsuariosSelecionados(event: any): void {
     console.log("🔄 Atualizando usuários selecionados:", event.value);
 
-    // Atualiza corretamente os usuários responsáveis
-    this.atividadeSelecionada.usuariosResponsaveis = event.value.map((id: number) => {
-        return this.usuarios.find(user => user.id === id) || { id, nome: 'Desconhecido', email: '' };
-    });
+    // Como o MultiSelect já fornece apenas IDs, basta atribuir diretamente
+    this.atividadeSelecionada.usuariosResponsaveis = [...event.value];
 
     console.log("✅ Usuários selecionados atualizados:", this.atividadeSelecionada.usuariosResponsaveis);
-}
+  }
+
 
 
 

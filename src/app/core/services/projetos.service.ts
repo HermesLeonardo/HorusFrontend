@@ -15,7 +15,7 @@ export class ProjetosService {
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
-    console.log('Token enviado no cabeçalho:', token);  // 🔍 Log para depuração
+    console.log('Token enviado no cabeçalho em Projetos:', token);  // 🔍 Log para depuração
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -103,9 +103,9 @@ export class ProjetosService {
       headers: this.getAuthHeaders()
     });
   }
-  
-  
-  
+
+
+
 
 
 }

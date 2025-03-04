@@ -36,4 +36,10 @@ export class AuthService {
       'Authorization': `Bearer ${token}`
     });
   }
+
+  getUserId(): number {
+    const user = JSON.parse(localStorage.getItem('user') || '{}'); // Pegando o usuário logado do localStorage (ou outro método)
+    return user?.id || 0; // Retorna o ID ou 0 caso não encontre
+  }
+  
 }

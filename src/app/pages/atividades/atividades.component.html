@@ -77,7 +77,7 @@
 
                     </div>
 
-                    <div class="input-group">     
+                    <div class="input-group">
                         <label for="status">Status:</label>
                         <p-dropdown [options]="['ABERTA', 'EM_ANDAMENTO', 'CONCLUIDA', 'PAUSADA']"
                             [(ngModel)]="atividadeSelecionada.status" placeholder="Selecione o Status">
@@ -88,8 +88,9 @@
                 <!-- MultiSelect para Responsáveis -->
                 <label for="responsavel">Responsáveis:</label>
                 <p-multiSelect [options]="usuariosResponsaveis" [(ngModel)]="atividadeSelecionada.usuariosResponsaveis"
-                    (onChange)="atualizarUsuariosSelecionados($event)" optionLabel="label" optionValue="value">
+                    (onChange)="atualizarUsuariosSelecionados($event)" optionLabel="label">
                 </p-multiSelect>
+
 
                 <!-- Data de Início e Fim lado a lado e com maior largura -->
                 <div class="row">
@@ -122,23 +123,19 @@
                 <p><strong>Nome:</strong> {{ atividadeSelecionada?.nome }}</p>
                 <p><strong>Descrição:</strong> {{ atividadeSelecionada?.descricao }}</p>
 
-                <p><strong>Projeto:</strong> {{ getNomeProjeto(atividadeSelecionada?.id_projeto) }}</p>
+                <p><strong>Projeto:</strong> {{ atividadeSelecionada?.id_projeto ?
+                    getNomeProjeto(atividadeSelecionada?.id_projeto) : 'Não definido' }}</p>
 
-                <p><strong>Responsável:</strong>
-                    {{ atividadeSelecionada?.id_usuario_responsavel
-                    ? getNomeUsuarioResponsavel(atividadeSelecionada.id_usuario_responsavel)
-                    : 'Não definido' }}
-                </p>
+                <p><strong>Responsáveis:</strong></p>
+                <p-listbox [options]="atividadeSelecionada?.usuariosResponsaveis || []" optionLabel="nome"
+                    [filter]="true" class="w-full">
+                </p-listbox>
 
-                <p><strong>Data de Início:</strong>
-                    {{ atividadeSelecionada?.data_inicio ? (atividadeSelecionada.data_inicio | date: 'dd/MM/yyyy') :
-                    'Não definida' }}
-                </p>
+                <p><strong>Data de Início:</strong> {{ atividadeSelecionada?.data_inicio ?
+                    (atividadeSelecionada.data_inicio | date: 'dd/MM/yyyy') : 'Não definida' }}</p>
 
-                <p><strong>Data de Fim:</strong>
-                    {{ atividadeSelecionada?.data_fim ? (atividadeSelecionada.data_fim | date: 'dd/MM/yyyy') : 'Não
-                    definida' }}
-                </p>
+                <p><strong>Data de Fim:</strong> {{ atividadeSelecionada?.data_fim ? (atividadeSelecionada.data_fim |
+                    date: 'dd/MM/yyyy') : 'Não definida' }}</p>
 
 
 
