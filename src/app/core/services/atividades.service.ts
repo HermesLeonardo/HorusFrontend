@@ -14,60 +14,62 @@ export class AtividadesService {
 
 
 
-  private getHeaders(): HttpHeaders {
+  private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
-    console.log("🛑 Enviando requisição com token:", token); // 🔹 Verifica se está correto
-
+    console.log('Token enviado no cabeçalho em Atividades:', token);  // 🔍 Log para depuração
     return new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+      'Authorization': `Bearer ${token}`
     });
   }
 
 
   getAtividades(): Observable<Atividade[]> {
-    return this.http.get<Atividade[]>(this.apiUrl, { headers: this.getHeaders() }).pipe(
-        map((atividades: any[]) => atividades.map(a => ({
-            ...a,
-            dataInicio: a.dataInicio ? new Date(a.dataInicio + "T00:00:00") : null, 
-            dataFim: a.dataFim ? new Date(a.dataFim + "T00:00:00") : null 
-        })))
+    return this.http.get<Atividade[]>(this.apiUrl, { headers: this.getAuthHeaders() }).pipe(
+      map((atividades: any[]) => atividades.map(a => ({
+        ...a,
+        dataInicio: a.dataInicio ? new Date(a.dataInicio + "T00:00:00") : null,
+        dataFim: a.dataFim ? new Date(a.dataFim + "T00:00:00") : null
+      })))
     );
-}
+  }
 
 
 
 
   getAtividadeById(id: number): Observable<Atividade> {
-    return this.http.get<Atividade>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
+    return this.http.get<Atividade>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
   }
 
   criarAtividade(atividade: Atividade): Observable<Atividade> {
+
+    const headers = this.getAuthHeaders();
+
     const requestBody = {
-      id_projeto: (atividade.id_projeto as any)?.id ?? atividade.id_projeto,  
+      id_projeto: (atividade.id_projeto as any)?.id ?? atividade.id_projeto,
       nome: atividade.nome,
       descricao: atividade.descricao,
       status: atividade.status,
-      dataInicio: atividade.dataInicio instanceof Date
-        ? atividade.dataInicio.toISOString().split('T')[0]
-        : atividade.dataInicio,
-      dataFim: atividade.dataFim instanceof Date
-        ? atividade.dataFim.toISOString().split('T')[0]
-        : atividade.dataFim,
-      usuariosIds: atividade.usuariosIds || []  // 🔥 Garante que o array de IDs está presente
-    };
+      data_inicio: atividade.dataInicio instanceof Date
+          ? atividade.dataInicio.toISOString().split('T')[0]
+          : atividade.dataInicio || null,
+      data_fim: atividade.dataFim instanceof Date
+          ? atividade.dataFim.toISOString().split('T')[0]
+          : atividade.dataFim || null,
+      usuariosIds: atividade.usuariosIds || []
+  };
+  
 
     console.log("📤 JSON enviado para criação da atividade:", JSON.stringify(requestBody, null, 2));
 
-    return this.http.post<Atividade>(this.apiUrl, requestBody, { headers: this.getHeaders() })
+    return this.http.post<Atividade>(this.apiUrl, requestBody, { headers})
       .pipe(
         tap(response => console.log("✅ Atividade criada com sucesso:", response)),
         catchError(error => {
           console.error("❌ Erro ao criar atividade:", error);
           return throwError(() => error);
         })
-      );
-}
+      );    
+  }
 
 
 
@@ -77,24 +79,24 @@ export class AtividadesService {
       dataInicio: atividade.dataInicio instanceof Date
         ? atividade.dataInicio.toISOString().split('T')[0]
         : atividade.dataInicio,
-    
+
       dataFim: atividade.dataFim instanceof Date
         ? atividade.dataFim.toISOString().split('T')[0]
         : atividade.dataFim
     };
-    
 
-    return this.http.put<Atividade>(`${this.apiUrl}/${id}`, atividadeFormatada, { headers: this.getHeaders() });
+
+    return this.http.put<Atividade>(`${this.apiUrl}/${id}`, atividadeFormatada, { headers: this.getAuthHeaders() });
   }
 
 
-  
+
 
 
 
 
   deletarAtividade(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
   }
 
 

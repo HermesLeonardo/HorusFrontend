@@ -150,7 +150,6 @@ export class ProjetosComponent implements OnInit {
     const usuariosIds = this.projetoSelecionado.idUsuarioResponsavel || [];
 
     if (this.projetoSelecionado.id) {
-      // Aqui devemos chamar ATUALIZAR PROJETO
       this.projetosService.atualizarProjeto(
         this.projetoSelecionado.id, // Passamos o ID para atualização
         {
@@ -171,7 +170,6 @@ export class ProjetosComponent implements OnInit {
         }
       );
     } else {
-      // Se o projeto NÃO TEM ID, então estamos criando um novo
       this.projetosService.salvarProjeto({
           projeto: {
               ...this.projetoSelecionado,

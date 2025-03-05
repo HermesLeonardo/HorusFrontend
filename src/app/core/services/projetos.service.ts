@@ -27,6 +27,14 @@ export class ProjetosService {
     return this.http.get<Projeto[]>(this.apiUrl, { headers: this.getAuthHeaders() });
   }
 
+  private formatarData(data: string | Date | null): string | null {
+    if (!data) return null; // Retorna null corretamente se a data for nula
+    if (typeof data === 'string') return data.split('T')[0]; // Se já for string, formata
+    return data instanceof Date ? data.toISOString().split('T')[0] : null; // Se for Date, converte para string
+  }
+
+
+
   salvarProjeto(dados: { projeto: Projeto; usuariosIds: number[] }): Observable<Projeto> {
     const headers = this.getAuthHeaders();
 
@@ -36,8 +44,10 @@ export class ProjetosService {
         descricao: dados.projeto.descricao,
         status: typeof dados.projeto.status === 'object' && 'value' in dados.projeto.status ? dados.projeto.status.value : dados.projeto.status,
         prioridade: typeof dados.projeto.prioridade === 'object' && 'value' in dados.projeto.prioridade ? dados.projeto.prioridade.value : dados.projeto.prioridade,
-        dataInicio: dados.projeto.dataInicio ? new Date(dados.projeto.dataInicio).toISOString() : null,
-        dataFim: dados.projeto.dataFim ? new Date(dados.projeto.dataFim).toISOString() : null
+        dataInicio: dados.projeto.dataInicio ? this.formatarData(dados.projeto.dataInicio) : null,
+        dataFim: dados.projeto.dataFim ? this.formatarData(dados.projeto.dataFim) : null
+
+
       },
       usuariosIds: dados.usuariosIds || []
     };

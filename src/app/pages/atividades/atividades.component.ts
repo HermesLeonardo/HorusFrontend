@@ -104,12 +104,21 @@ export class AtividadesComponent implements OnInit {
     if (atividade) {
         console.log("✏️ Modo edição ativado");
         this.modoEdicao = true;
+
         this.atividadeSelecionada = {
             ...atividade,
-            id_projeto: atividade.projeto ? atividade.projeto.id : null, 
-            dataInicio: atividade.dataInicio ? new Date(atividade.dataInicio) : null, 
-            dataFim: atividade.dataFim ? new Date(atividade.dataFim) : null, 
-            projeto: atividade.projeto || { id: null, nome: "Não definido" } 
+            id_projeto: atividade.projeto ? atividade.projeto.id : null,
+            dataInicio: atividade.dataInicio 
+                ? (typeof atividade.dataInicio === 'string' 
+                    ? new Date(atividade.dataInicio) 
+                    : atividade.dataInicio) 
+                : null,
+            dataFim: atividade.dataFim 
+                ? (typeof atividade.dataFim === 'string' 
+                    ? new Date(atividade.dataFim) 
+                    : atividade.dataFim) 
+                : null,
+            projeto: atividade.projeto || { id: null, nome: "Não definido" }
         };
     } else {
         console.log("➕ Criando nova atividade");
@@ -117,7 +126,7 @@ export class AtividadesComponent implements OnInit {
         this.atividadeSelecionada = this.novaAtividade();
     }
 
-    console.log("📌 Atividade Selecionada:", this.atividadeSelecionada);
+    console.log("📌 Atividade Selecionada após ajuste:", this.atividadeSelecionada);
     this.exibirDialog = true;
 }
 
@@ -125,32 +134,31 @@ export class AtividadesComponent implements OnInit {
 
 
 
+abrirVisualizacao(atividade: Atividade): void {
+  if (atividade) {
 
+      this.atividadeSelecionada = {
+          ...atividade,
+          dataInicio: atividade.dataInicio ? new Date(atividade.dataInicio) : null,
+          dataFim: atividade.dataFim ? new Date(atividade.dataFim) : null,
+          usuariosResponsaveis: atividade.usuariosResponsaveis || [],
+          id_projeto: atividade.projeto ? atividade.projeto.id : null, // 🔹 Atribui corretamente o ID do projeto
+          projeto: atividade.projeto || { id: null, nome: "Não definido" } // 🔹 Garante que o projeto esteja presente
+      };
 
-  abrirVisualizacao(atividade: Atividade): void {
-    if (atividade) {
+      console.log("📌 Atividade Selecionada após conversão:", this.atividadeSelecionada);
 
-        this.atividadeSelecionada = {
-            ...atividade,
-            dataInicio: atividade.dataInicio ? new Date(atividade.dataInicio) : null,
-            dataFim: atividade.dataFim ? new Date(atividade.dataFim) : null,
-            usuariosResponsaveis: atividade.usuariosResponsaveis || [],
-            id_projeto: atividade.projeto ? atividade.projeto.id : null, // 🔹 Atribui corretamente o ID do projeto
-            projeto: atividade.projeto || { id: null, nome: "Não definido" } // 🔹 Garante que o projeto esteja presente
-        };
+      if (!this.projetos.length) {
+          this.carregarProjetos();
+      }
+      if (!this.usuarios.length) {
+          this.carregarUsuarios(atividade.id_projeto);
+      }
 
-        console.log("📌 Atividade Selecionada após conversão:", this.atividadeSelecionada);
-
-        if (!this.projetos.length) {
-            this.carregarProjetos();
-        }
-        if (!this.usuarios.length) {
-            this.carregarUsuarios(atividade.id_projeto);
-        }
-
-        this.exibirVisualizacao = true;
-    }
+      this.exibirVisualizacao = true;
+  }
 }
+
 
 
 
@@ -244,7 +252,7 @@ export class AtividadesComponent implements OnInit {
       status: 'ABERTA',
       usuariosIds: []
     };
-    
+
   }
 
   resetarFiltros(): void {

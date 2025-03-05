@@ -1,8 +1,3 @@
-export interface Usuario {
-    id: number;
-    nome: string;
-    email: string;
-}
 
 export interface Atividade {
     projeto: any;
@@ -11,8 +6,15 @@ export interface Atividade {
     id_projeto: number;
     nome: string;
     descricao: string;
-    dataInicio: Date | null; // Alterado de data_inicio para dataInicio
-    dataFim: Date | null;     // Alterado de data_fim para dataFim
+    dataInicio: Date | null; 
+    dataFim: Date  | null;     
     status: 'ABERTA' | 'EM_ANDAMENTO' | 'CONCLUIDA' | 'PAUSADA';
     usuariosResponsaveis?: Usuario[];
+}
+
+
+export interface Usuario {
+    id: number;
+    nome: string;
+    email: string;
 }
