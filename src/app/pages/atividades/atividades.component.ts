@@ -102,22 +102,26 @@ export class AtividadesComponent implements OnInit {
 
   abrirDialog(atividade?: Atividade): void {
     if (atividade) {
-      console.log("✏️ Modo edição ativado");
-      this.modoEdicao = true;
-      this.atividadeSelecionada = {
-        ...atividade,
-        data_inicio: atividade.data_inicio ? new Date(atividade.data_inicio) : null,
-        data_fim: atividade.data_fim ? new Date(atividade.data_fim) : null
-      };
+        console.log("✏️ Modo edição ativado");
+        this.modoEdicao = true;
+        this.atividadeSelecionada = {
+            ...atividade,
+            id_projeto: atividade.projeto ? atividade.projeto.id : null, 
+            dataInicio: atividade.dataInicio ? new Date(atividade.dataInicio) : null, 
+            dataFim: atividade.dataFim ? new Date(atividade.dataFim) : null, 
+            projeto: atividade.projeto || { id: null, nome: "Não definido" } 
+        };
     } else {
-      console.log("➕ Criando nova atividade");
-      this.modoEdicao = false;
-      this.atividadeSelecionada = this.novaAtividade();
+        console.log("➕ Criando nova atividade");
+        this.modoEdicao = false;
+        this.atividadeSelecionada = this.novaAtividade();
     }
 
     console.log("📌 Atividade Selecionada:", this.atividadeSelecionada);
     this.exibirDialog = true;
-  }
+}
+
+
 
 
 
@@ -125,13 +129,14 @@ export class AtividadesComponent implements OnInit {
 
   abrirVisualizacao(atividade: Atividade): void {
     if (atividade) {
-        console.log("📌 Abrindo modal de visualização com atividade:", atividade);
 
         this.atividadeSelecionada = {
             ...atividade,
-            data_inicio: atividade.data_inicio ? new Date(atividade.data_inicio) : null,
-            data_fim: atividade.data_fim ? new Date(atividade.data_fim) : null,
-            usuariosResponsaveis: atividade.usuariosResponsaveis || []
+            dataInicio: atividade.dataInicio ? new Date(atividade.dataInicio) : null,
+            dataFim: atividade.dataFim ? new Date(atividade.dataFim) : null,
+            usuariosResponsaveis: atividade.usuariosResponsaveis || [],
+            id_projeto: atividade.projeto ? atividade.projeto.id : null, // 🔹 Atribui corretamente o ID do projeto
+            projeto: atividade.projeto || { id: null, nome: "Não definido" } // 🔹 Garante que o projeto esteja presente
         };
 
         console.log("📌 Atividade Selecionada após conversão:", this.atividadeSelecionada);
@@ -146,6 +151,7 @@ export class AtividadesComponent implements OnInit {
         this.exibirVisualizacao = true;
     }
 }
+
 
 
 
@@ -230,13 +236,15 @@ export class AtividadesComponent implements OnInit {
     return {
       id: 0,
       id_projeto: 0,
+      projeto: { id: 0, nome: '' },  // ✅ Adicionando um projeto vazio para evitar o erro
       nome: '',
       descricao: '',
-      data_inicio: new Date(),
-      data_fim: new Date(),
+      dataInicio: new Date(),
+      dataFim: new Date(),
       status: 'ABERTA',
       usuariosIds: []
     };
+    
   }
 
   resetarFiltros(): void {
@@ -253,37 +261,38 @@ export class AtividadesComponent implements OnInit {
 
   onProjetoSelecionado(projetoSelecionado: any) {
     if (!projetoSelecionado || !projetoSelecionado.id) {
-        console.warn("⚠ ID do projeto inválido:", projetoSelecionado);
-        return;
+      console.warn("⚠ ID do projeto inválido:", projetoSelecionado);
+      return;
     }
 
     const projetoId = projetoSelecionado.id;
     console.log("🔄 Projeto selecionado ID:", projetoId);
 
     this.projetosService.getUsuariosPorProjeto(projetoId).subscribe({
-        next: (usuarios) => {
-            console.log("✅ Usuários carregados:", usuarios);
+      next: (usuarios) => {
+        console.log("✅ Usuários carregados:", usuarios);
 
-            this.usuariosResponsaveis = usuarios.map(user => ({
-                label: user.nome,
-                value: user.id
-            }));
+        this.usuariosResponsaveis = usuarios.map(user => ({
+          label: user.nome,
+          value: user.id
+        }));
 
-            if (!this.modoEdicao) {
-                this.atividadeSelecionada.usuariosResponsaveis = [];
-            } else {
-                const idsSelecionados = this.atividadeSelecionada.usuariosResponsaveis?.map(user => user.id) || [];
-                this.atividadeSelecionada.usuariosResponsaveis = usuarios.filter(user => idsSelecionados.includes(user.id));
-            }
-
-            console.log("✅ Usuários pré-selecionados:", this.atividadeSelecionada.usuariosResponsaveis);
-        },
-        error: (err) => {
-            console.error("❌ Erro ao carregar usuários do projeto", err);
-            this.usuariosResponsaveis = [];
+        if (!this.modoEdicao) {
+          this.atividadeSelecionada.usuariosResponsaveis = [];
+        } else {
+          const idsSelecionados = this.atividadeSelecionada.usuariosResponsaveis?.map(user => user.id) || [];
+          this.atividadeSelecionada.usuariosResponsaveis = usuarios.filter(user =>
+            idsSelecionados.includes(user.id));
         }
+
+        console.log("✅ Usuários pré-selecionados:", this.atividadeSelecionada.usuariosResponsaveis);
+      },
+      error: (err) => {
+        console.error("❌ Erro ao carregar usuários do projeto", err);
+        this.usuariosResponsaveis = [];
+      }
     });
-}
+  }
 
 
 

@@ -96,12 +96,13 @@
                 <div class="row">
                     <div class="input-group full-width">
                         <label for="data_inicio">Data de Início:</label>
-                        <input id="data_inicio" type="date" [(ngModel)]="atividadeSelecionada.data_inicio">
+                        <input id="data_inicio" type="date" [(ngModel)]="atividadeSelecionada.dataInicio"
+                            [ngModelOptions]="{standalone: true}">
                     </div>
 
                     <div class="input-group full-width">
                         <label for="data_fim">Data de Fim:</label>
-                        <input id="data_fim" type="date" [(ngModel)]="atividadeSelecionada.data_fim">
+                        <input id="data_fim" type="date" [(ngModel)]="atividadeSelecionada.dataFim" [ngModelOptions]="{standalone: true}">
                     </div>
                 </div>
 
@@ -123,22 +124,18 @@
                 <p><strong>Nome:</strong> {{ atividadeSelecionada?.nome }}</p>
                 <p><strong>Descrição:</strong> {{ atividadeSelecionada?.descricao }}</p>
 
-                <p><strong>Projeto:</strong> {{ atividadeSelecionada?.id_projeto ?
-                    getNomeProjeto(atividadeSelecionada?.id_projeto) : 'Não definido' }}</p>
+                <p><strong>Projeto:</strong> {{ atividadeSelecionada?.projeto?.nome || 'Não definido' }}</p>
 
                 <p><strong>Responsáveis:</strong></p>
-                <p-listbox [options]="atividadeSelecionada?.usuariosResponsaveis || []" optionLabel="nome"
-                    [filter]="true" class="w-full">
-                </p-listbox>
+                <p-listbox [options]="atividadeSelecionada?.usuariosResponsaveis" optionLabel="nome"
+                    [filter]="true"></p-listbox>
 
-                <p><strong>Data de Início:</strong> {{ atividadeSelecionada?.data_inicio ?
-                    (atividadeSelecionada.data_inicio | date: 'dd/MM/yyyy') : 'Não definida' }}</p>
 
-                <p><strong>Data de Fim:</strong> {{ atividadeSelecionada?.data_fim ? (atividadeSelecionada.data_fim |
+                <p><strong>Data de Início:</strong> {{ atividadeSelecionada?.dataInicio ?
+                    (atividadeSelecionada.dataInicio | date: 'dd/MM/yyyy') : 'Não definida' }}</p>
+
+                <p><strong>Data de Fim:</strong> {{ atividadeSelecionada?.dataFim ? (atividadeSelecionada.dataFim |
                     date: 'dd/MM/yyyy') : 'Não definida' }}</p>
-
-
-
 
 
             </div>

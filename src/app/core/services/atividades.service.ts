@@ -27,13 +27,14 @@ export class AtividadesService {
 
   getAtividades(): Observable<Atividade[]> {
     return this.http.get<Atividade[]>(this.apiUrl, { headers: this.getHeaders() }).pipe(
-      map((atividades: any[]) => atividades.map(a => ({
-        ...a,
-        data_inicio: a.data_inicio ? new Date(a.data_inicio) : null,
-        data_fim: a.data_fim ? new Date(a.data_fim) : null
-      })))
+        map((atividades: any[]) => atividades.map(a => ({
+            ...a,
+            dataInicio: a.dataInicio ? new Date(a.dataInicio + "T00:00:00") : null, 
+            dataFim: a.dataFim ? new Date(a.dataFim + "T00:00:00") : null 
+        })))
     );
-  }
+}
+
 
 
 
@@ -47,12 +48,12 @@ export class AtividadesService {
       nome: atividade.nome,
       descricao: atividade.descricao,
       status: atividade.status,
-      data_inicio: atividade.data_inicio instanceof Date
-        ? atividade.data_inicio.toISOString().split('T')[0]
-        : atividade.data_inicio,
-      data_fim: atividade.data_fim instanceof Date
-        ? atividade.data_fim.toISOString().split('T')[0]
-        : atividade.data_fim,
+      dataInicio: atividade.dataInicio instanceof Date
+        ? atividade.dataInicio.toISOString().split('T')[0]
+        : atividade.dataInicio,
+      dataFim: atividade.dataFim instanceof Date
+        ? atividade.dataFim.toISOString().split('T')[0]
+        : atividade.dataFim,
       usuariosIds: atividade.usuariosIds || []  // 🔥 Garante que o array de IDs está presente
     };
 
@@ -68,27 +69,26 @@ export class AtividadesService {
       );
 }
 
-  
-  
-
-
 
 
   atualizarAtividade(id: number, atividade: Atividade): Observable<Atividade> {
     const atividadeFormatada = {
       ...atividade,
-      data_inicio: atividade.data_inicio instanceof Date
-        ? atividade.data_inicio.toISOString().split('T')[0]  // Converte para "YYYY-MM-DD"
-        : atividade.data_inicio,
-
-      data_fim: atividade.data_fim instanceof Date
-        ? atividade.data_fim.toISOString().split('T')[0]
-        : atividade.data_fim
+      dataInicio: atividade.dataInicio instanceof Date
+        ? atividade.dataInicio.toISOString().split('T')[0]
+        : atividade.dataInicio,
+    
+      dataFim: atividade.dataFim instanceof Date
+        ? atividade.dataFim.toISOString().split('T')[0]
+        : atividade.dataFim
     };
+    
 
     return this.http.put<Atividade>(`${this.apiUrl}/${id}`, atividadeFormatada, { headers: this.getHeaders() });
   }
 
+
+  
 
 
 
