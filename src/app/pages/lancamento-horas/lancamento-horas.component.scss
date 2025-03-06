@@ -1,1 +1,206 @@
-///oie
+/* ================== CONFIGURAÇÃO DA PÁGINA ================== */
+.lancamento-horas-container {
+  padding: 20px;
+  margin: 80px auto;
+  max-width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.topo-lancamentos {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding-right: 20px;
+}
+
+.novo-lancamento-btn {
+  background-color: #007ad9;
+  color: white;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-weight: bold;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background-color: #005bb5;
+  }
+}
+
+/* ================== FILTROS ================== */
+.filtros-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  background: #1e1e2d;
+  border-radius: 8px;
+}
+
+.filtro-btn {
+  background-color: #4a5568;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background-color: #2d3748;
+  }
+
+  &.limpar {
+    background-color: #e53e3e;
+
+    &:hover {
+      background-color: #c53030;
+    }
+  }
+}
+
+/* ================== TABELA ================== */
+.lancamentos-card {
+  padding: 15px;
+  background: var(--card-background);
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px var(--card-shadow);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* ================== BOTÕES DE AÇÃO ================== */
+.acao-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  font-size: 1.2rem;
+
+  &.visualizar {
+    color: #4ade80;
+  }
+
+  &.editar {
+    color: #facc15;
+  }
+
+  &.excluir {
+    color: #ef4444;
+  }
+
+  &.cancelar {
+    color: #d97706;
+  }
+}
+
+/* ================== MODAL DE NOVO/EDIÇÃO DE LANÇAMENTO ================== */
+.custom-modal {
+  width: 450px;
+  border-radius: 8px;
+  padding: 20px;
+  color: #ffffff;
+
+  .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    label {
+      font-weight: bold;
+      color: #b3b3b3;
+    }
+
+    input,
+    textarea,
+    .custom-dropdown {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      background-color: #2a2a3a;
+      border: 1px solid #3a3a4a;
+      color: #ffffff;
+      font-size: 14px;
+
+      &:focus {
+        border-color: #007ad9;
+        outline: none;
+      }
+    }
+
+    textarea {
+      resize: none;
+      height: 60px;
+    }
+  }
+
+  .form-row {
+    display: flex;
+    gap: 15px;
+
+    .form-group {
+      flex: 1;
+    }
+  }
+
+  .modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .btn-primary {
+      background-color: #007ad9;
+      color: white;
+
+      &:hover {
+        background-color: #005bb5;
+      }
+    }
+
+    .btn-secondary {
+      background-color: #3a3a4a;
+      color: white;
+
+      &:hover {
+        background-color: #5a5a6a;
+      }
+    }
+  }
+}
+
+/* ================== RESPONSIVIDADE ================== */
+@media (max-width: 768px) {
+  .lancamento-horas-container {
+    padding: 10px;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .custom-modal {
+    width: 90%;
+  }
+}

@@ -80,7 +80,8 @@ export class ProjetosComponent implements OnInit {
   constructor(
     private projetosService: ProjetosService,
     private usuariosService: UsuariosService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService 
   ) { }
 
   ngOnInit(): void {
@@ -149,7 +150,6 @@ export class ProjetosComponent implements OnInit {
     const usuariosIds = this.projetoSelecionado.idUsuarioResponsavel || [];
 
     if (this.projetoSelecionado.id) {
-      // Aqui devemos chamar ATUALIZAR PROJETO
       this.projetosService.atualizarProjeto(
         this.projetoSelecionado.id, // Passamos o ID para atualização
         {
@@ -170,7 +170,6 @@ export class ProjetosComponent implements OnInit {
         }
       );
     } else {
-      // Se o projeto NÃO TEM ID, então estamos criando um novo
       this.projetosService.salvarProjeto({
           projeto: {
               ...this.projetoSelecionado,
@@ -195,15 +194,13 @@ export class ProjetosComponent implements OnInit {
 
 
 
-
-
   visualizarProjeto(projeto: Projeto): void {
     console.log("🟢 Abrindo visualização para o projeto:", projeto);
 
     // 🔍 Verifica se os IDs vieram corretamente
     console.log("📌 IDs dos responsáveis recebidos:", projeto.idUsuarioResponsavel);
 
-    const usuariosIds = projeto.idUsuarioResponsavel || [];
+    const usuariosIds = projeto.usuarios ? projeto.usuarios.map(user => user.id) : [];
 
     // 🔹 Filtra os usuários com base nos IDs e gera os nomes corretamente
     const usuariosNomes = this.usuarios
@@ -235,22 +232,44 @@ export class ProjetosComponent implements OnInit {
   }
 
   confirmarExclusao(projeto: Projeto): void {
-    if (confirm(`Deseja realmente excluir o projeto "${projeto.nome}"?`)) {
-      this.projetosService.excluirProjeto(projeto.id).subscribe(() => {
-        this.carregarProjetos();
-      });
-    }
-  }
+    this.confirmationService.confirm({
+        message: `Tem certeza que deseja excluir o projeto "${projeto.nome}"? Esta ação não pode ser desfeita!`,
+        acceptLabel: "Sim, Excluir",
+        rejectLabel: "Cancelar",
+        icon: "pi pi-exclamation-triangle",
+        accept: () => {
+            this.projetosService.excluirProjeto(projeto.id).subscribe(() => {
+                this.carregarProjetos();
+                this.messageService.add({ 
+                    severity: 'success', 
+                    summary: 'Sucesso', 
+                    detail: 'Projeto excluído com sucesso!' 
+                });
+            },
+            (error) => {
+                console.error("Erro ao excluir projeto:", error);
+                this.messageService.add({ 
+                    severity: 'error', 
+                    summary: 'Erro', 
+                    detail: 'Não foi possível excluir o projeto.' 
+                });
+            });
+        }
+    });
+}
 
-  carregarProjetos(): void {
-    this.projetosService.getProjetos().subscribe(
-      (data) => {
-        this.projetos = data;
-        this.filtrarProjetos();
-      },
-      () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar projetos!' })
-    );
-  }
+
+carregarProjetos(): void {
+  this.projetosService.getProjetos().subscribe(
+    (data) => {
+      console.log("📢 Dados recebidos da API:", data);
+      this.projetos = data;
+      this.filtrarProjetos();
+    },
+    () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar projetos!' })
+  );
+}
+
 
   filtrarProjetos(): void {
     this.projetosFiltrados = this.projetos.filter(p =>

@@ -10,4 +10,5 @@ export interface Usuario {
     ultimoLogin: string | Date;  
     projetos?: Projeto[]; 
     dataCriacao: string | Date;
+    temVinculacoes?: boolean;  
 }

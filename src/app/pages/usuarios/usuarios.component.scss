@@ -234,6 +234,15 @@
   background: #292943;
   border-radius: 6px;
 }
+input,
+textarea,
+p-dropdown,
+p-multiSelect {
+  padding: 10px;
+  border-radius: 6px;
+  color: #ffffff;
+  border: none;
+}
 
 p {
   color: var(--text-color, #ffffff);

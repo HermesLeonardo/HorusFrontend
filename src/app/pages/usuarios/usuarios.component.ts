@@ -141,31 +141,32 @@ export class UsuariosComponent implements OnInit {
 
 
   confirmarExclusao(usuario: Usuario): void {
-    if (!this.confirmationService) {
-      console.error("❌ Erro: ConfirmationService não está definido.");
-      return;
-    }
-
-    this.confirmationService.confirm({
-      message: `Tem certeza que deseja excluir ${usuario.nome}? Esta ação não pode ser desfeita!`,
-      accept: () => {
-        this.usuariosService.deletarUsuario(usuario.id).subscribe({
-          next: () => {
-            this.carregarUsuarios();
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Sucesso',
-              detail: 'Usuário excluído com sucesso!'
+    this.usuariosService.verificarVinculacoes(usuario.id).subscribe((temVinculacoes) => {
+        if (temVinculacoes) {
+            this.mostrarPopupErro('Usuário não pode ser excluído pois possui registros de horas ou projetos vinculados.', usuario);
+        } else {
+            this.confirmationService.confirm({
+                message: `Tem certeza que deseja excluir ${usuario.nome}? Esta ação não pode ser desfeita!`,
+                accept: () => {
+                    this.usuariosService.deletarUsuario(usuario.id).subscribe({
+                        next: () => {
+                            this.carregarUsuarios();
+                            this.messageService.add({
+                                severity: 'success',
+                                summary: 'Sucesso',
+                                detail: 'Usuário excluído com sucesso!'
+                            });
+                        },
+                        error: (erro) => {
+                            console.error("Erro ao excluir usuário:", erro);
+                            this.mostrarPopupErro(erro.message, usuario);
+                        }
+                    });
+                }
             });
-          },
-          error: (erro) => {
-            console.error("Erro ao excluir usuário:", erro);
-            this.mostrarPopupErro(erro.message, usuario);
-          }
-        });
-      }
+        }
     });
-  }
+}
 
 
 
