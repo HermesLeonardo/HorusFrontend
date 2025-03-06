@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Injectable({
@@ -12,7 +12,13 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) {}
 
   login(email: string, password: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/login`, { email, senha: password });
+    return this.http.post<any>(`${this.apiUrl}/login`, { email, senha: password }).pipe(
+      tap(response => {
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('userRole', response.role);
+        localStorage.setItem('userId', response.id); // ✅ Salvar o ID do usuário
+      })
+    );
   }
   
 
@@ -38,8 +44,17 @@ export class AuthService {
   }
 
   getUserId(): number {
-    const user = JSON.parse(localStorage.getItem('user') || '{}'); // Pegando o usuário logado do localStorage (ou outro método)
-    return user?.id || 0; // Retorna o ID ou 0 caso não encontre
+    const token = localStorage.getItem('token');
+    if (!token) return 0;
+  
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1])); // Decodifica o JWT
+      return payload?.id || 0; // Retorna o ID do usuário ou 0 se não encontrar
+    } catch (error) {
+      console.error("❌ Erro ao decodificar token:", error);
+      return 0;
+    }
   }
+  
   
 }

@@ -42,9 +42,99 @@ import { Atividade } from '../../core/model/atividade.model';
 })
 export class LancamentoHorasComponent implements OnInit {
   apiUrl: any;
-  salvarLancamento() {
-    throw new Error('Method not implemented.');
+
+  salvarLancamento(): void {
+    if (!this.lancamentoSelecionado.idAtividade || !this.lancamentoSelecionado.horaInicio || !this.lancamentoSelecionado.horaFim) {
+      this.exibirMensagem('warn', 'Campos obrigatórios', 'Preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    // Converte a data para o formato correto antes de enviar ao backend
+    const dataEscolhida = this.lancamentoSelecionado.dataInicio;
+    let dataFormatada: string;
+
+    const dataObj = new Date(dataEscolhida); // Converte a string para um objeto Date
+
+    if (!isNaN(dataObj.getTime())) { // Verifica se a conversão foi bem-sucedida
+      const dia = dataObj.getDate().toString().padStart(2, '0');
+      const mes = (dataObj.getMonth() + 1).toString().padStart(2, '0');
+      const ano = dataObj.getFullYear();
+      dataFormatada = `${ano}-${mes}-${dia}`;
+    } else {
+      this.exibirMensagem('error', 'Erro no formato da data', 'A data selecionada não é válida.');
+      return;
+    }
+
+
+    // Formata a data para o formato dd/MM esperado pelo backend
+    const formatarDataParaBackend = (data: any): string => {
+      if (!data) return ""; // Evita valores nulos
+
+      if (typeof data === "string") {
+        return data.includes("-") ? data.split("-").reverse().slice(0, 2).join("/") : data;
+      }
+
+      const dateObj = new Date(data);
+      const dia = dateObj.getDate().toString().padStart(2, "0");
+      const mes = (dateObj.getMonth() + 1).toString().padStart(2, "0");
+
+      return `${dia}/${mes}`; // Retorna no formato "dd/MM"
+    };
+
+    // Formata a hora para o formato HH:mm esperado pelo backend
+    const formatarHoraParaBackend = (hora: any): string => {
+      if (!hora) return ""; // Evita valores nulos
+
+      if (typeof hora === "string" && hora.includes("T")) {
+        return hora.split("T")[1].substring(0, 5); // Extrai HH:mm de "2025-03-06T21:37:41.892Z"
+      }
+
+      const dateObj = new Date(hora);
+      const horas = dateObj.getHours().toString().padStart(2, "0");
+      const minutos = dateObj.getMinutes().toString().padStart(2, "0");
+
+      return `${horas}:${minutos}`; // Retorna no formato HH:mm
+    };
+
+
+    const payload = {
+      idAtividade: typeof this.lancamentoSelecionado.idAtividade === "object"
+        ? this.lancamentoSelecionado.idAtividade.value
+        : this.lancamentoSelecionado.idAtividade,
+
+      idUsuario: this.authService.getUserId(), // ✅ Pegando o usuário corretamente
+
+      descricao: this.lancamentoSelecionado.descricao,
+      dataInicio: formatarDataParaBackend(this.lancamentoSelecionado.dataInicio), // ✅ Mantendo "dd/MM"
+      dataFim: formatarDataParaBackend(this.lancamentoSelecionado.dataInicio), // ✅ Mesma data
+      horaInicio: formatarHoraParaBackend(this.lancamentoSelecionado.horaInicio), // ✅ Ajuste aqui!
+      horaFim: formatarHoraParaBackend(this.lancamentoSelecionado.horaFim) // ✅ Ajuste aqui!
+    };
+
+    console.log("📤 Enviando lançamento para API:", JSON.stringify(payload));
+
+
+
+
+
+    this.lancamentoService.criarLancamento(payload).subscribe({
+      next: (novoLancamento) => {
+        this.lancamentos.push(novoLancamento);
+        this.exibirMensagem('success', 'Lançamento criado', 'O lançamento foi registrado com sucesso.');
+        this.fecharDialog();
+        this.carregarLancamentos();
+      },
+      error: (err) => {
+        console.error("❌ Erro ao criar lançamento:", err);
+        this.exibirMensagem('error', 'Erro ao salvar', 'Ocorreu um erro ao salvar o lançamento.');
+      }
+    });
   }
+
+
+
+
+
   lancamentos: LancamentoHoras[] = [];
   atividadesOptions: { label: string; value: number }[] = [];
   usuariosOptions: { label: string; value: number }[] = [];
@@ -94,25 +184,37 @@ export class LancamentoHorasComponent implements OnInit {
 
   filtrarAtividades(event: any) {
     const query = event.query.toLowerCase();
-    
-    this.lancamentoService.getAtividades().subscribe({
+
+    this.lancamentoService.getAtividadesDoUsuario().subscribe({
       next: (data) => {
+        if (!data || data.length === 0) {
+          console.warn("⚠ Nenhuma atividade vinculada ao usuário.");
+          this.atividadesFiltradas = [];
+          this.messageService.add({ severity: 'warn', summary: 'Atenção', detail: 'Você não está vinculado a nenhuma atividade.' });
+          return;
+        }
+
         this.atividadesFiltradas = data
           .filter(atividade => atividade.nome.toLowerCase().includes(query))
           .map(atividade => ({ label: atividade.nome, value: atividade.id }));
       },
-      error: (err) => console.error("Erro ao filtrar atividades:", err)
+      error: (err) => {
+        console.error("❌ Erro ao buscar atividades:", err);
+        this.atividadesFiltradas = [];
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar atividades. Verifique sua conexão.' });
+      }
     });
   }
-  
-  
+
+
+
   filtrarUsuarios(event: any) {
     const query = event.query.toLowerCase();
     this.usuariosFiltrados = this.usuariosOptions.filter(usuario =>
       usuario.label.toLowerCase().includes(query)
     );
   }
-  
+
 
   resetarFiltros(): void {
     this.filtro = {
@@ -128,14 +230,30 @@ export class LancamentoHorasComponent implements OnInit {
 
 
   carregarAtividades(): void {
-    this.http.get<Atividade[]>('/api/atividades/usuario-logado').subscribe({
-      next: (atividades: any[]) => {
-        this.atividadesOptions = atividades.map(a => ({ label: a.nome, value: a.id }));
+    this.lancamentoService.getAtividadesDoUsuario().subscribe({
+      next: (atividades) => {
+        console.log("✅ Atividades carregadas:", atividades);
+
+        if (!atividades || atividades.length === 0) {
+          console.warn("⚠ Nenhuma atividade vinculada ao usuário.");
+          this.atividadesOptions = [];
+          this.messageService.add({ severity: 'warn', summary: 'Atenção', detail: 'Você não está vinculado a nenhuma atividade.' });
+        } else {
+          this.atividadesOptions = atividades.map(a => ({ label: a.nome, value: a.id }));
+          console.log("📌 Atividades para dropdown:", this.atividadesOptions);
+        }
       },
-      error: (err) => console.error("Erro ao buscar atividades do usuário logado:", err)
+      error: (err) => {
+        console.error("❌ Erro ao buscar atividades do usuário logado:", err);
+        this.atividadesOptions = [];
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar atividades. Verifique sua conexão.' });
+      }
     });
   }
-  
+
+
+
+
 
   carregarUsuarios(): void {
 
@@ -159,7 +277,7 @@ export class LancamentoHorasComponent implements OnInit {
     });
   }
 
-  
+
 
 
 
@@ -209,16 +327,20 @@ export class LancamentoHorasComponent implements OnInit {
     const dataAtual = new Date();
     return {
       idAtividade: 0,
-      idUsuario: this.authService.getUserId(),
+      idUsuario: this.authService.getUserId(), // ✅ Adicionando o id do usuário autenticado
       descricao: '',
-      dataInicio: `${dataAtual.getFullYear()}-MM-DD`, // Ano fixo, mês e dia preenchidos pelo usuário
+      dataInicio: `${dataAtual.getFullYear()}-MM-DD`,
       dataFim: `${dataAtual.getFullYear()}-MM-DD`,
       horaInicio: '',
       horaFim: ''
     };
   }
-  
 
-  
-  
+
+
+
+
+
+
+
 }

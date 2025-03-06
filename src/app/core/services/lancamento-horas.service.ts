@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { catchError, Observable, tap, throwError } from 'rxjs';
 import { LancamentoHoras } from '../model/lancamento-horas.model';
+import { Atividade } from '../model/atividade.model';
 
 @Injectable({
   providedIn: 'root'
@@ -34,12 +35,18 @@ export class LancamentoHorasService {
   }
 
   criarLancamento(lancamento: LancamentoHoras): Observable<LancamentoHoras> {
-    return this.http.post<LancamentoHoras>(this.apiUrl, lancamento, { headers: this.getAuthHeaders() });
+    return this.http.post<LancamentoHoras>(
+      'http://localhost:8080/api/lancamentos-horas', 
+      lancamento, 
+      { headers: this.getAuthHeaders() }
+    );
   }
-
+  
+  
   atualizarLancamento(id: number, lancamento: LancamentoHoras): Observable<LancamentoHoras> {
     return this.http.put<LancamentoHoras>(`${this.apiUrl}/${id}`, lancamento, { headers: this.getAuthHeaders() });
   }
+  
 
   deletarLancamento(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
@@ -52,5 +59,20 @@ export class LancamentoHorasService {
   getAtividades() {
     return this.http.get<{ id: number, nome: string }[]>(`${this.apiUrl}/atividades`, { headers: this.getAuthHeaders() });
   }
+
+  getAtividadesDoUsuario(): Observable<Atividade[]> {
+    return this.http.get<Atividade[]>(`http://localhost:8080/api/atividades/usuario-logado`, { headers: this.getAuthHeaders() }).pipe(
+      catchError(error => {
+        console.error("❌ Erro ao buscar atividades do usuário:", error);
+        return throwError(() => error);
+      })
+    );
+  }
+  
+  
+  
+  
+   
+  
   
 }

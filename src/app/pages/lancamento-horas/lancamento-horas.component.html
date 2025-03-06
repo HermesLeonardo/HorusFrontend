@@ -72,8 +72,9 @@
     <div class="form-group">
       <label for="atividade">Atividade:</label>
       <p-autoComplete [(ngModel)]="lancamentoSelecionado.idAtividade" [suggestions]="atividadesFiltradas"
-        (completeMethod)="filtrarAtividades($event)" placeholder="Pesquise a Atividade">
+        (completeMethod)="filtrarAtividades($event)" field="label" placeholder="Pesquise a Atividade">
       </p-autoComplete>
+
 
     </div>
 
@@ -85,7 +86,8 @@
 
     <div class="form-group">
       <label for="dataInicio">Data:</label>
-      <p-calendar id="data" [(ngModel)]="lancamentoSelecionado.dataInicio" dateFormat="dd/mm" showIcon="true" placeholder="Selecione uma data"></p-calendar>
+      <p-calendar id="data" [(ngModel)]="lancamentoSelecionado.dataInicio" dateFormat="dd/mm/yy" showIcon="true"
+        placeholder="Selecione uma data"></p-calendar>
 
     </div>
 
