@@ -1,169 +1,107 @@
-<div class="dashboard-container" [ngClass]="{ 'expanded': !isCollapsed, 'collapsed': isCollapsed }">
+<div class="admin-dashboard">
 
-  <!-- Cards de Atividades -->
-  <div class="activity-cards">
-    <div class="card" (click)="abrirAtividades('ABERTA')">
-      <h3>Atividades Abertas</h3>
-      <p class="value">{{ atividadesAbertas.length }}</p>
-      <p class="status positivo">+12% ↑</p>
+  <!-- 🔹 Seção 1: Visão Geral (Cards de Métricas) -->
+  <section class="dashboard-overview">
+    <div class="dashboard-card">
+      <h3>Total de Projetos</h3>
+      <p>{{ totalProjetos }}</p>
     </div>
-    <div class="card" (click)="abrirAtividades('EM_ANDAMENTO')">
-      <h3>Atividades em Andamento</h3>
-      <p class="value">{{ atividadesEmAndamento.length }}</p>
-      <p class="status positivo">+8% ↑</p>
+    <div class="dashboard-card">
+      <h3>Total de Atividades</h3>
+      <p>{{ totalAtividades }}</p>
     </div>
-    <div class="card" (click)="abrirAtividades('CONCLUIDA')">
-      <h3>Atividades Concluídas</h3>
-      <p class="value">{{ atividadesConcluidas.length }}</p>
-      <p class="status positivo">+20% ↑</p>
+    <div class="dashboard-card">
+      <h3>Total de Horas Lançadas</h3>
+      <p>{{ totalHorasLancadas }}</p>
     </div>
-    <div class="card" (click)="abrirAtividades('PAUSADA')">
-      <h3>Atividades Pausadas</h3>
-      <p class="value">{{ atividadesPausadas.length }}</p>
-      <p class="status negativo">-5% ↓</p>
+    <div class="dashboard-card">
+      <h3>Total de Usuários</h3>
+      <p>{{ totalUsuarios }}</p>
     </div>
-  </div>
+  </section>
 
-  <!-- ================== INÍCIO: MODAL DE PROJETO ================== -->
-  <div class="custom-modal-overlay" *ngIf="projetoDialogVisivel">
-    <div class="custom-modal">
-      <h2>Detalhes do Projeto</h2>
-      <div class="modal-body">
-        <label for="nome">Nome:</label>
-        <input id="nome" type="text" [(ngModel)]="projetoSelecionado.nome">
-
-        <label for="status">Status:</label>
-        <select id="status" [(ngModel)]="projetoSelecionado.status">
-          <option value="PLANEJAMENTO">Planejamento</option>
-          <option value="EM_ANDAMENTO">Em Andamento</option>
-          <option value="CONCLUIDO">Concluído</option>
-          <option value="CANCELADO">Cancelado</option>
-        </select>
-
-        <label for="prioridade">Prioridade:</label>
-        <select id="prioridade" [(ngModel)]="projetoSelecionado.prioridade">
-          <option value="ALTA">Alta</option>
-          <option value="MEDIA">Média</option>
-          <option value="BAIXA">Baixa</option>
-        </select>
-
-        <label for="descricao">Descrição:</label>
-        <textarea id="descricao" [(ngModel)]="projetoSelecionado.descricao"></textarea>
-
-        <!-- Campo de Senha só aparece após o clique -->
-        <div *ngIf="mostrarCampoSenha">
-          <label for="senha">Confirme sua senha:</label>
-          <input id="senha" type="password" [(ngModel)]="senhaConfirmacao">
-        </div>
-
-        <div class="modal-buttons">
-          <button (click)="salvarProjeto()">Salvar</button>
-          <button *ngIf="!mostrarCampoSenha" (click)="mostrarCampoSenha = true">Excluir</button>
-          <button *ngIf="mostrarCampoSenha" (click)="deletarProjeto()">Confirmar Exclusão</button>
-          <button (click)="fecharDialog()">Fechar</button>
-        </div>
-      </div>
+  <!-- 🔹 Seção 2: Status Resumido dos Projetos -->
+  <section class="dashboard-project-status">
+    <h2>Status dos Projetos e Atividades</h2>
+    <div class="chart-container">
+      <canvas id="projetosChart"></canvas>
     </div>
-  </div>
-  <!-- ================== FIM: MODAL DE PROJETO ================== -->
+  </section>
 
-  <!-- ================== SEÇÃO DE PROJETOS COM GRÁFICO ================== -->
-  <div class="projects-and-chart" [ngClass]="{ 'expand': mostrarGrafico, 'collapsed': !mostrarGrafico }">
-    <!-- CARD DE PROJETOS -->
-    <div class="project-card">
-      <!-- Botão de Toggle: Dentro do Card -->
-      <button class="toggle-chart-btn" (click)="alternarGrafico()"
-        [title]="mostrarGrafico ? 'Ocultar Gráfico' : 'Mostrar Gráfico'">
-        {{ mostrarGrafico ? '➡' : '⬅' }}
-      </button>
+  <!-- 🔹 Seção 3: Últimos Projetos Criados -->
+  <section class="dashboard-recent-projects">
+    <h2>Últimos Projetos Criados</h2>
+    <table class="dashboard-table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Responsável</th>
+          <th>Status</th>
+          <th>Data de Criação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let projeto of projetosRecentes">
+          <td>{{ projeto.nome }}</td>
+          <td>{{ projeto.responsavel }}</td>
+          <td>{{ projeto.status }}</td>
+          <td>{{ projeto.dataCriacao | date:'dd/MM/yyyy' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
 
-      <h2>Projetos</h2>
-      <div class="pagination-indicator">
-        Página {{ stepIndex + 1 }} de {{ projetosPaginados.length }}
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Nome do Projeto</th>
-            <th>Status</th>
-            <th>Prioridade</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let projeto of projetosPaginados[stepIndex]">
-            <td>{{ projeto.nome }}</td>
-            <td>{{ projeto.status }}</td>
-            <td>{{ projeto.prioridade }}</td>
-            <td>
-              <button class="view-btn" (click)="abrirProjeto(projeto)">🔍</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  <!-- 🔹 Seção 4: Atividades Pendentes -->
+  <section class="dashboard-pending-tasks">
+    <h2>Atividades Pendentes</h2>
+    <table class="dashboard-table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Responsável</th>
+          <th>Data de Vencimento</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let atividade of atividadesPendentes">
+          <td>{{ atividade.nome }}</td>
+          <td>{{ atividade.responsavel }}</td>
+          <td>{{ atividade.dataFim | date:'dd/MM/yyyy' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
 
-      <div class="stepper-buttons">
-        <button (click)="voltarStep()" [disabled]="stepIndex === 0">⬅</button>
-        <button (click)="avancarStep()" [disabled]="stepIndex >= projetosPaginados.length - 1">➡</button>
-      </div>
-
-    </div>
-
-    <!-- GRÁFICO -->
-    <div class="status-chart-section" [ngClass]="{ 'oculto': !mostrarGrafico }">
-      <h2>Status dos Projetos</h2>
-      <canvas id="graficoStatusProjetos"></canvas>
-    </div>
-  </div>
-  <!-- ================== FIM: SEÇÃO DE PROJETOS COM GRÁFICO ================== -->
-
- <!-- ================== SEÇÃO DE USUÁRIOS COM ÚLTIMOS LOGINS ================== -->
-<div class="users-and-logins" [ngClass]="{ 'expand': mostrarUsuarios, 'collapsed': !mostrarUsuarios }">
-
-  <!-- CARD DE USUÁRIOS RECENTES -->
-  <div class="recent-users-card">
-    <!-- ✅ O BOTÃO PERMANECE NO CARD DE USUÁRIOS RECENTES -->
-    <button class="toggle-users-btn" (click)="alternarUsuarios()"
-      [title]="mostrarUsuarios ? 'Ocultar Últimos Logins' : 'Mostrar Últimos Logins'">
-      {{ mostrarUsuarios ? '➡' : '⬅' }}
-    </button>
-
-    <h2>Usuários Recentes</h2>
-
-    <!-- Barra de Pesquisa -->
-    <div class="search-bar">
-      <input type="text" placeholder="Buscar usuário..." #usuarioFiltro
-        (input)="atualizarFiltro(usuarioFiltro.value)" />
-      <button (click)="filtrarUsuarios()">🔍</button>
-    </div>
-
-    <!-- Lista de Usuários -->
-    <ul class="user-list">
-      <li *ngFor="let usuario of usuariosFiltrados">
-        <div class="user-info">
-          <span><strong>{{ usuario.nome }}</strong></span>
-          <span>{{ usuario.email }}</span>
-        </div>
-        <button class="view-btn" (click)="abrirUsuario(usuario)">🔍</button>
-      </li>
-    </ul>
-  </div>
-
-  <!-- CARD DE ÚLTIMOS LOGINS -->
-  <div class="last-logins-card">
+  <!-- 🔹 Seção 5: Últimos Logins -->
+  <section class="dashboard-last-logins">
     <h2>Últimos Logins</h2>
-    <ul class="user-list">
-      <li *ngFor="let usuario of usuariosLoginsRecentes">
-        <div class="user-info">
-          <span><strong>{{ usuario.nome }}</strong></span>
-          <span>Último Login: {{ usuario.ultimoLogin | date:'dd/MM/yyyy HH:mm' }}</span>
-        </div>
-      </li>
-    </ul>
-  </div>
+    <table class="dashboard-table">
+      <thead>
+        <tr>
+          <th>Usuário</th>
+          <th>Email</th>
+          <th>Último Login</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let usuario of ultimosLogins">
+          <td>{{ usuario.nome }}</td>
+          <td>{{ usuario.email }}</td>
+          <td>{{ usuario.ultimoLogin | date:'dd/MM/yyyy HH:mm' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
 
-</div>
-<!-- ================== FIM: SEÇÃO DE USUÁRIOS COM ÚLTIMOS LOGINS ================== -->
-
+  <!-- 🔹 Seção 6: Ações Rápidas -->
+  <section class="dashboard-quick-actions">
+    <h2>Ações Rápidas</h2>
+    <div class="quick-actions-container">
+      <button (click)="criarNovoProjeto()">➕ Criar Novo Projeto</button>
+      <button (click)="criarNovaAtividade()">📌 Criar Nova Atividade</button>
+      <button (click)="acessarRelatorios()">📊 Acessar Relatórios</button>
+      <button (click)="gerenciarUsuarios()">👤 Gerenciar Usuários</button>
+    </div>
+  </section>
 
 </div>

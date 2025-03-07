@@ -1,408 +1,217 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { Chart, ChartConfiguration, ChartData, ChartOptions, ChartType } from 'chart.js';
 import { ProjetosService } from '../../../core/services/projetos.service';
+import { AtividadesService } from '../../../core/services/atividades.service';
 import { UsuariosService } from '../../../core/services/usuarios.service';
-import { Projeto } from '../../../core/model/projeto.model';
-import { Usuario } from '../../../core/model/usuario.model';
-import { Chart, registerables } from 'chart.js';
-import { FormsModule } from '@angular/forms';
-import { TableModule } from 'primeng/table';
-import { MessageService } from 'primeng/api';
-import { ToastModule } from 'primeng/toast';
 
+import { registerables } from 'chart.js';
 Chart.register(...registerables);
+
 
 @Component({
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
-  styleUrls: ['./admin-dashboard.component.scss'],
-  standalone: true,
-  imports: [CommonModule, FormsModule, TableModule, ToastModule],
-  providers: [MessageService],
-  encapsulation: ViewEncapsulation.Emulated
-
+  styleUrls: ['./admin-dashboard.component.scss']
 })
 export class AdminDashboardComponent implements OnInit {
-  projetos: Projeto[] = [];
-  projetosPaginados: Projeto[][] = [];
-  projetoSelecionado: Projeto | null = null;
-  projetoDialogVisivel: boolean = false;
-  stepIndex: number = 0;
-  senhaConfirmacao: string = '';
+  // 🔹 Variáveis para armazenar os dados do dashboard
+  totalProjetos: number = 0;
+  totalAtividades: number = 0;
+  totalHorasLancadas: number = 0;
+  totalUsuarios: number = 0;
 
+  // 🔹 Arrays para armazenar listas de dados
+  projetosRecentes: any[] = [];
+  atividadesPendentes: any[] = [];
+  ultimosLogins: any[] = [];
 
-  usuarios: Usuario[] = [];
-  usuariosFiltrados: Usuario[] = [];
-  usuariosPrioridadeAlta: Usuario[] = [];
-  usuarioSelecionado: Usuario | null = null;
-
-  atividadesAbertas: any[] = [];
-  atividadesEmAndamento: any[] = [];
-  atividadesConcluidas: any[] = [];
-  atividadesPausadas: any[] = [];
-  atividadesSelecionadas: any[] = [];
-
-  statusAtividadeSelecionado: string = '';
-  filtroUsuario: string = '';
-  isCollapsed: any;
-
+  // 🔹 Variável para armazenar os dados do gráfico
+  statusProjetosData: any = {};
 
   constructor(
     private projetosService: ProjetosService,
-    private usuariosService: UsuariosService,
-    private messageService: MessageService
-  ) { }
+    private atividadesService: AtividadesService,
+    private usuariosService: UsuariosService
+  ) {}
 
   ngOnInit(): void {
-    this.carregarProjetos();
-    this.carregarUsuarios();
-
-    this.carregarUsuariosLogins();
+    this.carregarDados();
   }
 
-
-  /*===== COMEÇO: CONFIG PARA USUÁRIOS =====*/
-
-  carregarUsuarios(): void {
-    this.usuariosService.getUsuarios().subscribe(
-      (data) => {
-        this.usuarios = data;
-        this.usuariosFiltrados = [...this.usuarios];
-      },
-      (error) => console.error('Erro ao carregar usuários', error)
-    );
+  private carregarDados(): void {
+    this.projetosService.getProjetos().subscribe(projetos => {
+      this.totalProjetos = projetos.length;
+      this.projetosRecentes = projetos.slice(0, 5);
+      
+      this.atividadesService.getAtividades().subscribe(atividades => {
+        this.totalAtividades = atividades.length;
+        this.atividadesPendentes = atividades.filter(a => a.status !== 'CONCLUIDA').slice(0, 5);
+        
+        // Processa os dados do gráfico combinando Projetos e Atividades
+        this.processarDadosParaGrafico(projetos, atividades);
+      });
+    });
+  
+    this.usuariosService.getUsuarios().subscribe(usuarios => {
+      this.totalUsuarios = usuarios.length;
+      this.ultimosLogins = usuarios
+        .sort((a, b) => new Date(b.ultimoLogin).getTime() - new Date(a.ultimoLogin).getTime())
+        .slice(0, 5);
+    });
   }
 
-  abrirUsuario(usuario: Usuario): void {
-    this.usuarioSelecionado = usuario;
-  }
-
-  abrirAtividades(status: string): void {
-    this.statusAtividadeSelecionado = status;
-    switch (status) {
-      case 'ABERTA':
-        this.atividadesSelecionadas = this.atividadesAbertas;
-        break;
-      case 'EM_ANDAMENTO':
-        this.atividadesSelecionadas = this.atividadesEmAndamento;
-        break;
-      case 'CONCLUIDA':
-        this.atividadesSelecionadas = this.atividadesConcluidas;
-        break;
-      case 'PAUSADA':
-        this.atividadesSelecionadas = this.atividadesPausadas;
-        break;
-    }
-  }
-
-  fecharModal(): void {
-    this.projetoSelecionado = null;
-    this.usuarioSelecionado = null;
-    this.atividadesSelecionadas = [];
-  }
-
-  identificarUsuariosComPrioridadeAlta(): void {
-    this.usuariosPrioridadeAlta = this.usuarios.filter(usuario =>
-      usuario.projetos?.some(projeto => projeto.prioridade === 'ALTA')
-    );
-  }
-
-  /*===== FIM: CONFIG PARA USUÁRIOS =====*/
-
-
-  /*===== COMEÇO: CONFIG PARA PROJETOS =====*/
-  carregarProjetos(): void {
-    this.projetosService.getProjetos().subscribe(
-      (data) => {
-        this.projetos = data;
-        this.paginaProjetos();
-        this.gerarGraficoStatusProjetos();
-        this.identificarUsuariosComPrioridadeAlta();
-      },
-      (error) => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar projetos!' })
-    );
-  }
-
-  paginaProjetos(): void {
-    const tamanhoPagina = 6;
-    this.projetosPaginados = [];
-
-    for (let i = 0; i < this.projetos.length; i += tamanhoPagina) {
-      this.projetosPaginados.push(this.projetos.slice(i, i + tamanhoPagina));
-    }
-
-    // GARANTIR QUE O stepIndex NÃO FIQUE FORA DOS LIMITES
-    this.stepIndex = Math.min(this.stepIndex, this.projetosPaginados.length - 1);
-  }
-
-  avancarStep(): void {
-    if (this.stepIndex < this.projetosPaginados.length - 1) {
-      this.stepIndex++;
-    }
-  }
-
-  voltarStep(): void {
-    if (this.stepIndex > 0) {
-      this.stepIndex--;
-    }
-  }
-
-  abrirProjeto(projeto: Projeto): void {
-    this.projetoSelecionado = { ...projeto };
-    this.projetoDialogVisivel = true;
-
-    // Garantir que o campo 'Status' já venha preenchido
-    if (!this.projetoSelecionado.status) {
-      this.projetoSelecionado.status = 'PLANEJADO'; // Valor padrão se estiver vazio
-    }
-
-    this.mostrarCampoSenha = false;
-  }
-
-  mostrarCampoSenha: boolean = false;
-
-  exibirCampoSenha(): void {
-    this.mostrarCampoSenha = true;
-  }
-
-  fecharDialog(): void {
-    this.projetoDialogVisivel = false;
-    this.projetoSelecionado = null;
-    this.senhaConfirmacao = '';
-    this.mostrarCampoSenha = false;
-  }
-
-  salvarProjeto(): void {
-    if (!this.projetoSelecionado) {
-      console.error("🚨 Nenhum projeto foi selecionado!");
-      return;
-    }
-
-    const usuariosIds = this.projetoSelecionado.idUsuarioResponsavel || [];
-
-    if (this.projetoSelecionado.id) {
-      this.projetosService.atualizarProjeto(
-        this.projetoSelecionado.id,
-        this.projetoSelecionado,
-        usuariosIds
-      ).subscribe(
-        () => {
-          this.carregarProjetos();
-          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto atualizado com sucesso!' });
-          this.fecharDialog();
-        },
-        (error) => {
-          console.error("❌ Erro ao atualizar o projeto:", error);
-          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao atualizar o projeto!' });
-        }
-      );
-    } else {
-      this.projetosService.salvarProjeto({
-        projeto: this.projetoSelecionado, // ✅ Agora enviando dentro do objeto esperado
-        usuariosIds: usuariosIds
-      }).subscribe(
-        () => {
-          this.carregarProjetos();
-          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto salvo com sucesso!' });
-          this.fecharDialog();
-        },
-        (error) => {
-          console.error("❌ Erro ao salvar o projeto:", error);
-          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao salvar o projeto!' });
-        }
-      );
-
-    }
-  }
-
-
-  deletarProjeto(): void {
-    console.log('Iniciando exclusão do projeto:', this.projetoSelecionado?.id);
-
-    if (!this.senhaConfirmacao) {
-      console.log('Nenhuma senha fornecida.');
-      this.messageService.add({ severity: 'warn', summary: 'Aviso', detail: 'Por favor, insira a senha!' });
-      return;
-    }
-
-    console.log('Senha fornecida:', this.senhaConfirmacao);
-
-    if (this.projetoSelecionado?.status === 'PLANEJADO' || this.projetoSelecionado?.status === 'EM_ANDAMENTO') {
-      console.log('Aviso: Projeto em andamento ou planejamento.');
-      this.messageService.add({ severity: 'info', summary: 'Atenção', detail: 'Você está prestes a excluir um projeto em andamento ou planejamento!' });
-    }
-
-    if (this.senhaConfirmacao !== localStorage.getItem('senhaUsuario')) {
-      console.log('Senha incorreta!');
-      this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Senha incorreta!' });
-      return;
-    }
-
-    console.log('Senha correta, procedendo com exclusão.');
-
-    if (this.projetoSelecionado) {
-      this.projetosService.deletarProjeto(this.projetoSelecionado.id).subscribe(
-        () => {
-          console.log('Projeto excluído com sucesso:', this.projetoSelecionado?.id);
-          this.carregarProjetos();
-          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto excluído com sucesso!' });
-          this.fecharDialog();
-        },
-        (error) => {
-          console.error('Erro ao excluir o projeto:', error);
-          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao excluir o projeto!' });
-        }
-      );
-    }
-  }
-
-
-
-  exibirCampoSenhaOuDeletar(): void {
-    if (!this.mostrarCampoSenha) {
-      this.mostrarCampoSenha = true; // Exibe o campo de senha
-    } else {
-      this.deletarProjeto(); // Se o campo já estiver visível, chama o método de exclusão
-    }
-  }
-
-  /*===== FIM: CONFIG PARA PROJETOS =====*/
-
-
-
-  /* ===== NOVA FUNÇÃO: RETRAIR/EXIBIR GRÁFICO ===== */
-  mostrarGrafico: boolean = true;
-
-  alternarGrafico(): void {
-    this.mostrarGrafico = !this.mostrarGrafico;
-    if (this.mostrarGrafico) {
-      setTimeout(() => {
-        this.gerarGraficoStatusProjetos(true);
-      }, 300); // Delay para reaparecer suavemente
-    }
-  }
-  /* ===== FIM: NOVA FUNÇÃO: RETRAIR/EXIBIR GRÁFICO ===== */
-
-
-  /*===== INÍCIO: CONFIG PARA GRÁFICO DE STATUS =====*/
-  graficoStatusProjetos: Chart | null = null;
-  gerarGraficoStatusProjetos(recriar: boolean = false): void {
-    const statusCounts = {
-      PLANEJAMENTO: 0,
+  private processarDadosParaGrafico(projetos: any[], atividades: any[]): void {
+    // Contadores para Projetos e Atividades
+    const statusProjetosCount: { [key: string]: number } = {
+      PLANEJADO: 0,
       EM_ANDAMENTO: 0,
       CONCLUIDO: 0,
       CANCELADO: 0
     };
-
-    // Contabilizar os status corretamente
-    this.projetos.forEach(projeto => {
-      // Garantindo que status seja uma string antes de chamar .toUpperCase()
-      const status = typeof projeto.status === 'object' && 'value' in projeto.status
-        ? projeto.status.value
-        : projeto.status;
-
-      const statusNormalizado = status?.toUpperCase().replace(/\s+/g, '_');
-
-      if (statusCounts[statusNormalizado as keyof typeof statusCounts] !== undefined) {
-        statusCounts[statusNormalizado as keyof typeof statusCounts]++;
+  
+    const statusAtividadesCount: { [key: string]: number } = {
+      ABERTA: 0,
+      EM_ANDAMENTO: 0,
+      CONCLUIDA: 0,
+      PAUSADA: 0
+    };
+  
+    // Contabilizando os status de projetos
+    projetos.forEach(projeto => {
+      if (statusProjetosCount[projeto.status] !== undefined) {
+        statusProjetosCount[projeto.status]++;
       }
     });
-
-
-    // Se o gráfico já existe, destruir antes de recriar
-    if (this.graficoStatusProjetos) {
-      this.graficoStatusProjetos.destroy();
-      this.graficoStatusProjetos = null;
-    }
-
-    if (!recriar && !this.mostrarGrafico) {
-      return;
-    }
-
-    // Criar um novo gráfico
-    this.graficoStatusProjetos = new Chart('graficoStatusProjetos', {
-      type: 'pie',
-      data: {
-        labels: ['Planejamento', 'Em Andamento', 'Concluído', 'Cancelado'],
-        datasets: [{
+  
+    // Contabilizando os status de atividades
+    atividades.forEach(atividade => {
+      if (statusAtividadesCount[atividade.status] !== undefined) {
+        statusAtividadesCount[atividade.status]++;
+      }
+    });
+  
+    // 🔹 Criando os dados para o gráfico duplo
+    this.statusProjetosData = {
+      labels: ['Planejado/Aberta', 'Em Andamento', 'Concluído/Concluída', 'Cancelado/Pausada'],
+      datasets: [
+        {
+          label: 'Projetos',
           data: [
-            statusCounts.PLANEJAMENTO,
-            statusCounts.EM_ANDAMENTO,
-            statusCounts.CONCLUIDO,
-            statusCounts.CANCELADO
+            statusProjetosCount['PLANEJADO'],
+            statusProjetosCount['EM_ANDAMENTO'],
+            statusProjetosCount['CONCLUIDO'],
+            statusProjetosCount['CANCELADO']
           ],
-          backgroundColor: ['#5A50FF', '#4772E6', '#8347E6', '#47A4E6'],
-          hoverBackgroundColor: ['#5A50FF', '#4772E6', '#8347E6', '#47A4E6'],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: true,
-            position: 'bottom', // Alternativa: 'left' se preferir
-            align: 'center', // Garante que as opções fiquem alinhadas na esquerda
-            labels: {
-              boxWidth: 15, // Ajusta o tamanho do quadrado colorido da legenda
-              padding: 10 // Adiciona espaçamento entre os itens
-            }
-          }
+          backgroundColor: '#3498db'
+        },
+        {
+          label: 'Atividades',
+          data: [
+            statusAtividadesCount['ABERTA'],
+            statusAtividadesCount['EM_ANDAMENTO'],
+            statusAtividadesCount['CONCLUIDA'],
+            statusAtividadesCount['PAUSADA']
+          ],
+          backgroundColor: '#2ecc71'
         }
+      ]
+    };
+  
+    this.renderizarGrafico();
+  }
+  
+  
+
+  // 🔹 Processa os status dos projetos para o gráfico
+  private processarStatusProjetos(projetos: any[]): void {
+    const statusCount: { [key: string]: number } = {
+      PLANEJADO: 0,
+      EM_ANDAMENTO: 0,
+      CONCLUIDO: 0,
+      CANCELADO: 0
+    };
+  
+    projetos.forEach(projeto => {
+      const status = projeto.status as keyof typeof statusCount; // Converte para um tipo válido
+      if (statusCount[status] !== undefined) {
+        statusCount[status]++;
       }
     });
-  }
-  /*===== FIM: CONFIG PARA GRÁFICO DE STATUS =====*/
-
-
-  /* ================== SEÇÃO DE USUÁRIOS COM ÚLTIMOS LOGINS ================== */
-  mostrarUsuarios: boolean = true;
-  usuariosLoginsRecentes: Usuario[] = [];
-
-
-  carregarUsuariosLogins(): void {
-    this.usuariosService.getUsuarios().subscribe(
-      (data) => {
-        console.log('Usuários recebidos:', data);
-
-        if (!Array.isArray(data)) {
-          console.error('🚨 Erro: A resposta da API não é um array:', data);
-          return;
+  
+    this.statusProjetosData = {
+      labels: ['Planejado', 'Em Andamento', 'Concluído', 'Cancelado'],
+      datasets: [
+        {
+          data: Object.values(statusCount),
+          backgroundColor: ['#f39c12', '#3498db', '#2ecc71', '#e74c3c']
         }
+      ]
+    };
+  
+    this.renderizarGrafico();
+  }
+  
 
-        this.usuariosLoginsRecentes = data
-          .filter(usuario => usuario.ultimoLogin)
-          .sort((a, b) => new Date(b.ultimoLogin).getTime() - new Date(a.ultimoLogin).getTime())
-          .slice(0, 6);
-      },
-      (error) => {
-        console.error(' Erro ao carregar últimos logins:', error);
+  // 🔹 Renderiza o gráfico de status dos projetos
+  private renderizarGrafico(): void {
+    setTimeout(() => {
+      const canvas = document.getElementById('projetosChart') as HTMLCanvasElement;
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+  
+        if (ctx) {
+          new Chart(ctx, {
+            type: 'bar',
+            data: this.statusProjetosData,
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: {
+                  ticks: {
+                    color: '#fff'
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    stepSize: 1,
+                    color: '#fff'
+                  }
+                }
+              },
+              plugins: {
+                legend: {
+                  position: 'top',
+                  labels: {
+                    color: '#fff'
+                  }
+                }
+              }
+            }
+          });
+        }
       }
-    );
+    }, 500);
+  }
+  
+  
+  
+
+  // 🔹 Métodos para os botões de ação rápida
+  criarNovoProjeto(): void {
+    console.log('Criando novo projeto...');
   }
 
-
-
-
-
-  alternarUsuarios(): void {
-    this.mostrarUsuarios = !this.mostrarUsuarios;
+  criarNovaAtividade(): void {
+    console.log('Criando nova atividade...');
   }
 
-  atualizarFiltro(valor: string): void {
-    this.filtroUsuario = valor.trim().toLowerCase();
-    this.filtrarUsuarios();
+  acessarRelatorios(): void {
+    console.log('Acessando relatórios...');
   }
 
-  filtrarUsuarios(): void {
-    this.usuariosFiltrados = this.usuarios.filter(usuario =>
-      usuario.nome.toLowerCase().includes(this.filtroUsuario) ||
-      usuario.email.toLowerCase().includes(this.filtroUsuario)
-    );
+  gerenciarUsuarios(): void {
+    console.log('Gerenciando usuários...');
   }
-  /* ================== FIM: SEÇÃO DE USUÁRIOS COM ÚLTIMOS LOGINS ================== */
-
-
-
 }
