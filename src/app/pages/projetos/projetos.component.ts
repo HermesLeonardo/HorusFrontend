@@ -44,6 +44,10 @@ export class ProjetosComponent implements OnInit {
   usuariosOptions: { label: string; value: number }[] = [];
   exibirDialog: boolean = false;
   usuarios: Usuario[] = [];
+  adminsOptions: { label: string; value: number }[] = [];
+  admins: Array<{ label: string; value: number }> = [];
+
+
 
   // Utilize o novo tipo de exibição para armazenar campos extras
   projetoVisualizacao: ProjetoVisualizacao = {
@@ -81,7 +85,7 @@ export class ProjetosComponent implements OnInit {
     private projetosService: ProjetosService,
     private usuariosService: UsuariosService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService 
+    private confirmationService: ConfirmationService
   ) { }
 
   ngOnInit(): void {
@@ -91,19 +95,20 @@ export class ProjetosComponent implements OnInit {
 
   carregarUsuarios(): void {
     console.log("📢 Buscando usuários...");
-  
+
     this.usuariosService.getUsuarios().subscribe(
       (usuarios) => {
         console.log("✅ Usuários carregados com sucesso:", usuarios);
-        
+
+        // 🔹 Garante que o primeiro campo mostre todos os usuários (Admins e Usuários comuns)
         this.usuarios = usuarios;
+
         this.usuariosOptions = usuarios.map(user => ({
           label: user.nome,
           value: user.id
         }));
-  
-        // Adicionando um log para ver se os usuários estão sendo corretamente formatados
-        console.log("🎯 Opções de usuários formatadas:", this.usuariosOptions);
+
+        console.log("🎯 Todos os usuários carregados:", this.usuariosOptions);
       },
       (error) => {
         console.error("❌ Erro ao carregar usuários:", error);
@@ -111,7 +116,33 @@ export class ProjetosComponent implements OnInit {
       }
     );
   }
-  
+
+
+  atualizarAdminsResponsaveis(): void {
+    console.log("🔄 Atualizando lista de Admins disponíveis...");
+
+    if (!this.projetoSelecionado.idUsuarioResponsavel) {
+      this.projetoSelecionado.idUsuarioResponsavel = [];
+    }
+
+    // 🔹 Filtra os usuários que são ADMIN e que foram selecionados no campo anterior
+    const adminsSelecionados = this.usuarios.filter(user =>
+      user.perfil === 'ADMIN' && (this.projetoSelecionado.idUsuarioResponsavel ?? []).includes(user.id)
+    );
+
+
+    // 🔹 Atualiza a lista de admins disponíveis
+    this.adminsOptions = adminsSelecionados.map(admin => ({
+      label: admin.nome,
+      value: admin.id
+    }));
+
+    console.log("✅ Admins disponíveis para seleção:", this.adminsOptions);
+  }
+
+
+
+
 
   abrirDialog(projeto?: Projeto): void {
     if (projeto) {
@@ -124,16 +155,16 @@ export class ProjetosComponent implements OnInit {
         ? new Date(projeto.dataFim).toISOString().split('T')[0]
         : '';
 
-      this.projetoSelecionado.idUsuarioResponsavel = projeto.usuarios
-        ? projeto.usuarios.map(user => user.id)
-        : [];
-
-      console.log("📌 Usuários vinculados carregados:", this.projetoSelecionado.idUsuarioResponsavel);
+      // 🔹 Garante que os arrays não sejam undefined
+      this.projetoSelecionado.idUsuarioResponsavel = projeto.idUsuarioResponsavel ?? [];
     } else {
       this.projetoSelecionado = this.novoProjeto();
     }
+
+    this.atualizarAdminsResponsaveis(); // Atualiza admins disponíveis
     this.exibirDialog = true;
   }
+
 
 
 
@@ -143,53 +174,64 @@ export class ProjetosComponent implements OnInit {
 
   salvarProjeto(): void {
     if (!this.projetoSelecionado) {
-        console.error("🚨 Nenhum projeto foi selecionado!");
-        return;
+      console.error("🚨 Nenhum projeto foi selecionado!");
+      return;
     }
 
-    const usuariosIds = this.projetoSelecionado.idUsuarioResponsavel || [];
+    const usuariosIds = this.projetoSelecionado.usuarios
+      ? this.projetoSelecionado.usuarios.map((usuario: any) => usuario.id)
+      : [];
+
+    const novoProjeto = {
+      projeto: {
+        ...this.projetoSelecionado,
+        status: typeof this.projetoSelecionado.status === 'object'
+          ? this.projetoSelecionado.status.value
+          : this.projetoSelecionado.status,
+        prioridade: typeof this.projetoSelecionado.prioridade === 'object'
+          ? this.projetoSelecionado.prioridade.value
+          : this.projetoSelecionado.prioridade
+      },
+      usuariosIds: usuariosIds,  // Agora passa corretamente os IDs dos usuários
+      idUsuarioResponsavel: this.projetoSelecionado.idUsuarioResponsavel?.find(id => {
+        const user = this.usuarios.find(u => u.id === id);
+        return user?.perfil === 'ADMIN';
+      }) || null
+    };
+
+
 
     if (this.projetoSelecionado.id) {
       this.projetosService.atualizarProjeto(
-        this.projetoSelecionado.id, // Passamos o ID para atualização
-        {
-          ...this.projetoSelecionado,
-          status: typeof this.projetoSelecionado.status === 'object' && 'value' in this.projetoSelecionado.status ? this.projetoSelecionado.status.value : this.projetoSelecionado.status,
-          prioridade: typeof this.projetoSelecionado.prioridade === 'object' && 'value' in this.projetoSelecionado.prioridade ? this.projetoSelecionado.prioridade.value : this.projetoSelecionado.prioridade
-        },
-        usuariosIds
-      ).subscribe(
-        () => {
-          this.carregarProjetos();
-          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto atualizado com sucesso!' });
-          this.fecharDialog();
-        },
-        (error) => {
-          console.error("❌ Erro ao atualizar o projeto:", error);
-          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao atualizar o projeto!' });
-        }
-      );
+        this.projetoSelecionado.id,
+        novoProjeto.projeto,
+        novoProjeto.usuariosIds,
+        novoProjeto.idUsuarioResponsavel ?? 0
+      ).subscribe(() => {
+        this.carregarProjetos();
+        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto atualizado com sucesso!' });
+        this.fecharDialog();
+      }, (error) => {
+        console.error("❌ Erro ao atualizar o projeto:", error);
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao atualizar o projeto!' });
+      });
     } else {
-      this.projetosService.salvarProjeto({
-          projeto: {
-              ...this.projetoSelecionado,
-              status: typeof this.projetoSelecionado.status === 'object' && 'value' in this.projetoSelecionado.status ? this.projetoSelecionado.status.value : this.projetoSelecionado.status,
-              prioridade: typeof this.projetoSelecionado.prioridade === 'object' && 'value' in this.projetoSelecionado.prioridade ? this.projetoSelecionado.prioridade.value : this.projetoSelecionado.prioridade
-          },
-          usuariosIds: usuariosIds
-      }).subscribe(
-          () => {
-              this.carregarProjetos();
-              this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto salvo com sucesso!' });
-              this.fecharDialog();
-          },
-          (error) => {
-              console.error("❌ Erro ao salvar o projeto:", error);
-              this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao salvar o projeto!' });
-          }
-      );
+      this.projetosService.salvarProjeto(novoProjeto)
+        .subscribe(() => {
+          this.carregarProjetos();
+          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto salvo com sucesso!' });
+          this.fecharDialog();
+        }, (error) => {
+          console.error("❌ Erro ao salvar o projeto:", error);
+          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao salvar o projeto!' });
+        });
     }
-}
+    console.log("🔹 Dados sendo enviados para a API:", novoProjeto);
+    console.log("📌 Admin selecionado para o projeto:", this.projetoSelecionado.idUsuarioResponsavel);
+    console.log("🚀 JSON corrigido antes do envio:", novoProjeto);
+
+
+  }
 
 
 
@@ -204,9 +246,10 @@ export class ProjetosComponent implements OnInit {
 
     // 🔹 Filtra os usuários com base nos IDs e gera os nomes corretamente
     const usuariosNomes = this.usuarios
-      .filter(user => usuariosIds.includes(user.id))
+      .filter(user => usuariosIds.includes(user.id)) // ✅ Agora sempre será um array válido
       .map(user => user.nome)
       .join(', ');
+
 
     console.log("👥 Usuários carregados:", this.usuarios);
     console.log("✅ IDs dos responsáveis usados:", usuariosIds);
@@ -233,42 +276,42 @@ export class ProjetosComponent implements OnInit {
 
   confirmarExclusao(projeto: Projeto): void {
     this.confirmationService.confirm({
-        message: `Tem certeza que deseja excluir o projeto "${projeto.nome}"? Esta ação não pode ser desfeita!`,
-        acceptLabel: "Sim, Excluir",
-        rejectLabel: "Cancelar",
-        icon: "pi pi-exclamation-triangle",
-        accept: () => {
-            this.projetosService.excluirProjeto(projeto.id).subscribe(() => {
-                this.carregarProjetos();
-                this.messageService.add({ 
-                    severity: 'success', 
-                    summary: 'Sucesso', 
-                    detail: 'Projeto excluído com sucesso!' 
-                });
-            },
-            (error) => {
-                console.error("Erro ao excluir projeto:", error);
-                this.messageService.add({ 
-                    severity: 'error', 
-                    summary: 'Erro', 
-                    detail: 'Não foi possível excluir o projeto.' 
-                });
+      message: `Tem certeza que deseja excluir o projeto "${projeto.nome}"? Esta ação não pode ser desfeita!`,
+      acceptLabel: "Sim, Excluir",
+      rejectLabel: "Cancelar",
+      icon: "pi pi-exclamation-triangle",
+      accept: () => {
+        this.projetosService.excluirProjeto(projeto.id).subscribe(() => {
+          this.carregarProjetos();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Projeto excluído com sucesso!'
+          });
+        },
+          (error) => {
+            console.error("Erro ao excluir projeto:", error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erro',
+              detail: 'Não foi possível excluir o projeto.'
             });
-        }
+          });
+      }
     });
-}
+  }
 
 
-carregarProjetos(): void {
-  this.projetosService.getProjetos().subscribe(
-    (data) => {
-      console.log("📢 Dados recebidos da API:", data);
-      this.projetos = data;
-      this.filtrarProjetos();
-    },
-    () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar projetos!' })
-  );
-}
+  carregarProjetos(): void {
+    this.projetosService.getProjetos().subscribe(
+      (data) => {
+        console.log("📢 Dados recebidos da API:", data);
+        this.projetos = data;
+        this.filtrarProjetos();
+      },
+      () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar projetos!' })
+    );
+  }
 
 
   filtrarProjetos(): void {

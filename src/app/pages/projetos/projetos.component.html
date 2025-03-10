@@ -16,7 +16,7 @@
     <input pInputText [(ngModel)]="filtro.nome" placeholder="Buscar Projeto..." />
     <button class="filtro-btn" (click)="filtrarProjetos()"><i class="pi pi-filter"></i> Filtrar</button>
     <button class="filtro-btn limpar" (click)="resetarFiltros()"><i class="pi pi-times"></i> Limpar</button>
-</div>
+  </div>
 
 
   <!-- ================== TABELA DE PROJETOS ================== -->
@@ -60,15 +60,21 @@
         <label for="nome">Nome do Projeto:</label>
         <input id="nome" type="text" [(ngModel)]="projetoSelecionado.nome" placeholder="Digite o nome do projeto">
 
-        <label for="status">Status:</label>
-        <p-dropdown class="custom-dropdown" [options]="statusOptions" [(ngModel)]="projetoSelecionado.status"
-          optionLabel="label" placeholder="Selecione o Status">
-        </p-dropdown>
+        <div class="status-prioridade-container">
+          <div class="input-group">
+            <label for="status">Status:</label>
+            <p-dropdown class="custom-dropdown" [options]="statusOptions" [(ngModel)]="projetoSelecionado.status"
+              optionLabel="label" placeholder="Selecione o Status">
+            </p-dropdown>
+          </div>
 
-        <label for="prioridade">Prioridade:</label>
-        <p-dropdown class="custom-dropdown" [options]="prioridadeOptions" [(ngModel)]="projetoSelecionado.prioridade"
-          optionLabel="label" placeholder="Selecione a Prioridade">
-        </p-dropdown>
+          <div class="input-group">
+            <label for="prioridade">Prioridade:</label>
+            <p-dropdown class="custom-dropdown" [options]="prioridadeOptions"
+              [(ngModel)]="projetoSelecionado.prioridade" optionLabel="label" placeholder="Selecione a Prioridade">
+            </p-dropdown>
+          </div>
+        </div>
 
         <div class="data-container">
           <div>
@@ -82,12 +88,26 @@
         </div>
 
         <label for="descricao_projeto">Descrição do Projeto:</label>
-        <textarea id="descricao_projeto" [(ngModel)]="projetoSelecionado.descricao" rows="3" placeholder="Descreva o projeto"></textarea>
+        <textarea id="descricao_projeto" [(ngModel)]="projetoSelecionado.descricao" rows="3"
+          placeholder="Descreva o projeto"></textarea>
 
-        <label for="usuarios">Usuários Responsáveis:</label>
-        <p-multiSelect [options]="usuariosOptions" [(ngModel)]="projetoSelecionado.idUsuarioResponsavel"
-          optionLabel="label" placeholder="Selecione os responsáveis">
-        </p-multiSelect>
+        <div class="responsaveis-container">
+          <div class="input-group usuarios-responsaveis">
+            <label for="usuarios">Usuários Responsáveis:</label>
+            <p-multiSelect [options]="usuariosOptions" [(ngModel)]="projetoSelecionado.idUsuarioResponsavel"
+              optionLabel="label" placeholder="Selecione os responsáveis" (onChange)="atualizarAdminsResponsaveis()"> <!-- 🔹 Atualiza admins ao mudar os responsáveis -->
+            </p-multiSelect>
+          </div>
+
+          <div class="input-group admin-responsavel">
+            <label for="admin">Admin Responsável:</label>
+            <p-dropdown [options]="adminsOptions" [(ngModel)]="projetoSelecionado.adminResponsavel" optionLabel="label"
+              placeholder="Selecione o Admin">
+            </p-dropdown>
+          </div>
+        </div>
+
+
 
         <div class="modal-buttons">
           <button (click)="salvarProjeto()">Salvar</button>
@@ -101,32 +121,28 @@
   <div class="custom-modal-overlay" *ngIf="exibirVisualizacao">
     <div class="custom-modal">
       <p-card class="custom-card">
-        <ng-template pTemplate="title"> 
+        <ng-template pTemplate="title">
           {{ projetoVisualizacao.nome }}
         </ng-template>
-      
+
         <ng-template pTemplate="content">
           <div class="info-container">
             <div class="info-group">
               <p><strong>Status:</strong> {{ projetoVisualizacao.status }}</p>
               <p><strong>Prioridade:</strong> {{ projetoVisualizacao.prioridade }}</p>
             </div>
-  
+
             <div class="info-group">
               <p><strong>Data de Início:</strong> {{ projetoVisualizacao.dataInicioFormatada }}</p>
               <p><strong>Data de Fim:</strong> {{ projetoVisualizacao.dataFimFormatada }}</p>
             </div>
-  
+
             <p><strong>Descrição:</strong> {{ projetoVisualizacao.descricao }}</p>
           </div>
-  
+
           <!-- ListBox para Usuários -->
           <p><strong>Usuários Responsáveis:</strong></p>
-          <p-listbox 
-            [options]="projetoVisualizacao.usuarios" 
-            optionLabel="nome" 
-            [filter]="true" 
-            class="w-full md:w-56">
+          <p-listbox [options]="projetoVisualizacao.usuarios" optionLabel="nome" [filter]="true" class="w-full md:w-56">
             <ng-template let-user pTemplate="item">
               <div class="flex align-items-center">
                 <i class="pi pi-user" style="font-size: 1.2rem; margin-right: 8px;"></i>
@@ -140,13 +156,12 @@
           </p-listbox>
         </ng-template>
       </p-card>
-  
+
       <!-- ✅ Botão de Fechar Ajustado -->
       <div class="modal-buttons">
-        <button pButton label="Fechar" icon="pi pi-times" class="p-button-secondary" (click)="fecharVisualizacao()"></button>
+        <button pButton label="Fechar" icon="pi pi-times" class="p-button-secondary"
+          (click)="fecharVisualizacao()"></button>
       </div>
-  
+
     </div>
   </div>
-  
-  

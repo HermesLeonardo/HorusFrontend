@@ -163,13 +163,16 @@ p-multiSelect {
 /* Ajuste no container de Status e Prioridade */
 .status-prioridade-container {
   display: flex;
-  gap: 10px;
+  gap: 15px;
   justify-content: space-between;
 
-  .p-dropdown {
-    flex: 1;
+  .input-group {
+    flex: 1; // Ambos os campos ocupam 50% do espaço
+    display: flex;
+    flex-direction: column;
   }
 }
+
 
 /* Ajuste nos inputs de Data */
 .data-container {
@@ -256,6 +259,22 @@ p-multiSelect {
   outline: none;
   box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
 }
+
+.responsaveis-container {
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  .usuarios-responsaveis {
+    flex: 0.7; // Usuários Responsáveis ocupa 70%
+  }
+
+  .admin-responsavel {
+    flex: 0.3; // Admin Responsável ocupa 30%
+  }
+}
+
 
 /* ================== DARK MODE ================== */
 body.dark-mode {
