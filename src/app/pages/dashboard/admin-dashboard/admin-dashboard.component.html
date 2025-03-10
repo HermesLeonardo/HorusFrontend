@@ -20,13 +20,49 @@
     </div>
   </section>
 
-  <!-- 🔹 Seção 2: Status Resumido dos Projetos -->
+  <!-- 🔹 Seção 2: Status Resumido dos Projetos e Atividades -->
   <section class="dashboard-project-status">
-    <h2>Status dos Projetos e Atividades</h2>
-    <div class="chart-container">
-      <canvas id="projetosChart"></canvas>
-    </div>
+    <div class="dashboard-content"> <!-- 🔹 Esse container faz o flex funcionar -->
+
+      <!-- 🔹 Gráfico -->
+      <div class="chart-container">
+        <canvas id="projetosChart"></canvas>
+      </div>
+
+      <!-- 🔹 Seção de Filtros -->
+      <div class="filter-container">
+        <h3>Filtros</h3>
+
+        <!-- 🔹 Filtro de Período -->
+        <label for="filtroPeriodo">Período:</label>
+        <select id="filtroPeriodo" [value]="filtroPeriodo" (change)="atualizarGrafico($event.target.value)">
+          <option value="7">Últimos 7 dias</option>
+          <option value="30">Últimos 30 dias</option>
+          <option value="todos">Todos</option>
+        </select>
+
+        <!-- 🔹 Alternar Tipo de Gráfico -->
+        <button (click)="alternarTipoGrafico()">🔄 Alternar Gráfico</button>
+
+        <!-- 🔹 Filtros de Status -->
+        <h4>Status dos Projetos:</h4>
+        <div *ngFor="let status of statusProjetos">
+          <input type="checkbox" [id]="status" [(ngModel)]="statusSelecionadosProjetos[status]"
+            (change)="atualizarGrafico()">
+          <label [for]="status">{{ status }}</label>
+        </div>
+
+        <h4>Status das Atividades:</h4>
+        <div *ngFor="let status of statusAtividades">
+          <input type="checkbox" [id]="status" [(ngModel)]="statusSelecionadosAtividades[status]"
+            (change)="atualizarGrafico()">
+          <label [for]="status">{{ status }}</label>
+        </div>
+      </div>
+
+    </div> <!-- 🔹 Fim de .dashboard-content -->
   </section>
+
 
   <!-- 🔹 Seção 3: Últimos Projetos Criados -->
   <section class="dashboard-recent-projects">

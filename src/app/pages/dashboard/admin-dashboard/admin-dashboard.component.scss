@@ -66,30 +66,54 @@
   }
 }
 
-// 🔹 Ajustando o Gráfico de Status dos Projetos
+
+
+
+// 🔹 Ajustando Layout dos Filtros e Gráficos
 .dashboard-project-status {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: column; // Mantém a organização
   margin-bottom: 30px;
   padding: 20px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
 
-  h2 {
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-bottom: 15px;
-    color: var(--primary-text);
+  .dashboard-content {
+    display: flex;
+    flex-direction: row; // 🔹 Gráfico à esquerda, filtros à direita
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    gap: 20px;
   }
 
   .chart-container {
-    width: 100%;
-    max-width: 600px; // 🔹 Ajuste de tamanho máximo para evitar que fique enorme
-    height: 300px; // 🔹 Definição de altura fixa para manter um tamanho adequado
+    flex-grow: 2; // 🔹 Permite que o gráfico cresça mais
+    min-width: 60%; // 🔹 Mantém o gráfico ocupando a largura correta
+    min-height: 550px; // 🔹 Aumenta a altura mínima do gráfico
+    height: auto; // 🔹 Permite que ele cresça conforme o espaço disponível
+    display: flex; // 🔹 Garante que o canvas ocupe todo o espaço
+    align-items: center; // 🔹 Centraliza dentro do espaço disponível
+  }
+  
+
+  .filter-container {
+    flex-grow: 1; // 🔹 Ocupa o espaço restante
+    max-width: 30%;
+    min-width: 250px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
 }
+
+
 
 
 
