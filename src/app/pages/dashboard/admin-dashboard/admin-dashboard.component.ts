@@ -1,11 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { Chart, ChartConfiguration, ChartData, ChartOptions, ChartType } from 'chart.js';
-import { ProjetosService } from '../../../core/services/projetos.service';
-import { AtividadesService } from '../../../core/services/atividades.service';
-import { UsuariosService } from '../../../core/services/usuarios.service';
-
-import { FormsModule } from '@angular/forms';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { DropdownModule } from 'primeng/dropdown';
+import { MultiSelectModule } from 'primeng/multiselect';
+
+
+import { ProjetosService } from '../../../core/services/projetos.service';
+import { Projeto } from '../../../core/model/projeto.model';
+
+import { AtividadesService } from '../../../core/services/atividades.service';
+import { Atividade } from '../../../core/model/atividade.model';
+
+import { UsuariosService } from '../../../core/services/usuarios.service';
+import { Usuario } from '../../../core/model/usuario.model';
+
+
 
 
 
@@ -17,10 +28,14 @@ Chart.register(...registerables);
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.scss'],
+  providers: [MessageService, ConfirmationService],
   standalone: true,
   imports: [
     FormsModule,
-    CommonModule
+    CommonModule,
+    ReactiveFormsModule,
+    DropdownModule,
+    MultiSelectModule
   ]
 })
 export class AdminDashboardComponent implements OnInit {
@@ -49,7 +64,9 @@ export class AdminDashboardComponent implements OnInit {
   constructor(
     private projetosService: ProjetosService,
     private atividadesService: AtividadesService,
-    private usuariosService: UsuariosService
+    private usuariosService: UsuariosService,
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService
   ) { }
 
   ngOnInit(): void {
@@ -226,4 +243,106 @@ export class AdminDashboardComponent implements OnInit {
   gerenciarUsuarios(): void {
     console.log('Gerenciando usuários...');
   }
+
+
+
+  //Seção de configuração para os modais
+
+
+  abrirDialogProjeto(): void {
+    this.projetoSelecionado = this.novoProjeto();
+    this.carregarUsuarios();
+    this.exibirDialogProjeto = true;
+    console.log("🔹 Modal deve aparecer - exibirDialogProjeto =", this.exibirDialogProjeto);
+  }
+  
+  
+
+  fecharDialogProjeto(): void {
+    this.exibirDialogProjeto = false;
+  }
+
+
+  // 🔹 Variáveis para o modal de criação de projetos
+  exibirDialogProjeto: boolean = false;
+  projetoSelecionado: Projeto = this.novoProjeto();
+  usuariosOptions: { label: string; value: number }[] = [];
+  usuarios: Usuario[] = [];
+
+  statusOptions = [
+    { label: 'Planejamento', value: 'PLANEJADO' },
+    { label: 'Em andamento', value: 'EM_ANDAMENTO' },
+    { label: 'Concluído', value: 'CONCLUIDO' },
+    { label: 'Cancelado', value: 'CANCELADO' }
+  ];
+
+  prioridadeOptions = [
+    { label: 'Alta', value: 'ALTA' },
+    { label: 'Média', value: 'MEDIA' },
+    { label: 'Baixa', value: 'BAIXA' }
+  ];
+
+
+  carregarUsuarios(): void {
+    this.usuariosService.getUsuarios().subscribe(
+      (usuarios) => {
+        this.usuarios = usuarios;
+        this.usuariosOptions = usuarios.map(user => ({
+          label: user.nome,
+          value: user.id
+        }));
+      },
+      (error) => {
+        console.error("❌ Erro ao carregar usuários:", error);
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar usuários!' });
+      }
+    );
+  }
+
+
+  salvarProjeto(): void {
+    if (!this.projetoSelecionado.nome) {
+      this.messageService.add({ severity: 'warn', summary: 'Aviso', detail: 'O nome do projeto é obrigatório!' });
+      return;
+    }
+
+    const usuariosIds = this.projetoSelecionado.idUsuarioResponsavel || [];
+
+    this.projetosService.salvarProjeto({
+      projeto: {
+        ...this.projetoSelecionado,
+        status: typeof this.projetoSelecionado.status === 'object' ? this.projetoSelecionado.status.value : this.projetoSelecionado.status,
+        prioridade: typeof this.projetoSelecionado.prioridade === 'object' ? this.projetoSelecionado.prioridade.value : this.projetoSelecionado.prioridade
+      },
+      usuariosIds: usuariosIds
+    }).subscribe(
+      () => {
+        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto criado com sucesso!' });
+        this.fecharDialogProjeto();
+      },
+      (error) => {
+        console.error("❌ Erro ao criar projeto:", error);
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao criar projeto!' });
+      }
+    );
+  }
+
+  novoProjeto(): Projeto {
+    return {
+      projeto: null,
+      id: 0,
+      nome: '',
+      descricao: '',
+      status: 'PLANEJADO',
+      prioridade: 'MEDIA',
+      idUsuarioResponsavel: [],
+      dataInicio: new Date(),
+      dataFim: undefined
+    };
+  }
+
+
+
+
+
 }

@@ -133,11 +133,63 @@
   <section class="dashboard-quick-actions">
     <h2>Ações Rápidas</h2>
     <div class="quick-actions-container">
-      <button (click)="criarNovoProjeto()">➕ Criar Novo Projeto</button>
+
+      <button (click)="abrirDialogProjeto()">➕ Criar Novo Projeto</button>
+
       <button (click)="criarNovaAtividade()">📌 Criar Nova Atividade</button>
+
       <button (click)="acessarRelatorios()">📊 Acessar Relatórios</button>
+
       <button (click)="gerenciarUsuarios()">👤 Gerenciar Usuários</button>
     </div>
   </section>
+
+
+  <!-- 🔹 MODAL DE CRIAÇÃO DE PROJETO -->
+  <div class="custom-modal-overlay" *ngIf="exibirDialogProjeto">
+    <div class="custom-modal">
+      <h2>{{ projetoSelecionado?.id ? 'Editar Projeto' : 'Novo Projeto' }}</h2>
+
+      <div class="modal-body">
+        <label for="nome">Nome do Projeto:</label>
+        <input id="nome" type="text" [(ngModel)]="projetoSelecionado.nome" placeholder="Digite o nome do projeto">
+
+        <label for="status">Status:</label>
+        <p-dropdown class="custom-dropdown" [options]="statusOptions" [(ngModel)]="projetoSelecionado.status"
+          optionLabel="label" optionValue="value" 
+          placeholder="Selecione o Status"
+          name="status">
+        </p-dropdown>
+
+        <label for="prioridade">Prioridade:</label>
+        <p-dropdown class="custom-dropdown" [options]="prioridadeOptions" [(ngModel)]="projetoSelecionado.prioridade"
+          optionLabel="label" optionValue="value" 
+          placeholder="Selecione a Prioridade"
+          name="prioridade">
+        </p-dropdown>
+
+        <label for="descricao_projeto">Descrição do Projeto:</label>
+        <textarea id="descricao_projeto" [(ngModel)]="projetoSelecionado.descricao" rows="3"
+          placeholder="Descreva o projeto"></textarea>
+
+        <label for="usuarios">Usuários Responsáveis:</label>
+        <p-multiSelect [options]="usuariosOptions" [(ngModel)]="projetoSelecionado.idUsuarioResponsavel"
+          optionLabel="label" optionValue="value" 
+          placeholder="Selecione os responsáveis"
+          name="usuarios">
+        </p-multiSelect>
+
+        <div class="modal-buttons">
+          <button (click)="salvarProjeto()">Salvar</button>
+          <button (click)="fecharDialogProjeto()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
 
 </div>

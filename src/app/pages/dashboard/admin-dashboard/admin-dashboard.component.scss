@@ -89,12 +89,12 @@
   }
 
   .chart-container {
-    flex-grow: 2; // 🔹 Permite que o gráfico cresça mais
-    min-width: 60%; // 🔹 Mantém o gráfico ocupando a largura correta
-    min-height: 550px; // 🔹 Aumenta a altura mínima do gráfico
-    height: auto; // 🔹 Permite que ele cresça conforme o espaço disponível
-    display: flex; // 🔹 Garante que o canvas ocupe todo o espaço
-    align-items: center; // 🔹 Centraliza dentro do espaço disponível
+    flex-grow: 2; 
+    min-width: 60%; 
+    min-height: 550px; 
+    height: auto; 
+    display: flex; 
+    align-items: center; 
   }
   
 
@@ -157,4 +157,118 @@
       color: var(--primary-text);
     }
   }
+}
+
+
+
+// Seção dos modais de visualização de projeto e atividade
+
+// 🔹 Fundo escuro para dar destaque ao modal
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6); // Escurece o fundo para destacar o modal
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; // Garante que o modal fique na frente
+}
+
+// 🔹 Estilização do próprio modal
+.custom-modal {
+  background-color: var(--modal-bg, #1e1e2d); // Usa cor do modo escuro por padrão
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  width: 50%;
+  max-width: 600px;
+  border: 2px solid var(--border-color, #5a5a5a);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  position: relative;
+}
+
+// 🔹 Ajustes para os inputs dentro do modal
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  label {
+    font-weight: bold;
+    color: var(--text-color, #ffffff);
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--text-color);
+  }
+}
+
+// 🔹 Ajustando a largura do MultiSelect
+::ng-deep .p-multiselect {
+  width: 100% !important;
+}
+
+::ng-deep .p-multiselect-panel {
+  width: 300px !important;
+}
+
+// 🔹 Ajuste dos botões dentro do modal
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s ease;
+
+    &:first-child {
+      background-color: #3b82f6;
+      color: white;
+    }
+
+    &:first-child:hover {
+      background-color: #2563eb;
+    }
+
+    &:last-child {
+      background-color: #6b7280;
+      color: white;
+    }
+
+    &:last-child:hover {
+      background-color: #52525b;
+    }
+  }
+}
+
+// 🔹 Dark Mode Support
+body.dark-mode {
+  --modal-bg: #1e1e2d;
+  --text-color: #ffffff;
+  --input-bg: #2a2a3b;
+  --border-color: #5a5a5a;
+}
+
+body:not(.dark-mode) {
+  --modal-bg: #ffffff;
+  --text-color: #000000;
+  --input-bg: #f9f9f9;
+  --border-color: #ccc;
 }
