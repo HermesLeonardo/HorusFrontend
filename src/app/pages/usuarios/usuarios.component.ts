@@ -62,9 +62,12 @@ export class UsuariosComponent implements OnInit {
   filtrarUsuarios(): void {
     this.usuariosFiltrados = this.usuarios.filter(usuario =>
       (this.filtro.nome ? usuario.nome.toLowerCase().includes(this.filtro.nome.toLowerCase()) : true) &&
-      (this.filtro.perfil ? usuario.perfil === this.filtro.perfil : true)
+      (this.filtro.perfil ? usuario.perfil === this.filtro.perfil : true) &&
+      (this.filtroAtivo ? usuario.ativo === true : usuario.ativo === false) // Ajuste correto
     );
   }
+  
+  
 
   resetarFiltros(): void {
     this.filtro = { nome: '', perfil: null };
@@ -72,8 +75,20 @@ export class UsuariosComponent implements OnInit {
   }
 
   mostrarUsuariosDesativados(): void {
-    this.usuariosFiltrados = this.usuarios.filter(usuario => !usuario.ativo);
+    this.filtroAtivo = false;
+    this.aplicarFiltroAtivo();
   }
+  
+  mostrarUsuariosAtivos(): void {
+    this.filtroAtivo = true;
+    this.aplicarFiltroAtivo();
+  }
+  toggleUsuariosDesativados(): void {
+    this.filtroAtivo = !this.filtroAtivo;
+    this.aplicarFiltroAtivo();
+  }
+  
+  
 
 
   ngOnInit(): void {
@@ -86,11 +101,27 @@ export class UsuariosComponent implements OnInit {
     this.usuariosService.getUsuarios().subscribe(
       (data) => {
         this.usuarios = data;
-        this.filtrarUsuarios();
+        this.aplicarFiltroAtivo(); // Novo método que iremos criar
       },
       () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar usuários!' })
     );
   }
+  filtroAtivo: boolean = true;  // por padrão exibe usuários ativos
+
+  aplicarFiltroAtivo(): void {
+    this.usuariosFiltrados = this.usuarios.filter(usuario =>
+      this.filtroAtivo ? usuario.ativo === true : usuario.ativo === false
+    );
+  }
+  
+
+
+
+  // Novo método criado
+  filtrarUsuariosAtivos(): void {
+    this.usuariosFiltrados = this.usuarios.filter(usuario => usuario.ativo);
+  }
+
 
   abrirDialog(usuario?: Usuario): void {
     if (usuario) {
@@ -142,32 +173,51 @@ export class UsuariosComponent implements OnInit {
 
   confirmarExclusao(usuario: Usuario): void {
     this.usuariosService.verificarVinculacoes(usuario.id).subscribe((temVinculacoes) => {
-        if (temVinculacoes) {
-            this.mostrarPopupErro('Usuário não pode ser excluído pois possui registros de horas ou projetos vinculados.', usuario);
-        } else {
-            this.confirmationService.confirm({
-                message: `Tem certeza que deseja excluir ${usuario.nome}? Esta ação não pode ser desfeita!`,
-                accept: () => {
-                    this.usuariosService.deletarUsuario(usuario.id).subscribe({
-                        next: () => {
-                            this.carregarUsuarios();
-                            this.messageService.add({
-                                severity: 'success',
-                                summary: 'Sucesso',
-                                detail: 'Usuário excluído com sucesso!'
-                            });
-                        },
-                        error: (erro) => {
-                            console.error("Erro ao excluir usuário:", erro);
-                            this.mostrarPopupErro(erro.message, usuario);
-                        }
-                    });
-                }
+      if (temVinculacoes) {
+        this.confirmationService.confirm({
+          message: `O usuário ${usuario.nome} tem vinculações com o sistema e não pode ser excluído diretamente. Deseja desativá-lo?`,
+          acceptLabel: "Sim, desativar",
+          rejectLabel: "Cancelar",
+          accept: () => {
+            usuario.ativo = false;
+            this.usuariosService.atualizarUsuario(usuario.id, usuario).subscribe(() => {
+              this.carregarUsuarios();
+              this.messageService.add({
+                severity: 'info',
+                summary: 'Usuário desativado',
+                detail: 'O usuário foi desativado com sucesso.'
+              });
             });
-        }
+          }
+        });
+      } else {
+        this.confirmationService.confirm({
+          message: `Tem certeza que deseja excluir ${usuario.nome}? Esta ação não pode ser desfeita!`,
+          acceptLabel: "Sim, excluir",
+          rejectLabel: "Cancelar",
+          accept: () => {
+            this.usuariosService.deletarUsuario(usuario.id).subscribe({
+              next: () => {
+                this.carregarUsuarios();
+                this.messageService.add({
+                  severity: 'success',
+                  summary: 'Sucesso',
+                  detail: 'Usuário excluído com sucesso!'
+                });
+              },
+              error: () => {
+                this.messageService.add({
+                  severity: 'error',
+                  summary: 'Erro',
+                  detail: 'Não foi possível excluir o usuário!'
+                });
+              }
+            });
+          }
+        });
+      }
     });
-}
-
+  }
 
 
   novoUsuario(): Usuario {
@@ -176,34 +226,57 @@ export class UsuariosComponent implements OnInit {
 
 
 
+  // Desativar usuário
   desativarUsuario(usuario: Usuario): void {
-    usuario.ativo = false;
-    this.usuariosService.atualizarUsuario(usuario.id, usuario).subscribe(() => {
-      this.carregarUsuarios();
-      this.messageService.add({
-        severity: 'info',
-        summary: 'Usuário desativado',
-        detail: 'O usuário foi desativado, mas ainda pode ser reativado.'
-      });
+    this.confirmationService.confirm({
+      message: `Deseja desativar o usuário ${usuario.nome}?`,
+      acceptLabel: "Sim",
+      rejectLabel: "Cancelar",
+      accept: () => {
+        usuario.ativo = false;
+        this.usuariosService.atualizarUsuario(usuario.id, usuario).subscribe(() => {
+          this.carregarUsuarios(); // Isso já carregará somente ativos agora
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Usuário desativado',
+            detail: 'O usuário foi desativado com sucesso!'
+          });
+        });
+      }
     });
   }
+
+  // Reativar usuário
+  reativarUsuario(usuario: Usuario): void {
+    usuario.ativo = true;
+    this.usuariosService.atualizarUsuario(usuario.id, usuario).subscribe(
+      () => {
+        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Usuário reativado com sucesso!' });
+        this.carregarUsuarios(); // recarrega e atualiza a tabela
+      },
+      () => {
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Falha ao reativar usuário.' });
+      }
+    );
+  }
+  
 
 
   mostrarPopupErro(mensagemErro: string, usuario: Usuario): void {
     if (!this.confirmationService) {
-        console.error("❌ Erro: ConfirmationService não está definido.");
-        return;
+      console.error("❌ Erro: ConfirmationService não está definido.");
+      return;
     }
 
     this.confirmationService.confirm({
-        message: `${mensagemErro} Deseja desativar o usuário em vez de excluir?`,
-        acceptLabel: "Desativar Usuário",
-        rejectLabel: "Cancelar",
-        accept: () => {
-            this.desativarUsuario(usuario);
-        }
+      message: `${mensagemErro} Deseja desativar o usuário em vez de excluir?`,
+      acceptLabel: "Desativar Usuário",
+      rejectLabel: "Cancelar",
+      accept: () => {
+        this.desativarUsuario(usuario);
+      }
     });
-}
+  }
 
 
 

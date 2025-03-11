@@ -11,21 +11,26 @@
       <li (click)="navegar('/projetos')">
         <i class="pi pi-briefcase icon-small"></i> <span>Projetos</span>
       </li>
-
       <li (click)="navegar('/usuarios')">
-        <i class="pi pi-user icon-small"></i> <span>Usuarios</span>
+        <i class="pi pi-user icon-small"></i> <span>Usuários</span>
       </li>
-
       <li (click)="navegar('/atividades')">
         <i class="pi pi-calendar icon-small"></i> <span>Atividades</span>
       </li>
-
-
       <li (click)="navegar('/lancamento-horas')">
         <i class="pi pi-clock icon-small"></i> <span>Horas</span>
       </li>
-
-      <li><i class="pi pi-chart-line icon-small"></i> <span>Relatórios</span></li>
+      <li (click)="navegar('/relatorios')">
+        <i class="pi pi-chart-line icon-small"></i> <span>Relatórios</span>
+      </li>
     </ul>
   </nav>
 </aside>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal">
+  <div class="modal">
+    <p>📢 Relatório será implementado em atualizações futuras.</p>
+    <button (click)="fecharModal()">OK</button>
+  </div>
+</div>

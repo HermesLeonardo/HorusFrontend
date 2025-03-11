@@ -45,7 +45,7 @@ export class LoginComponent {
           this.router.navigate(['/dashboard/admin']);
         } else {
           console.log('Redirecionando para Dashboard Usuário...');
-          this.router.navigate(['/dashboard/user']);
+          this.router.navigate(['/dashboard/admin']);
         }
       },
       error: (err) => {

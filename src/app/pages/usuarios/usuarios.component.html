@@ -11,13 +11,23 @@
 
     <!-- FILTROS -->
     <div class="filtros-container">
-        <p-dropdown [options]="perfis" [(ngModel)]="filtro.perfil" optionLabel="label" placeholder="Perfil"></p-dropdown>
+        <p-dropdown [options]="perfis" [(ngModel)]="filtro.perfil" optionLabel="label"
+            placeholder="Perfil"></p-dropdown>
         <input pInputText [(ngModel)]="filtro.nome" placeholder="Buscar Usuário..." />
         <button class="filtro-btn" (click)="filtrarUsuarios()"><i class="pi pi-filter"></i> Filtrar</button>
         <button class="filtro-btn limpar" (click)="resetarFiltros()"><i class="pi pi-times"></i> Limpar</button>
-        <button class="filtro-btn" (click)="mostrarUsuariosDesativados()"><i class="pi pi-user-minus"></i> Usuários Desativados</button>
+
+        <!-- Botão de Alternância -->
+        <div class="status-container">
+            <button class="filtro-btn" (click)="toggleUsuariosDesativados()">
+                <i class="pi pi-user-minus"></i> {{ filtroAtivo ? 'Mostrar Usuários Desativados' : 'Mostrar Usuários Ativos' }}
+            </button>
+            <span class="status-text">
+                {{ filtroAtivo ? 'Exibindo Usuários Ativos' : 'Exibindo Usuários Desativados' }}
+            </span>
+        </div>
     </div>
-    
+
 
     <!-- TABELA DE USUÁRIOS -->
     <div class="usuarios-card">
@@ -42,20 +52,26 @@
                         <button class="acao-btn editar" (click)="abrirDialog(usuario)">
                             <i class="pi pi-pencil"></i>
                         </button>
-                        <button class="acao-btn excluir" 
-                        (click)="confirmarExclusao(usuario)" 
-                        [disabled]="usuario.temVinculacoes">
-                    <i class="pi pi-trash"></i>
-                </button>
-                
-                        <button class="acao-btn desativar" (click)="desativarUsuario(usuario)">
+                        <button class="acao-btn excluir" (click)="confirmarExclusao(usuario)"
+                            [disabled]="usuario.temVinculacoes">
+                            <i class="pi pi-trash"></i>
+                        </button>
+
+                        <!-- Se o filtro de desativados NÃO estiver ativo, mostra botão de desativar -->
+                        <button class="acao-btn desativar" (click)="desativarUsuario(usuario)" *ngIf="filtroAtivo">
                             <i class="pi pi-ban"></i>
+                        </button>
+
+                        <!-- Se o filtro de desativados estiver ativo, mostra botão de reativar -->
+                        <button class="acao-btn ativar" (click)="reativarUsuario(usuario)" *ngIf="!filtroAtivo">
+                            <i class="pi pi-refresh" style="color: #34c38f;"></i>
                         </button>
                     </td>
                 </tr>
             </ng-template>
         </p-table>
     </div>
+
 
     <!-- MODAL DE CADASTRO/EDIÇÃO -->
     <div class="custom-modal-overlay" *ngIf="exibirDialog">
@@ -73,7 +89,8 @@
                 <input id="senha" type="password" [(ngModel)]="usuarioSelecionado.senha" placeholder="Digite a senha">
 
                 <label for="perfil">Perfil:</label>
-                <p-dropdown class="custom-dropdown" [options]="perfis" [(ngModel)]="usuarioSelecionado.perfil" optionLabel="label" placeholder="Selecione o Perfil"></p-dropdown>
+                <p-dropdown class="custom-dropdown" [options]="perfis" [(ngModel)]="usuarioSelecionado.perfil"
+                    optionLabel="label" placeholder="Selecione o Perfil"></p-dropdown>
 
                 <div class="modal-buttons">
                     <button (click)="salvarUsuario()">Salvar</button>
@@ -94,18 +111,22 @@
                     <div class="info-container">
                         <div class="info-group">
                             <p><strong>Email:</strong> {{ usuarioVisualizacao.email }}</p>
-                            <p><strong>Perfil:</strong> {{ usuarioVisualizacao.perfil.value ? usuarioVisualizacao.perfil.value : usuarioVisualizacao.perfil }}</p>
+                            <p><strong>Perfil:</strong> {{ usuarioVisualizacao.perfil.value ?
+                                usuarioVisualizacao.perfil.value : usuarioVisualizacao.perfil }}</p>
                         </div>
                         <div class="info-group">
                             <p><strong>Status:</strong> {{ usuarioVisualizacao.ativo ? 'Ativo' : 'Inativo' }}</p>
-                            <p><strong>Último Login:</strong> {{ usuarioVisualizacao.ultimoLogin | date:'dd/MM/yyyy HH:mm' }}</p>
+                            <p><strong>Último Login:</strong> {{ usuarioVisualizacao.ultimoLogin | date:'dd/MM/yyyy
+                                HH:mm' }}</p>
                         </div>
-                        <p><strong>Data de Criação:</strong> {{ usuarioVisualizacao.dataCriacao | date:'dd/MM/yyyy HH:mm' }}</p>
+                        <p><strong>Data de Criação:</strong> {{ usuarioVisualizacao.dataCriacao | date:'dd/MM/yyyy
+                            HH:mm' }}</p>
                     </div>
                 </ng-template>
             </p-card>
             <div class="modal-buttons">
-                <button pButton label="Fechar" icon="pi pi-times" class="p-button-secondary" (click)="fecharVisualizacao()"></button>
+                <button pButton label="Fechar" icon="pi pi-times" class="p-button-secondary"
+                    (click)="fecharVisualizacao()"></button>
             </div>
         </div>
     </div>

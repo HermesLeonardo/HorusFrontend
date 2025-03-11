@@ -23,6 +23,11 @@ export class UsuariosService {
     return this.http.get<Usuario[]>(this.apiUrl, { headers: this.getAuthHeaders() });
   }
 
+  // Novo método criado:
+  getUsuariosDesativados(): Observable<Usuario[]> {
+    return this.http.get<Usuario[]>(`${this.apiUrl}/desativados`, { headers: this.getAuthHeaders() });
+  }
+
 
   criarUsuario(usuario: Usuario): Observable<Usuario> {
     console.log("📤 Enviando JSON para API:", usuario); // 🔍 Log para depuração

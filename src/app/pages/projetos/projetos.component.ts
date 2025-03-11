@@ -178,9 +178,13 @@ export class ProjetosComponent implements OnInit {
       return;
     }
 
-    const usuariosIds = this.projetoSelecionado.usuarios
-      ? this.projetoSelecionado.usuarios.map((usuario: any) => usuario.id)
+    const usuariosIds = this.projetoSelecionado.idUsuarioResponsavel
+      ? [...this.projetoSelecionado.idUsuarioResponsavel]
       : [];
+
+    console.log("📌 IDs dos usuários extraídos para envio:", usuariosIds);
+
+
 
     const novoProjeto = {
       projeto: {
@@ -192,12 +196,15 @@ export class ProjetosComponent implements OnInit {
           ? this.projetoSelecionado.prioridade.value
           : this.projetoSelecionado.prioridade
       },
-      usuariosIds: usuariosIds,  // Agora passa corretamente os IDs dos usuários
+      usuariosIds: this.projetoSelecionado.idUsuarioResponsavel ?? [], // 🔹 Agora envia os IDs corretamente
       idUsuarioResponsavel: this.projetoSelecionado.idUsuarioResponsavel?.find(id => {
         const user = this.usuarios.find(u => u.id === id);
         return user?.perfil === 'ADMIN';
       }) || null
     };
+
+    console.log("📌 JSON corrigido antes do envio:", JSON.stringify(novoProjeto, null, 2));
+
 
 
 
@@ -229,6 +236,7 @@ export class ProjetosComponent implements OnInit {
     console.log("🔹 Dados sendo enviados para a API:", novoProjeto);
     console.log("📌 Admin selecionado para o projeto:", this.projetoSelecionado.idUsuarioResponsavel);
     console.log("🚀 JSON corrigido antes do envio:", novoProjeto);
+    console.log("📌 IDs dos usuários enviados para a API:", usuariosIds);
 
 
   }

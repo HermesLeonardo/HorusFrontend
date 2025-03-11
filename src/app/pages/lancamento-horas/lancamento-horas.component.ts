@@ -102,13 +102,18 @@ export class LancamentoHorasComponent implements OnInit {
         ? this.lancamentoSelecionado.idAtividade.value
         : this.lancamentoSelecionado.idAtividade,
 
-      idUsuario: this.authService.getUserId(), // ✅ Pegando o usuário corretamente
+      idUsuario: this.authService.getUserId(), 
+      usuario: { 
+        id: this.authService.getUserId(), 
+        nome: this.authService.getUserName(), 
+        email: this.authService.getUserEmail() 
+      }, 
 
       descricao: this.lancamentoSelecionado.descricao,
-      dataInicio: formatarDataParaBackend(this.lancamentoSelecionado.dataInicio), // ✅ Mantendo "dd/MM"
-      dataFim: formatarDataParaBackend(this.lancamentoSelecionado.dataInicio), // ✅ Mesma data
-      horaInicio: formatarHoraParaBackend(this.lancamentoSelecionado.horaInicio), // ✅ Ajuste aqui!
-      horaFim: formatarHoraParaBackend(this.lancamentoSelecionado.horaFim) // ✅ Ajuste aqui!
+      dataInicio: formatarDataParaBackend(this.lancamentoSelecionado.dataInicio), 
+      dataFim: formatarDataParaBackend(this.lancamentoSelecionado.dataInicio),
+      horaInicio: formatarHoraParaBackend(this.lancamentoSelecionado.horaInicio), 
+      horaFim: formatarHoraParaBackend(this.lancamentoSelecionado.horaFim) 
     };
 
     console.log("📤 Enviando lançamento para API:", JSON.stringify(payload));
@@ -263,12 +268,26 @@ export class LancamentoHorasComponent implements OnInit {
       { label: 'Usuário C', value: 103 }
     ];
   }
-
   carregarLancamentos(): void {
     this.lancamentoService.getLancamentos().subscribe({
       next: (data) => {
-        console.log("✅ Lançamentos recebidos no componente:", data);
-        this.lancamentos = data;
+        console.log("✅ TODOS OS LANÇAMENTOS RECEBIDOS DA API:", data);
+  
+        const userId = Number(this.authService.getUserId());
+        const userRole = this.authService.getUserRole()?.trim().toUpperCase();
+  
+        console.log("🔍 ID do Usuário Atual:", userId);
+        console.log("🔍 Role do Usuário Atual:", userRole);
+  
+        data.forEach((lancamento, index) => {
+          console.log(`📝 Estrutura do lançamento [${index}]:`, lancamento);
+        });
+  
+        this.lancamentos = userRole === 'ROLE_ADMIN'
+          ? data
+          : data.filter(lancamento => Number(lancamento.usuario.id) === userId);
+  
+        console.log("✅ Lançamentos filtrados para exibição:", this.lancamentos);
       },
       error: (err) => {
         console.error("❌ Erro ao carregar lançamentos:", err);
@@ -276,10 +295,9 @@ export class LancamentoHorasComponent implements OnInit {
       }
     });
   }
-
-
-
-
+  
+  
+  
 
   abrirDialog(lancamento?: LancamentoHoras): void {
     if (lancamento) {
@@ -287,12 +305,12 @@ export class LancamentoHorasComponent implements OnInit {
     } else {
       this.lancamentoSelecionado = this.novoLancamento();
     }
-    this.dialogVisivel = true; // 🔹 Agora só abre quando chamado
+    this.dialogVisivel = true; 
   }
 
 
   fecharDialog(): void {
-    this.dialogVisivel = false; // 🔹 Agora o botão "Cancelar" fecha corretamente o modal
+    this.dialogVisivel = false; 
   }
 
 
@@ -327,7 +345,11 @@ export class LancamentoHorasComponent implements OnInit {
     const dataAtual = new Date();
     return {
       idAtividade: 0,
-      idUsuario: this.authService.getUserId(), // ✅ Adicionando o id do usuário autenticado
+      usuario: {
+        id: this.authService.getUserId(), // ✅ Pegando o ID do usuário autenticado
+        nome: this.authService.getUserName(), // 🔹 Certifique-se de ter esse método no AuthService
+        email: this.authService.getUserEmail() // 🔹 Certifique-se de ter esse método no AuthService
+      },
       descricao: '',
       dataInicio: `${dataAtual.getFullYear()}-MM-DD`,
       dataFim: `${dataAtual.getFullYear()}-MM-DD`,
@@ -335,6 +357,7 @@ export class LancamentoHorasComponent implements OnInit {
       horaFim: ''
     };
   }
+  
 
 
 

@@ -19,7 +19,7 @@ export class AppComponent implements OnInit {
 
   showLayoutComponents: boolean = true;
   themeLoaded: boolean = false;
-  isSidebarCollapsed: boolean = false; // Controle do estado do sidebar
+  isSidebarCollapsed: boolean = true; // Controle do estado do sidebar
 
   constructor(
     private themeService: ThemeService,
