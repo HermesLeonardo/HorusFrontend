@@ -78,7 +78,24 @@ export class AdminDashboardComponent implements OnInit {
   private carregarDados(): void {
     this.projetosService.getProjetos().subscribe(projetos => {
       this.totalProjetos = projetos.length;
-      this.projetosRecentes = projetos.slice(0, 5);
+
+      // 🔹 Obtém a lista de usuários primeiro
+      this.usuariosService.getUsuarios().subscribe(usuarios => {
+
+        // 🔹 Mapeia os projetos e atribui o usuário correspondente
+        this.projetosRecentes = projetos.slice(0, 5).map(projeto => ({
+          ...projeto,
+          usuarioResponsavel: Array.isArray(projeto.idUsuarioResponsavel)
+            ? usuarios.find(user => projeto.idUsuarioResponsavel?.includes(user.id)) // Se for array, usa includes
+            : usuarios.find(user => user.id === Number(projeto.idUsuarioResponsavel)) // Se for número, converte e compara diretamente
+            || { nome: 'Não atribuído' } // Se não encontrar, retorna um valor padrão
+        }));
+
+
+
+
+        console.log("📌 Projetos carregados (com responsáveis atribuídos):", this.projetosRecentes);
+      });
 
       this.atividadesService.getAtividades().subscribe(atividades => {
         this.totalAtividades = atividades.length;
@@ -255,8 +272,8 @@ export class AdminDashboardComponent implements OnInit {
     this.exibirDialogProjeto = true;
     console.log("🔹 Modal deve aparecer - exibirDialogProjeto =", this.exibirDialogProjeto);
   }
-  
-  
+
+
 
   fecharDialogProjeto(): void {
     this.exibirDialogProjeto = false;
