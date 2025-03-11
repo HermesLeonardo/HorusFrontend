@@ -14,9 +14,14 @@ export class RoleDirective implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const userRole = this.authService.getUserRole(); // Método que retorna o papel do usuário logado
-    if (userRole !== this.role) {
-      this.renderer.setStyle(this.el.nativeElement, 'display', 'none');
-    }
+    const userRole = this.authService.getUserRole(); 
+    console.log("🔍 Papel do usuário na diretiva:", userRole, "esperado:", this.role);
+
+
+   if (userRole !== this.role) {
+    this.renderer.setStyle(this.el.nativeElement, 'display', 'none');
+   }
+
+
   }
 }

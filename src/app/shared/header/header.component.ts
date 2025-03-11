@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common'; // ✅ IMPORTANTE: Adicione isso
   imports: [CommonModule, ThemeToggleComponent] // ✅ Adicione CommonModule aqui!
 })
 export class HeaderComponent implements OnInit {
-  @Input() isSidebarCollapsed: boolean = false;
+  @Input() isSidebarCollapsed: boolean = true;
   @Output() toggleSidebar = new EventEmitter<void>();
 
   paginaAtual: string = '';

@@ -11,8 +11,9 @@
 
   <!-- ================== SEÇÃO DE FILTROS ================== -->
   <div class="filtros-container">
-    <p-autoComplete [(ngModel)]="filtro.atividade" [suggestions]="atividadesFiltradas"
-      (completeMethod)="filtrarAtividades($event)" placeholder="Pesquisar Atividade"></p-autoComplete>
+    <p-autoComplete class="filtro-atividade" [(ngModel)]="filtro.atividade" [suggestions]="atividadesFiltradas"
+      (completeMethod)="filtrarAtividades($event)" placeholder="Pesquisar Atividade">
+    </p-autoComplete>
 
     <p-autoComplete [(ngModel)]="filtro.usuario" [suggestions]="usuariosFiltrados"
       (completeMethod)="filtrarUsuarios($event)" placeholder="Pesquisar Usuário"></p-autoComplete>
@@ -71,9 +72,12 @@
   <div class="modal-body">
     <div class="form-group">
       <label for="atividade">Atividade:</label>
-      <p-autoComplete [(ngModel)]="lancamentoSelecionado.idAtividade" [suggestions]="atividadesFiltradas"
-        (completeMethod)="filtrarAtividades($event)" field="label" placeholder="Pesquise a Atividade">
-      </p-autoComplete>
+      <p-autoComplete class="modal-atividade" [(ngModel)]="lancamentoSelecionado.idAtividade"
+      [suggestions]="atividadesFiltradas" (completeMethod)="filtrarAtividades($event)"
+      field="label" placeholder="Pesquise a Atividade">
+    </p-autoComplete>
+    
+
 
 
     </div>
@@ -84,20 +88,21 @@
         placeholder="Descreva o trabalho realizado"></textarea>
     </div>
 
-    <div class="form-group">
-      <label for="dataInicio">Data:</label>
-      <p-calendar id="data" [(ngModel)]="lancamentoSelecionado.dataInicio" dateFormat="dd/mm/yy" showIcon="true"
-        placeholder="Selecione uma data"></p-calendar>
-
-    </div>
-
-
     <div class="form-row">
+      <div class="form-group">
+        <label for="data">Data:</label>
+        <p-calendar id="data" [(ngModel)]="lancamentoSelecionado.dataInicio" dateFormat="dd/mm/yy" showIcon="true"
+          placeholder="Selecione uma data" appendTo="body">
+        </p-calendar>
+
+      </div>
+
       <div class="form-group">
         <label for="horaInicio">Hora de Início:</label>
         <p-calendar id="horaInicio" [(ngModel)]="lancamentoSelecionado.horaInicio" timeOnly
           hourFormat="24"></p-calendar>
       </div>
+
       <div class="form-group">
         <label for="horaFim">Hora de Fim:</label>
         <p-calendar id="horaFim" [(ngModel)]="lancamentoSelecionado.horaFim" timeOnly hourFormat="24"></p-calendar>

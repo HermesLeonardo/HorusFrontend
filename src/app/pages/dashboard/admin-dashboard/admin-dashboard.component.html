@@ -2,7 +2,7 @@
 
   <!-- 🔹 Seção 1: Visão Geral (Cards de Métricas) -->
   <section class="dashboard-overview">
-    <div class="dashboard-card">
+    <div class="dashboard-card" *ngIf="userRole === 'ROLE_ADMIN'">
       <h3>Total de Projetos</h3>
       <p>{{ totalProjetos }}</p>
     </div>
@@ -14,7 +14,7 @@
       <h3>Total de Horas Lançadas</h3>
       <p>{{ totalHorasLancadas }}</p>
     </div>
-    <div class="dashboard-card">
+    <div class="dashboard-card"  *ngIf="userRole === 'ROLE_ADMIN'">
       <h3>Total de Usuários</h3>
       <p>{{ totalUsuarios }}</p>
     </div>
@@ -65,7 +65,7 @@
 
 
   <!-- 🔹 Seção 3: Últimos Projetos Criados -->
-  <section class="dashboard-recent-projects">
+  <section class="dashboard-recent-projects" *ngIf="userRole === 'ROLE_ADMIN'">
     <h2>Últimos Projetos Criados</h2>
     <table class="dashboard-table">
       <thead>
@@ -79,7 +79,7 @@
       <tbody>
         <tr *ngFor="let projeto of projetosRecentes">
           <td>{{ projeto.nome }}</td>
-          <td>{{ projeto.usuarioResponsavel.nome || 'Não atribuído' }}</td>
+          <td>{{ projeto.responsavel }}</td>
           <td>{{ projeto.status }}</td>
           <td>{{ projeto.dataCriacao | date:'dd/MM/yyyy' }}</td>
         </tr>
@@ -109,7 +109,7 @@
   </section>
 
   <!-- 🔹 Seção 5: Últimos Logins -->
-  <section class="dashboard-last-logins">
+  <section class="dashboard-last-logins" *ngIf="userRole === 'ROLE_ADMIN'">
     <h2>Últimos Logins</h2>
     <table class="dashboard-table">
       <thead>
@@ -130,66 +130,14 @@
   </section>
 
   <!-- 🔹 Seção 6: Ações Rápidas -->
-  <section class="dashboard-quick-actions">
+  <section class="dashboard-quick-actions" *ngIf="userRole === 'ROLE_ADMIN'">
     <h2>Ações Rápidas</h2>
     <div class="quick-actions-container">
-
       <button (click)="abrirDialogProjeto()">➕ Criar Novo Projeto</button>
-
       <button (click)="criarNovaAtividade()">📌 Criar Nova Atividade</button>
-
       <button (click)="acessarRelatorios()">📊 Acessar Relatórios</button>
-
       <button (click)="gerenciarUsuarios()">👤 Gerenciar Usuários</button>
     </div>
   </section>
-
-
-  <!-- 🔹 MODAL DE CRIAÇÃO DE PROJETO -->
-  <div class="custom-modal-overlay" *ngIf="exibirDialogProjeto">
-    <div class="custom-modal">
-      <h2>{{ projetoSelecionado?.id ? 'Editar Projeto' : 'Novo Projeto' }}</h2>
-
-      <div class="modal-body">
-        <label for="nome">Nome do Projeto:</label>
-        <input id="nome" type="text" [(ngModel)]="projetoSelecionado.nome" placeholder="Digite o nome do projeto">
-
-        <label for="status">Status:</label>
-        <p-dropdown class="custom-dropdown" [options]="statusOptions" [(ngModel)]="projetoSelecionado.status"
-          optionLabel="label" optionValue="value" 
-          placeholder="Selecione o Status"
-          name="status">
-        </p-dropdown>
-
-        <label for="prioridade">Prioridade:</label>
-        <p-dropdown class="custom-dropdown" [options]="prioridadeOptions" [(ngModel)]="projetoSelecionado.prioridade"
-          optionLabel="label" optionValue="value" 
-          placeholder="Selecione a Prioridade"
-          name="prioridade">
-        </p-dropdown>
-
-        <label for="descricao_projeto">Descrição do Projeto:</label>
-        <textarea id="descricao_projeto" [(ngModel)]="projetoSelecionado.descricao" rows="3"
-          placeholder="Descreva o projeto"></textarea>
-
-        <label for="usuarios">Usuários Responsáveis:</label>
-        <p-multiSelect [options]="usuariosOptions" [(ngModel)]="projetoSelecionado.idUsuarioResponsavel"
-          optionLabel="label" optionValue="value" 
-          placeholder="Selecione os responsáveis"
-          name="usuarios">
-        </p-multiSelect>
-
-        <div class="modal-buttons">
-          <button (click)="salvarProjeto()">Salvar</button>
-          <button (click)="fecharDialogProjeto()">Cancelar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-
-
-
 
 </div>

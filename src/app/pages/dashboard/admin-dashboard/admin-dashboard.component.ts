@@ -5,6 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { forkJoin } from 'rxjs';
 
 
 import { ProjetosService } from '../../../core/services/projetos.service';
@@ -16,8 +17,10 @@ import { Atividade } from '../../../core/model/atividade.model';
 import { UsuariosService } from '../../../core/services/usuarios.service';
 import { Usuario } from '../../../core/model/usuario.model';
 
+import { LancamentoHorasService } from '../../../core/services/lancamento-horas.service';
+import { LancamentoHoras } from '../../../core/model/lancamento-horas.model';
 
-
+import { AuthService } from '../../../core/services/auth.service';
 
 
 import { registerables } from 'chart.js';
@@ -39,6 +42,8 @@ Chart.register(...registerables);
   ]
 })
 export class AdminDashboardComponent implements OnInit {
+  userRole: string = '';
+
   // 🔹 Variáveis para armazenar os dados do dashboard
   totalProjetos: number = 0;
   totalAtividades: number = 0;
@@ -61,58 +66,117 @@ export class AdminDashboardComponent implements OnInit {
   statusSelecionadosProjetos: { [key: string]: boolean } = {};
   statusSelecionadosAtividades: { [key: string]: boolean } = {};
 
+  userId: number = 0;
+
+
   constructor(
     private projetosService: ProjetosService,
     private atividadesService: AtividadesService,
     private usuariosService: UsuariosService,
+    private lancamentoService: LancamentoHorasService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void {
     this.carregarDados();
     this.statusProjetos.forEach(status => this.statusSelecionadosProjetos[status] = true);
     this.statusAtividades.forEach(status => this.statusSelecionadosAtividades[status] = true);
+
+    this.userRole = this.authService.getUserRole() ?? 'ROLE_USER'; // Se for null, assume 'USUARIO'
+    this.userId = this.authService.getUserId(); // Obtém o ID do usuário logado
+
+    console.log("🔍 UserRole no Dashboard:", this.userRole);
+    console.log("🔍 UserID no Dashboard:", this.userId);
   }
 
   private carregarDados(): void {
-    this.projetosService.getProjetos().subscribe(projetos => {
-      this.totalProjetos = projetos.length;
+    this.userRole = this.authService.getUserRole()?.trim().toUpperCase() ?? 'ROLE_USER'; // Garantir que a role esteja formatada corretamente
+    this.userId = this.authService.getUserId();
 
-      // 🔹 Obtém a lista de usuários primeiro
-      this.usuariosService.getUsuarios().subscribe(usuarios => {
+    const isAdmin = this.userRole === 'ROLE_ADMIN';
 
-        // 🔹 Mapeia os projetos e atribui o usuário correspondente
-        this.projetosRecentes = projetos.slice(0, 5).map(projeto => ({
+    console.log("🔍 UserRole no Dashboard:", this.userRole);
+    console.log("🔍 UserID no Dashboard:", this.userId);
+
+    forkJoin({
+      projetos: this.projetosService.getProjetos(),
+      atividades: this.atividadesService.getAtividades(),
+      usuarios: this.usuariosService.getUsuarios(),
+      lancamentos: this.lancamentoService.getLancamentos()
+    }).subscribe({
+      next: ({ projetos, atividades, usuarios, lancamentos }) => {
+        // 🔹 Filtragem de Projetos
+        this.totalProjetos = isAdmin ? projetos.length : projetos.filter(proj => {
+          if (!proj.idUsuarioResponsavel) return false;
+          return Array.isArray(proj.idUsuarioResponsavel)
+            ? proj.idUsuarioResponsavel.includes(this.userId)
+            : proj.idUsuarioResponsavel === this.userId;
+        }).length;
+
+        const projetosUsuario = isAdmin ? projetos : projetos.filter(proj => {
+          if (!proj.idUsuarioResponsavel) return false;
+          return Array.isArray(proj.idUsuarioResponsavel)
+            ? proj.idUsuarioResponsavel.includes(this.userId)
+            : proj.idUsuarioResponsavel === this.userId;
+        });
+
+        this.projetosRecentes = projetosUsuario.slice(0, 5).map(projeto => ({
           ...projeto,
           usuarioResponsavel: Array.isArray(projeto.idUsuarioResponsavel)
-            ? usuarios.find(user => projeto.idUsuarioResponsavel?.includes(user.id)) // Se for array, usa includes
-            : usuarios.find(user => user.id === Number(projeto.idUsuarioResponsavel)) // Se for número, converte e compara diretamente
-            || { nome: 'Não atribuído' } // Se não encontrar, retorna um valor padrão
+            ? usuarios.find(user => projeto.idUsuarioResponsavel?.includes(user.id))
+            : usuarios.find(user => user.id === Number(projeto.idUsuarioResponsavel))
+            || { nome: 'Não atribuído' }
         }));
 
+        // 🔹 Filtragem de Atividades
+        this.totalAtividades = isAdmin ? atividades.length : atividades.filter(ativ => {
+          return Array.isArray(ativ.usuariosResponsaveis) && ativ.usuariosResponsaveis.some(user => user.id === this.userId);
+        }).length;
 
+        const atividadesUsuario = isAdmin ? atividades : atividades.filter(ativ => {
+          return Array.isArray(ativ.usuariosResponsaveis) && ativ.usuariosResponsaveis.some(user => user.id === this.userId);
+        });
 
+        this.atividadesPendentes = atividadesUsuario.filter(a => a.status !== 'CONCLUIDA').slice(0, 5);
 
-        console.log("📌 Projetos carregados (com responsáveis atribuídos):", this.projetosRecentes);
-      });
+        // 🔹 Processamento de Lançamentos de Horas
+        const lancamentosUsuario = isAdmin ? lancamentos : lancamentos.filter(lanc => lanc.idUsuario === this.userId);
+        this.totalHorasLancadas = lancamentosUsuario.reduce((total, lanc) => {
+          const horaInicio = new Date(`1970-01-01T${lanc.horaInicio}:00`);
+          const horaFim = new Date(`1970-01-01T${lanc.horaFim}:00`);
+          const diferencaHoras = (horaFim.getTime() - horaInicio.getTime()) / (1000 * 60 * 60);
+          return total + (diferencaHoras > 0 ? diferencaHoras : 0);
+        }, 0);
 
-      this.atividadesService.getAtividades().subscribe(atividades => {
-        this.totalAtividades = atividades.length;
-        this.atividadesPendentes = atividades.filter(a => a.status !== 'CONCLUIDA').slice(0, 5);
+        // 🔹 Processamento de Usuários
+        this.totalUsuarios = isAdmin ? usuarios.length : 0;
+        this.ultimosLogins = isAdmin ? usuarios.sort((a, b) =>
+          new Date(b.ultimoLogin).getTime() - new Date(a.ultimoLogin).getTime()).slice(0, 5)
+          : [];
 
-        // Processa os dados do gráfico combinando Projetos e Atividades
-        this.processarDadosParaGrafico(projetos, atividades);
-      });
-    });
+        // 🔹 Atualiza os dados do gráfico após carregar tudo
+        this.processarDadosParaGrafico(projetosUsuario, atividadesUsuario);
 
-    this.usuariosService.getUsuarios().subscribe(usuarios => {
-      this.totalUsuarios = usuarios.length;
-      this.ultimosLogins = usuarios
-        .sort((a, b) => new Date(b.ultimoLogin).getTime() - new Date(a.ultimoLogin).getTime())
-        .slice(0, 5);
+        console.log("📌 Dados carregados:", {
+          totalProjetos: this.totalProjetos,
+          totalAtividades: this.totalAtividades,
+          totalHorasLancadas: this.totalHorasLancadas,
+          totalUsuarios: this.totalUsuarios,
+          projetosRecentes: this.projetosRecentes,
+          atividadesPendentes: this.atividadesPendentes,
+          ultimosLogins: this.ultimosLogins
+        });
+      },
+      error: (err) => {
+        console.error("❌ Erro ao carregar dados:", err);
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar dados do dashboard' });
+      }
     });
   }
+
+
 
   private processarDadosParaGrafico(projetos: any[], atividades: any[]): void {
     const statusProjetosCount: { [key: string]: number } = {
@@ -123,18 +187,38 @@ export class AdminDashboardComponent implements OnInit {
       ABERTA: 0, EM_ANDAMENTO: 0, CONCLUIDA: 0, PAUSADA: 0
     };
 
-    // 🔹 Contabiliza apenas os projetos e atividades que estão nos filtros ativos
+    console.log("🔍 Processando dados para gráfico...");
+    console.log("👤 Role do usuário:", this.userRole);
+    console.log("🆔 ID do usuário:", this.userId);
+
+    // 🔹 Contabiliza projetos baseado na role do usuário
     projetos.forEach(projeto => {
-      if (this.statusSelecionadosProjetos[projeto.status]) {
-        statusProjetosCount[projeto.status]++;
+      if (this.userRole === 'ROLE_ADMIN' || (
+        Array.isArray(projeto.idUsuarioResponsavel)
+          ? projeto.idUsuarioResponsavel.includes(this.userId)
+          : projeto.idUsuarioResponsavel === this.userId
+      )) {
+        if (this.statusSelecionadosProjetos[projeto.status]) {
+          statusProjetosCount[projeto.status]++;
+        }
       }
     });
 
+    // 🔹 Contabiliza atividades baseado na role do usuário
     atividades.forEach(atividade => {
-      if (this.statusSelecionadosAtividades[atividade.status]) {
-        statusAtividadesCount[atividade.status]++;
+      if (
+        this.userRole === 'ROLE_ADMIN' || (
+          Array.isArray(atividade.usuariosResponsaveis)
+            ? atividade.usuariosResponsaveis.some((user: Usuario) => user.id === this.userId)
+            : false
+        )
+      ) {
+        if (this.statusSelecionadosAtividades[atividade.status]) {
+          statusAtividadesCount[atividade.status]++;
+        }
       }
     });
+    
 
     // 🔹 Verifica se pelo menos um filtro está ativo
     const algumProjetoAtivo = Object.values(this.statusSelecionadosProjetos).some(selected => selected);
@@ -142,12 +226,15 @@ export class AdminDashboardComponent implements OnInit {
 
     // 🔹 Se todos os status estiverem desmarcados, mantém um valor mínimo para não sumir o gráfico
     if (!algumProjetoAtivo && !algumaAtividadeAtiva) {
-      console.warn("Nenhum filtro selecionado, adicionando valor mínimo para exibição do gráfico.");
+      console.warn("⚠️ Nenhum filtro selecionado, adicionando valores padrão.");
       statusProjetosCount["PLANEJADO"] = 1;
       statusAtividadesCount["ABERTA"] = 1;
     }
 
-    console.log("Dados do gráfico antes da atualização:", statusProjetosCount, statusAtividadesCount);
+    console.log("📊 Contagem de Status Projetos:", statusProjetosCount);
+    console.log("📊 Contagem de Status Atividades:", statusAtividadesCount);
+
+    // 🔹 Atualiza os dados do gráfico
     this.statusProjetosData = {
       labels: ['Planejado/Aberta', 'Em Andamento', 'Concluído/Concluída', 'Cancelado/Pausada'],
       datasets: [
@@ -156,7 +243,7 @@ export class AdminDashboardComponent implements OnInit {
           data: ['PLANEJADO', 'EM_ANDAMENTO', 'CONCLUIDO', 'CANCELADO']
             .map(status => this.statusSelecionadosProjetos[status] ? statusProjetosCount[status] : 0),
           backgroundColor: ['#1E88E5', '#FFC107', '#4CAF50', '#F44336'], // Azul, Amarelo, Verde, Vermelho
-          borderColor: '#fff', // Bordas brancas para destacar
+          borderColor: '#fff',
           borderWidth: 2
         },
         {
@@ -170,9 +257,10 @@ export class AdminDashboardComponent implements OnInit {
       ]
     };
 
-    console.log("Dados do gráfico após atualização:", this.statusProjetosData);
+    console.log("📈 Dados do gráfico atualizados:", this.statusProjetosData);
     this.renderizarGrafico();
-  }
+}
+
 
 
 
