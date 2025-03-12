@@ -1,0 +1,127 @@
+// Definição de variáveis para modo claro e escuro
+$background-dark: #1e1e2f;
+$background-light: #f5f5f5;
+$text-dark: #ffffff;
+$text-light: #333;
+$primary-color: #8257e6; // Cor principal do sistema
+
+// Estilos globais do componente
+:host {
+  display: block;
+  padding: 2rem;
+  font-family: 'Arial', sans-serif;
+  background-color: $background-dark;
+  color: $text-dark;
+  min-height: 100vh; // Garante que o componente ocupa toda a tela
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center; // ✅ Move tudo para o centro da tela
+  align-items: center;
+
+  &.light-mode {
+    background-color: $background-light;
+    color: $text-light;
+  }
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 4rem;
+}
+
+// Estilos dos filtros
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  width: 100%;
+
+  label {
+    font-weight: bold;
+    margin-right: 0.5rem;
+  }
+
+  input, select {
+    padding: 0.7rem;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+    color: $text-dark;
+    font-size: 1rem;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+    }
+  }
+
+  button {
+    background-color: $primary-color;
+    color: #fff;
+    border: none;
+    padding: 0.8rem 1.4rem;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+
+    &:hover {
+      background-color: darken($primary-color, 10%);
+    }
+  }
+}
+
+// Estilos da tabela de relatórios
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+
+  thead {
+    background: $primary-color;
+    color: #fff;
+
+    th {
+      padding: 1.2rem;
+      text-align: left;
+      font-size: 1.1rem;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      transition: 0.3s;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
+
+    td {
+      padding: 1.2rem;
+      font-size: 1rem;
+    }
+  }
+}
+
+// Ajuste responsivo para telas menores
+@media (max-width: 768px) {
+  .filtros {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  table {
+    font-size: 0.9rem;
+  }
+}

@@ -1,14 +1,14 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
-import { CommonModule } from '@angular/common'; // ✅ IMPORTANTE: Adicione isso!
+import { CommonModule } from '@angular/common'; 
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
   standalone: true,
-  imports: [CommonModule, ThemeToggleComponent] // ✅ Adicione CommonModule aqui!
+  imports: [CommonModule, ThemeToggleComponent] 
 })
 export class HeaderComponent implements OnInit {
   @Input() isSidebarCollapsed: boolean = true;
@@ -25,6 +25,12 @@ export class HeaderComponent implements OnInit {
       }
     });
   }
+
+  logout(): void {
+    localStorage.removeItem('token'); // Remova o token do localStorage
+    this.router.navigate(['/login']); // Redirecione para a página de login
+  }
+  
 
   definirPaginaAtual(url: string): void {
     const rota = url.split('/')[1]; 

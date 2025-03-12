@@ -24,15 +24,33 @@ export class LancamentoHorasService {
 
   getLancamentos(): Observable<LancamentoHoras[]> {
     return this.http.get<LancamentoHoras[]>(this.apiUrl, { headers: this.getAuthHeaders() }).pipe(
-      tap(lancamentos => console.log("📢 Lançamentos recebidos:", lancamentos)) // Adiciona um log para depuração
+      tap(lancamentos => console.log("📢 Lançamentos recebidos:", lancamentos))
+    );
+  }
+
+  getTotalHorasLancadas(): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/total-horas-lancadas`, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      tap(horas => console.log("Total de horas recebidas:", horas))
     );
   }
   
-  
+
+  getUltimosLancamentos(limite: number = 5): Observable<LancamentoHoras[]> {
+    return this.http.get<LancamentoHoras[]>(`${this.apiUrl}/ultimos-lancamentos?limite=${limite}`, {
+       headers: this.getAuthHeaders()
+    }).pipe(
+       tap(lancamentos => console.log("📢 Últimos lançamentos recebidos:", lancamentos))
+    );
+ }
+ 
+
 
   getLancamentoById(id: number): Observable<LancamentoHoras> {
     return this.http.get<LancamentoHoras>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
   }
+
 
   criarLancamento(lancamento: LancamentoHoras): Observable<LancamentoHoras> {
     return this.http.post<LancamentoHoras>(
@@ -41,8 +59,8 @@ export class LancamentoHorasService {
       { headers: this.getAuthHeaders() }
     );
   }
-  
-  
+
+
   atualizarLancamento(id: number, lancamento: LancamentoHoras): Observable<LancamentoHoras> {
     return this.http.put<LancamentoHoras>(`${this.apiUrl}/${id}`, lancamento, { headers: this.getAuthHeaders() });
   }

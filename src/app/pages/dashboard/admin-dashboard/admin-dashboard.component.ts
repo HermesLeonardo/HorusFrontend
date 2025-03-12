@@ -82,6 +82,10 @@ export class AdminDashboardComponent implements OnInit {
 
   userId: number = 0;
 
+  ultimosLancamentos: LancamentoHoras[] = [];
+
+
+
   constructor(
     private projetosService: ProjetosService,
     private atividadesService: AtividadesService,
@@ -96,13 +100,62 @@ export class AdminDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.carregarDados();
+    this.carregarTotalHorasLancadas();
+    this.carregarUltimosLancamentos();
+
     this.statusProjetos.forEach(status => this.statusSelecionadosProjetos[status] = true);
     this.statusAtividades.forEach(status => this.statusSelecionadosAtividades[status] = true);
 
-    this.userRole = this.authService.getUserRole() ?? 'ROLE_USER'; // Se for null, assume 'USUARIO'
-    this.userId = this.authService.getUserId(); // Obtém o ID do usuário logado
+    this.userRole = this.authService.getUserRole() ?? 'ROLE_USER';
+    this.userId = this.authService.getUserId();
 
     console.log("🔍 UserID no Dashboard:", this.userId);
+  }
+
+
+  private carregarTotalHorasLancadas(): void {
+    this.lancamentoService.getTotalHorasLancadas().subscribe({
+      next: (horas) => {
+        this.totalHorasLancadas = parseFloat(horas.toFixed(2));
+        console.log("🔹 Total de horas carregadas:", this.totalHorasLancadas);
+      },
+      error: (err) => {
+        console.error("❌ Erro ao carregar total de horas lançadas:", err);
+      }
+    });
+  }
+
+
+  private carregarUltimosLancamentos(): void {
+    this.lancamentoService.getUltimosLancamentos().subscribe({
+      next: (lancamentos) => {
+        console.log("📌 Últimos lançamentos carregados:", lancamentos);
+        this.ultimosLancamentos = lancamentos;
+      },
+      error: (err) => {
+        console.error("❌ Erro ao carregar últimos lançamentos:", err);
+      }
+    });
+  }
+
+  calcularHorasLancadas(lancamento: any): number {
+    if (!lancamento.dataInicio || !lancamento.dataFim) {
+      return 0;
+    }
+
+    const inicio = new Date(lancamento.dataInicio);
+    const fim = new Date(lancamento.dataFim);
+
+    // Converte para horas
+    const duracaoEmHoras = (fim.getTime() - inicio.getTime()) / (1000 * 60 * 60);
+
+    return Math.round(duracaoEmHoras * 100) / 100; // Arredonda para 2 casas decimais
+  }
+
+
+
+  verTodosLancamentos(): void {
+    window.location.href = '/lancamento-horas';
   }
 
   private carregarDados(): void {
@@ -115,9 +168,12 @@ export class AdminDashboardComponent implements OnInit {
       projetos: this.projetosService.getProjetos(),
       atividades: this.atividadesService.getAtividades(),
       usuarios: this.usuariosService.getUsuarios(),
-      lancamentos: this.lancamentoService.getLancamentos()
+      lancamentos: this.lancamentoService.getLancamentos(),
+      ultimosLancamentos: this.lancamentoService.getUltimosLancamentos()
+
+
     }).subscribe({
-      next: ({ projetos, atividades, usuarios, lancamentos }) => {
+      next: ({ projetos, atividades, usuarios, lancamentos, ultimosLancamentos }) => {
         // 🔹 Filtragem de Projetos conforme a Role do Usuário
         this.totalProjetos = isAdmin ? projetos.length : projetos.filter(proj =>
           proj.idUsuarioResponsavel && (
@@ -141,6 +197,8 @@ export class AdminDashboardComponent implements OnInit {
                 : proj.idUsuarioResponsavel === this.userId
             )
           );
+
+          this.ultimosLancamentos = ultimosLancamentos;
 
           const atividadesProjeto = atividades.filter(ativ => ativ.id_projeto === projeto.id);
 
@@ -540,10 +598,10 @@ export class AdminDashboardComponent implements OnInit {
       this.exibirMensagem('warn', 'Atenção', 'Nenhum projeto foi selecionado!');
       return;
     }
-  
+
     const idsResponsaveis = this.responsaveisSelecionados.map(u => u.id);
     const idUsuarioResponsavel = idsResponsaveis.length > 0 ? idsResponsaveis[0] : null;
-  
+
     const projetoAtualizado = {
       projeto: {
         id: this.projetoSelecionado.id,
@@ -557,41 +615,41 @@ export class AdminDashboardComponent implements OnInit {
       usuariosIds: idsResponsaveis, // ✅ Apenas IDs dos usuários vinculados
       idUsuarioResponsavel: idUsuarioResponsavel // ✅ ID do responsável
     };
-  
+
     this.exibirMensagem('info', 'Processando', 'Atualizando responsáveis...');
-  
+
     this.projetosService.atualizarProjeto(
       this.projetoSelecionado.id, // ✅ ID do projeto
       projetoAtualizado.projeto,  // ✅ Objeto do projeto
       projetoAtualizado.usuariosIds, // ✅ Lista de usuários responsáveis (IDs)
       projetoAtualizado.idUsuarioResponsavel // ✅ ID do usuário responsável
     )
-    .subscribe(() => {
-      this.exibirPicklist = false;
-      
-      this.ngZone.run(() => {
-        this.exibirMensagem('success', 'Sucesso', 'Responsáveis atualizados com sucesso!');
+      .subscribe(() => {
+        this.exibirPicklist = false;
+
+        this.ngZone.run(() => {
+          this.exibirMensagem('success', 'Sucesso', 'Responsáveis atualizados com sucesso!');
+        });
+
+        // 🔹 Atualiza o dashboard para refletir a mudança
+        this.carregarDados();
+      }, err => {
+        console.error("❌ Erro ao atualizar responsáveis:", err);
+
+        this.ngZone.run(() => {
+          if (err.status === 400) {
+            this.exibirMensagem('error', 'Erro', 'Dados inválidos enviados! Verifique os responsáveis selecionados.');
+          } else if (err.status === 403) {
+            this.exibirMensagem('error', 'Permissão Negada', 'Você não tem permissão para realizar essa ação.');
+          } else if (err.status === 500) {
+            this.exibirMensagem('error', 'Erro no Servidor', 'Ocorreu um erro interno. Tente novamente mais tarde.');
+          } else {
+            this.exibirMensagem('error', 'Erro', 'Falha ao atualizar responsáveis!');
+          }
+        });
       });
-  
-      // 🔹 Atualiza o dashboard para refletir a mudança
-      this.carregarDados();
-    }, err => {
-      console.error("❌ Erro ao atualizar responsáveis:", err);
-  
-      this.ngZone.run(() => {
-        if (err.status === 400) {
-          this.exibirMensagem('error', 'Erro', 'Dados inválidos enviados! Verifique os responsáveis selecionados.');
-        } else if (err.status === 403) {
-          this.exibirMensagem('error', 'Permissão Negada', 'Você não tem permissão para realizar essa ação.');
-        } else if (err.status === 500) {
-          this.exibirMensagem('error', 'Erro no Servidor', 'Ocorreu um erro interno. Tente novamente mais tarde.');
-        } else {
-          this.exibirMensagem('error', 'Erro', 'Falha ao atualizar responsáveis!');
-        }
-      });
-    });
   }
-  
+
   exibirMensagem(severity: string, summary: string, detail: string) {
     this.ngZone.run(() => {
       this.messageService.add({ severity, summary, detail });

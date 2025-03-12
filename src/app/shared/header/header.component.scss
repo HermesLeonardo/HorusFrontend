@@ -66,3 +66,22 @@
     }
   }
 }
+
+.logout-button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  i {
+    font-size: 18px;
+  }
+
+  &:hover {
+    color: #f05454;
+  }
+}
