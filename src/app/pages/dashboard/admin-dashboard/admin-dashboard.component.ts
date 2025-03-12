@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { Chart, ChartConfiguration, ChartData, ChartOptions, ChartType } from 'chart.js';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -6,6 +6,13 @@ import { CommonModule } from '@angular/common';
 import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { forkJoin } from 'rxjs';
+import { PickListModule } from 'primeng/picklist';
+import { DialogModule } from 'primeng/dialog';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { TableModule } from 'primeng/table';
+
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 
 import { ProjetosService } from '../../../core/services/projetos.service';
@@ -31,15 +38,22 @@ Chart.register(...registerables);
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.scss'],
-  providers: [MessageService, ConfirmationService],
+  providers: [MessageService, ConfirmationService, ProjetosService, AtividadesService, UsuariosService, LancamentoHorasService, AuthService],
   standalone: true,
   imports: [
     FormsModule,
     CommonModule,
     ReactiveFormsModule,
     DropdownModule,
-    MultiSelectModule
-  ]
+    MultiSelectModule,
+    PickListModule,
+    DialogModule,
+    ToastModule,
+    ConfirmDialogModule,
+    TableModule
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+
 })
 export class AdminDashboardComponent implements OnInit {
   userRole: string = '';
@@ -68,7 +82,6 @@ export class AdminDashboardComponent implements OnInit {
 
   userId: number = 0;
 
-
   constructor(
     private projetosService: ProjetosService,
     private atividadesService: AtividadesService,
@@ -76,7 +89,9 @@ export class AdminDashboardComponent implements OnInit {
     private lancamentoService: LancamentoHorasService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private changeDetectorRef: ChangeDetectorRef,
+    private ngZone: NgZone
   ) { }
 
   ngOnInit(): void {
@@ -87,18 +102,14 @@ export class AdminDashboardComponent implements OnInit {
     this.userRole = this.authService.getUserRole() ?? 'ROLE_USER'; // Se for null, assume 'USUARIO'
     this.userId = this.authService.getUserId(); // Obtém o ID do usuário logado
 
-    console.log("🔍 UserRole no Dashboard:", this.userRole);
     console.log("🔍 UserID no Dashboard:", this.userId);
   }
 
   private carregarDados(): void {
-    this.userRole = this.authService.getUserRole()?.trim().toUpperCase() ?? 'ROLE_USER'; // Garantir que a role esteja formatada corretamente
+    this.userRole = this.authService.getUserRole()?.trim().toUpperCase() ?? 'ROLE_USER';
     this.userId = this.authService.getUserId();
 
     const isAdmin = this.userRole === 'ROLE_ADMIN';
-
-    console.log("🔍 UserRole no Dashboard:", this.userRole);
-    console.log("🔍 UserID no Dashboard:", this.userId);
 
     forkJoin({
       projetos: this.projetosService.getProjetos(),
@@ -107,13 +118,13 @@ export class AdminDashboardComponent implements OnInit {
       lancamentos: this.lancamentoService.getLancamentos()
     }).subscribe({
       next: ({ projetos, atividades, usuarios, lancamentos }) => {
-        // 🔹 Filtragem de Projetos
-        this.totalProjetos = isAdmin ? projetos.length : projetos.filter(proj => {
-          if (!proj.idUsuarioResponsavel) return false;
-          return Array.isArray(proj.idUsuarioResponsavel)
-            ? proj.idUsuarioResponsavel.includes(this.userId)
-            : proj.idUsuarioResponsavel === this.userId;
-        }).length;
+        // 🔹 Filtragem de Projetos conforme a Role do Usuário
+        this.totalProjetos = isAdmin ? projetos.length : projetos.filter(proj =>
+          proj.idUsuarioResponsavel && (
+            Array.isArray(proj.idUsuarioResponsavel)
+              ? proj.idUsuarioResponsavel.includes(this.userId)
+              : proj.idUsuarioResponsavel === this.userId
+          )).length;
 
         const projetosUsuario = isAdmin ? projetos : projetos.filter(proj => {
           if (!proj.idUsuarioResponsavel) return false;
@@ -122,23 +133,58 @@ export class AdminDashboardComponent implements OnInit {
             : proj.idUsuarioResponsavel === this.userId;
         });
 
-        this.projetosRecentes = projetosUsuario.slice(0, 5).map(projeto => ({
-          ...projeto,
-          usuarioResponsavel: Array.isArray(projeto.idUsuarioResponsavel)
-            ? usuarios.find(user => projeto.idUsuarioResponsavel?.includes(user.id))
-            : usuarios.find(user => user.id === Number(projeto.idUsuarioResponsavel))
-            || { nome: 'Não atribuído' }
-        }));
+        this.projetosRecentes = projetosUsuario.slice(0, 5).map(projeto => {
+          const projetosUsuario = isAdmin ? projetos : projetos.filter(proj =>
+            proj.idUsuarioResponsavel && (
+              Array.isArray(proj.idUsuarioResponsavel)
+                ? proj.idUsuarioResponsavel.includes(this.userId)
+                : proj.idUsuarioResponsavel === this.userId
+            )
+          );
 
-        // 🔹 Filtragem de Atividades
-        this.totalAtividades = isAdmin ? atividades.length : atividades.filter(ativ => {
-          return Array.isArray(ativ.usuariosResponsaveis) && ativ.usuariosResponsaveis.some(user => user.id === this.userId);
-        }).length;
+          const atividadesProjeto = atividades.filter(ativ => ativ.id_projeto === projeto.id);
 
-        const atividadesUsuario = isAdmin ? atividades : atividades.filter(ativ => {
-          return Array.isArray(ativ.usuariosResponsaveis) && ativ.usuariosResponsaveis.some(user => user.id === this.userId);
+          const ultimaAtividade = atividadesProjeto
+            .map(a => a.dataFim ? new Date(a.dataFim).getTime() : 0)
+            .reduce((max, time) => Math.max(max, time), 0);
+
+          const ultimaAtividadeDate = ultimaAtividade ? new Date(ultimaAtividade) : null;
+
+          const diasSemAtividade = ultimaAtividadeDate
+            ? Math.ceil((new Date().getTime() - ultimaAtividadeDate.getTime()) / (1000 * 60 * 60 * 24))
+            : 999;
+
+          const prazoProximo = projeto.dataFim
+            ? (new Date(projeto.dataFim).getTime() - new Date().getTime()) < (2 * 24 * 60 * 60 * 1000)
+            : false;
+
+          const responsavel = usuarios.find(user =>
+            Array.isArray(projeto.idUsuarioResponsavel)
+              ? projeto.idUsuarioResponsavel.includes(user.id)
+              : user.id === projeto.idUsuarioResponsavel
+          ) || { nome: 'Não atribuído' };
+
+
+
+          return {
+            ...projeto,
+            usuarioResponsavel: responsavel,
+            quantidadeAtividades: atividadesProjeto.length,
+            diasSemAtividade,
+            prazoProximo
+          };
         });
 
+        // 🔹 Filtragem de Atividades conforme Role
+        this.totalAtividades = isAdmin ? atividades.length : atividades.filter(ativ =>
+          Array.isArray(ativ.usuariosResponsaveis) && ativ.usuariosResponsaveis.some(user => user.id === this.userId)
+        ).length;
+
+        const atividadesUsuario = isAdmin ? atividades : atividades.filter(ativ =>
+          Array.isArray(ativ.usuariosResponsaveis) && ativ.usuariosResponsaveis.some(user => user.id === this.userId)
+        );
+
+        // 🔹 Lista apenas as atividades pendentes
         this.atividadesPendentes = atividadesUsuario.filter(a => a.status !== 'CONCLUIDA').slice(0, 5);
 
         // 🔹 Processamento de Lançamentos de Horas
@@ -152,11 +198,11 @@ export class AdminDashboardComponent implements OnInit {
 
         // 🔹 Processamento de Usuários
         this.totalUsuarios = isAdmin ? usuarios.length : 0;
-        this.ultimosLogins = isAdmin ? usuarios.sort((a, b) =>
-          new Date(b.ultimoLogin).getTime() - new Date(a.ultimoLogin).getTime()).slice(0, 5)
-          : [];
+        this.ultimosLogins = isAdmin ? usuarios
+          .sort((a, b) => new Date(b.ultimoLogin).getTime() - new Date(a.ultimoLogin).getTime())
+          .slice(0, 5) : [];
 
-        // 🔹 Atualiza os dados do gráfico após carregar tudo
+        // 🔹 Atualiza os gráficos com os novos dados
         this.processarDadosParaGrafico(projetosUsuario, atividadesUsuario);
 
         console.log("📌 Dados carregados:", {
@@ -187,10 +233,6 @@ export class AdminDashboardComponent implements OnInit {
       ABERTA: 0, EM_ANDAMENTO: 0, CONCLUIDA: 0, PAUSADA: 0
     };
 
-    console.log("🔍 Processando dados para gráfico...");
-    console.log("👤 Role do usuário:", this.userRole);
-    console.log("🆔 ID do usuário:", this.userId);
-
     // 🔹 Contabiliza projetos baseado na role do usuário
     projetos.forEach(projeto => {
       if (this.userRole === 'ROLE_ADMIN' || (
@@ -218,7 +260,7 @@ export class AdminDashboardComponent implements OnInit {
         }
       }
     });
-    
+
 
     // 🔹 Verifica se pelo menos um filtro está ativo
     const algumProjetoAtivo = Object.values(this.statusSelecionadosProjetos).some(selected => selected);
@@ -257,9 +299,8 @@ export class AdminDashboardComponent implements OnInit {
       ]
     };
 
-    console.log("📈 Dados do gráfico atualizados:", this.statusProjetosData);
     this.renderizarGrafico();
-}
+  }
 
 
 
@@ -279,8 +320,6 @@ export class AdminDashboardComponent implements OnInit {
   // 🔹 Atualizar Gráfico ao Mudar Filtros
   atualizarGrafico(valor: string): void {
     this.filtroPeriodo = valor;
-    console.log("Filtro de período atualizado:", this.filtroPeriodo);
-
     // 🔹 Recarregar os dados ao atualizar o gráfico
     this.projetosService.getProjetos().subscribe(projetos => {
       this.atividadesService.getAtividades().subscribe(atividades => {
@@ -290,7 +329,28 @@ export class AdminDashboardComponent implements OnInit {
   }
 
 
+  atualizarStatusProjeto(projeto: any): void {
+    const usuariosIds = projeto.idUsuarioResponsavel
+      ? (Array.isArray(projeto.idUsuarioResponsavel) ? projeto.idUsuarioResponsavel : [projeto.idUsuarioResponsavel])
+      : [];
 
+    const idUsuarioResponsavel = projeto.idUsuarioResponsavel
+      ? (Array.isArray(projeto.idUsuarioResponsavel) ? projeto.idUsuarioResponsavel[0] : projeto.idUsuarioResponsavel)
+      : 0;
+
+    const projetoAtualizado = {
+      ...projeto,
+      status: projeto.status
+    };
+
+    this.projetosService.atualizarProjeto(projeto.id, projetoAtualizado, usuariosIds, idUsuarioResponsavel)
+      .subscribe(() => {
+        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Status atualizado!' });
+      }, err => {
+        console.error("Erro ao atualizar status:", err);
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Falha ao atualizar status!' });
+      });
+  }
 
 
 
@@ -434,7 +494,6 @@ export class AdminDashboardComponent implements OnInit {
 
   novoProjeto(): Projeto {
     return {
-      projeto: null,
       id: 0,
       nome: '',
       descricao: '',
@@ -447,7 +506,97 @@ export class AdminDashboardComponent implements OnInit {
   }
 
 
+  exibirPicklist = false;
+  usuariosDisponiveis: any[] = [];
+  responsaveisSelecionados: any[] = [];
 
+  abrirPicklistResponsaveis(projeto: Projeto) {
+    this.projetoSelecionado = { ...projeto }; // 🔹 Clona para evitar alteração direta
+
+    this.usuariosService.getUsuarios().subscribe(usuarios => {
+      // 🔹 IDs dos responsáveis já atribuídos ao projeto
+      const idsResponsaveis = Array.isArray(projeto.usuarios)
+        ? projeto.usuarios.map(u => u.id)
+        : [];
+
+      // 🔹 Separando os usuários disponíveis e os já vinculados
+      this.usuariosDisponiveis = usuarios.filter(u => !idsResponsaveis.includes(u.id));
+      this.responsaveisSelecionados = usuarios.filter(u => idsResponsaveis.includes(u.id));
+
+      this.exibirPicklist = true; // 🔹 Exibe o modal
+    }, err => {
+      console.error("❌ Erro ao carregar usuários:", err);
+      this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar usuários!' });
+    });
+  }
+
+
+  fecharPicklist() {
+    this.exibirPicklist = false; // 🔹 Fecha o modal
+  }
+
+  salvarResponsaveis() {
+    if (!this.projetoSelecionado) {
+      this.exibirMensagem('warn', 'Atenção', 'Nenhum projeto foi selecionado!');
+      return;
+    }
+  
+    const idsResponsaveis = this.responsaveisSelecionados.map(u => u.id);
+    const idUsuarioResponsavel = idsResponsaveis.length > 0 ? idsResponsaveis[0] : null;
+  
+    const projetoAtualizado = {
+      projeto: {
+        id: this.projetoSelecionado.id,
+        nome: this.projetoSelecionado.nome,
+        descricao: this.projetoSelecionado.descricao,
+        dataInicio: this.projetoSelecionado.dataInicio,
+        dataFim: this.projetoSelecionado.dataFim,
+        status: this.projetoSelecionado.status,
+        prioridade: this.projetoSelecionado.prioridade,
+      },
+      usuariosIds: idsResponsaveis, // ✅ Apenas IDs dos usuários vinculados
+      idUsuarioResponsavel: idUsuarioResponsavel // ✅ ID do responsável
+    };
+  
+    this.exibirMensagem('info', 'Processando', 'Atualizando responsáveis...');
+  
+    this.projetosService.atualizarProjeto(
+      this.projetoSelecionado.id, // ✅ ID do projeto
+      projetoAtualizado.projeto,  // ✅ Objeto do projeto
+      projetoAtualizado.usuariosIds, // ✅ Lista de usuários responsáveis (IDs)
+      projetoAtualizado.idUsuarioResponsavel // ✅ ID do usuário responsável
+    )
+    .subscribe(() => {
+      this.exibirPicklist = false;
+      
+      this.ngZone.run(() => {
+        this.exibirMensagem('success', 'Sucesso', 'Responsáveis atualizados com sucesso!');
+      });
+  
+      // 🔹 Atualiza o dashboard para refletir a mudança
+      this.carregarDados();
+    }, err => {
+      console.error("❌ Erro ao atualizar responsáveis:", err);
+  
+      this.ngZone.run(() => {
+        if (err.status === 400) {
+          this.exibirMensagem('error', 'Erro', 'Dados inválidos enviados! Verifique os responsáveis selecionados.');
+        } else if (err.status === 403) {
+          this.exibirMensagem('error', 'Permissão Negada', 'Você não tem permissão para realizar essa ação.');
+        } else if (err.status === 500) {
+          this.exibirMensagem('error', 'Erro no Servidor', 'Ocorreu um erro interno. Tente novamente mais tarde.');
+        } else {
+          this.exibirMensagem('error', 'Erro', 'Falha ao atualizar responsáveis!');
+        }
+      });
+    });
+  }
+  
+  exibirMensagem(severity: string, summary: string, detail: string) {
+    this.ngZone.run(() => {
+      this.messageService.add({ severity, summary, detail });
+    });
+  }
 
 
 }

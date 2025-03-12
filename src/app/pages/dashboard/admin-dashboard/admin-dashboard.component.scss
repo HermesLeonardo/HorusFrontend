@@ -272,3 +272,121 @@ body:not(.dark-mode) {
   --input-bg: #f9f9f9;
   --border-color: #ccc;
 }
+
+
+
+// modal picklist 
+/* 🔹 Fundo do modal - Fundo semi-transparente para destacar */
+.picklist-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5); /* Leve escurecimento */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* 🔹 Estrutura do Modal */
+.picklist-modal-content {
+  background: var(--primary-bg);
+  padding: 25px;
+  border-radius: 12px;
+  width: 60vw;
+  max-width: 900px;
+  box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.4);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 🔹 Estilizando o PickList */
+.picklist-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  gap: 20px;
+}
+
+/* 🔹 Ajustando as listas */
+.p-picklist {
+  width: 100%;
+}
+
+.p-picklist .p-picklist-list {
+  min-height: 350px;
+  width: 45%;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
+  padding: 10px;
+}
+
+/* 🔹 Caixas de busca */
+.p-picklist .p-picklist-header {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 6px;
+}
+
+/* 🔹 Ajustando os botões de movimentação */
+.p-picklist .p-picklist-buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+
+.p-picklist-buttons button {
+  background: var(--accent-color);
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.p-picklist-buttons button:hover {
+  background: var(--accent-hover);
+}
+
+/* 🔹 Botões de ação */
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.modal-footer button {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.modal-footer .fechar-btn {
+  background: #d9534f;
+  color: white;
+}
+
+.modal-footer .salvar-btn {
+  background: #5cb85c;
+  color: white;
+}
+
+.modal-footer button:hover {
+  opacity: 0.8;
+}

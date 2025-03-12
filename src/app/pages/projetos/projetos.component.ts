@@ -51,7 +51,6 @@ export class ProjetosComponent implements OnInit {
 
   // Utilize o novo tipo de exibição para armazenar campos extras
   projetoVisualizacao: ProjetoVisualizacao = {
-    projeto: null,
     id: 0,
     nome: '',
     descricao: '',
@@ -337,7 +336,6 @@ export class ProjetosComponent implements OnInit {
 
   novoProjeto(): Projeto {
     return {
-      projeto: null,
       id: 0,
       nome: '',
       descricao: '',

@@ -50,10 +50,10 @@ export class ProjetosService {
 
       },
       usuariosIds: dados.usuariosIds || [],
-      idUsuarioResponsavel: typeof dados.idUsuarioResponsavel === 'object' && dados.idUsuarioResponsavel !== null 
-      ? (dados.idUsuarioResponsavel as any).value ?? dados.idUsuarioResponsavel
-      : dados.idUsuarioResponsavel ?? null
-  
+      idUsuarioResponsavel: typeof dados.idUsuarioResponsavel === 'object' && dados.idUsuarioResponsavel !== null
+        ? (dados.idUsuarioResponsavel as any).value ?? dados.idUsuarioResponsavel
+        : dados.idUsuarioResponsavel ?? null
+
     };
 
 
@@ -65,29 +65,32 @@ export class ProjetosService {
 
 
 
-  atualizarProjeto(id: number, projeto: Projeto, usuariosIds: number[], idUsuarioResponsavel: number): Observable<Projeto> {
+  atualizarProjeto(id: number, projeto: Projeto, usuariosIds: number[], idUsuarioResponsavel: number | null): Observable<Projeto> {
     const headers = this.getAuthHeaders();
 
-    if (!projeto) {
-      console.error("❌ ERRO: O objeto 'projeto' está NULL antes da requisição!");
-      return throwError(() => new Error("Objeto 'projeto' inválido!"));
-    }
-
     const requestBody = {
-      projeto: {
-        ...projeto,
-        dataInicio: projeto.dataInicio ? projeto.dataInicio : null,
-        dataFim: projeto.dataFim ? projeto.dataFim : null
-      },
-      usuariosIds: usuariosIds || [],
-      idUsuarioResponsavel: idUsuarioResponsavel || null
+        projeto: {
+            nome: projeto.nome,
+            descricao: projeto.descricao,
+            status: typeof projeto.status === 'object' && 'value' in projeto.status ? projeto.status.value : projeto.status,
+            prioridade: typeof projeto.prioridade === 'object' && 'value' in projeto.prioridade ? projeto.prioridade.value : projeto.prioridade,
+            dataInicio: projeto.dataInicio ? this.formatarData(projeto.dataInicio) : null,
+            dataFim: projeto.dataFim ? this.formatarData(projeto.dataFim) : null
+        },
+        usuariosIds: usuariosIds || [],
+        idUsuarioResponsavel: typeof idUsuarioResponsavel === 'object' && idUsuarioResponsavel !== null
+            ? (idUsuarioResponsavel as any).value ?? idUsuarioResponsavel
+            : idUsuarioResponsavel ?? null
     };
 
-    // Adiciona um log para verificar a estrutura enviada ao backend
     console.log("📢 JSON enviado na atualização:", JSON.stringify(requestBody, null, 2));
 
     return this.http.put<Projeto>(`${this.apiUrl}/${id}`, requestBody, { headers });
 }
+
+
+
+
 
 
 
