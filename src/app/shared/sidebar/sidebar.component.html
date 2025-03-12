@@ -11,7 +11,7 @@
       <li (click)="navegar('/projetos')">
         <i class="pi pi-briefcase icon-small"></i> <span>Projetos</span>
       </li>
-      <li (click)="navegar('/usuarios')">
+      <li (click)="navegar('/usuarios')" *ngIf="userRole === 'ROLE_ADMIN'">
         <i class="pi pi-user icon-small"></i> <span>Usuários</span>
       </li>
       <li (click)="navegar('/atividades')">

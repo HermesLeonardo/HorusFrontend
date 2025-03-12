@@ -24,8 +24,16 @@ export class ProjetosService {
 
 
   getProjetos(): Observable<Projeto[]> {
-    return this.http.get<Projeto[]>(this.apiUrl, { headers: this.getAuthHeaders() });
+    const userRole = localStorage.getItem('userRole');
+  
+    let url = this.apiUrl;
+    if (userRole !== 'ROLE_ADMIN') {
+      url = `${this.apiUrl}/usuario-logado`; // ✅ Endpoint correto para usuários comuns
+    }
+  
+    return this.http.get<Projeto[]>(url, { headers: this.getAuthHeaders() });
   }
+  
 
   private formatarData(data: string | Date | null): string | null {
     if (!data) return null; // Retorna null corretamente se a data for nula
@@ -87,11 +95,6 @@ export class ProjetosService {
 
     return this.http.put<Projeto>(`${this.apiUrl}/${id}`, requestBody, { headers });
 }
-
-
-
-
-
 
 
 

@@ -16,6 +16,8 @@ import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { CardModule } from 'primeng/card';
+import { AuthService } from '../../core/services/auth.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-atividades',
@@ -48,15 +50,21 @@ export class AtividadesComponent implements OnInit {
   modoEdicao: boolean = false;
   usuariosResponsaveis: { label: string, value: number }[] = [];
 
+  userRole: string = '';
+
+
   constructor(
     private atividadesService: AtividadesService,
     private projetosService: ProjetosService,
     private usuariosService: UsuariosService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private authService: AuthService,
+    private cdRef: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
+    this.userRole = this.authService.getUserRole();
     this.carregarAtividades();
     this.carregarProjetos();
   }
@@ -68,19 +76,36 @@ export class AtividadesComponent implements OnInit {
     );
   }
 
+
+
   carregarAtividades(): void {
-    this.atividadesService.getAtividades().subscribe(
-      (data) => {
-        console.log("📥 Dados recebidos do backend:", data);
-        this.atividades = data;
-        this.filtrarAtividades();
-      },
-      (error) => {
-        console.error("❌ Erro ao carregar atividades!", error);
-        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar atividades!' });
-      }
-    );
+    if (this.authService.getUserRole() === 'ROLE_ADMIN') {
+      this.atividadesService.getAtividades().subscribe(
+        (data) => {
+          console.log("📥 Atividades recebidas (ADMIN):", data);
+          this.atividades = data;
+          this.filtrarAtividades();
+        },
+        (error) => {
+          console.error("❌ Erro ao carregar atividades!", error);
+          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar atividades!' });
+        }
+      );
+    } else {
+      this.atividadesService.getAtividadesUsuario().subscribe(
+        (data) => {
+          console.log("📥 Atividades recebidas (USUÁRIO):", data);
+          this.atividades = data;
+          this.filtrarAtividades();
+        },
+        (error) => {
+          console.error("❌ Erro ao carregar atividades para usuário!", error);
+          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar atividades!' });
+        }
+      );
+    }
   }
+
 
 
   carregarProjetos(): void {
@@ -102,63 +127,75 @@ export class AtividadesComponent implements OnInit {
 
   abrirDialog(atividade?: Atividade): void {
     if (atividade) {
-        console.log("✏️ Modo edição ativado");
-        this.modoEdicao = true;
+      console.log("✏️ Modo edição ativado");
+      this.modoEdicao = true;
 
-        this.atividadeSelecionada = {
-            ...atividade,
-            id_projeto: atividade.projeto ? atividade.projeto.id : null,
-            dataInicio: atividade.dataInicio 
-                ? (typeof atividade.dataInicio === 'string' 
-                    ? new Date(atividade.dataInicio) 
-                    : atividade.dataInicio) 
-                : null,
-            dataFim: atividade.dataFim 
-                ? (typeof atividade.dataFim === 'string' 
-                    ? new Date(atividade.dataFim) 
-                    : atividade.dataFim) 
-                : null,
-            projeto: atividade.projeto || { id: null, nome: "Não definido" }
-        };
+      this.atividadeSelecionada = {
+        ...atividade,
+        id_projeto: atividade.projeto ? atividade.projeto.id : null,
+        dataInicio: atividade.dataInicio
+          ? (typeof atividade.dataInicio === 'string'
+            ? new Date(atividade.dataInicio)
+            : atividade.dataInicio)
+          : null,
+        dataFim: atividade.dataFim
+          ? (typeof atividade.dataFim === 'string'
+            ? new Date(atividade.dataFim)
+            : atividade.dataFim)
+          : null,
+        projeto: atividade.projeto || { id: null, nome: "Não definido" }
+      };
     } else {
-        console.log("➕ Criando nova atividade");
-        this.modoEdicao = false;
-        this.atividadeSelecionada = this.novaAtividade();
+      console.log("➕ Criando nova atividade");
+      this.modoEdicao = false;
+      this.atividadeSelecionada = this.novaAtividade();
     }
 
     console.log("📌 Atividade Selecionada após ajuste:", this.atividadeSelecionada);
     this.exibirDialog = true;
-}
-
-
-
-
-
-abrirVisualizacao(atividade: Atividade): void {
-  if (atividade) {
-
-      this.atividadeSelecionada = {
-          ...atividade,
-          dataInicio: atividade.dataInicio ? new Date(atividade.dataInicio) : null,
-          dataFim: atividade.dataFim ? new Date(atividade.dataFim) : null,
-          usuariosResponsaveis: atividade.usuariosResponsaveis || [],
-          id_projeto: atividade.projeto ? atividade.projeto.id : null, // 🔹 Atribui corretamente o ID do projeto
-          projeto: atividade.projeto || { id: null, nome: "Não definido" } // 🔹 Garante que o projeto esteja presente
-      };
-
-      console.log("📌 Atividade Selecionada após conversão:", this.atividadeSelecionada);
-
-      if (!this.projetos.length) {
-          this.carregarProjetos();
-      }
-      if (!this.usuarios.length) {
-          this.carregarUsuarios(atividade.id_projeto);
-      }
-
-      this.exibirVisualizacao = true;
   }
-}
 
+
+  abrirVisualizacao(atividade: Atividade): void {
+    if (atividade) {
+      this.atividadeSelecionada = Object.assign({}, atividade, {
+        dataInicio: atividade.dataInicio ? new Date(atividade.dataInicio) : null,
+        dataFim: atividade.dataFim ? new Date(atividade.dataFim) : null,
+        usuariosResponsaveis: [], // Inicialmente vazio, depois será preenchido
+        id_projeto: atividade.projeto ? atividade.projeto.id : null,
+        projeto: atividade.projeto || { id: null, nome: "Não definido" }
+      });
+  
+      console.log("Antes da busca:", this.atividadeSelecionada.usuariosResponsaveis);
+  
+      this.exibirVisualizacao = true; // 🔹 Garante que o modal seja ativado antes da requisição
+  
+      this.atividadesService.getUsuariosDaAtividade(atividade.id).subscribe(
+        (usuarios) => {
+          console.log("Usuários recebidos:", usuarios);
+  
+          if (usuarios && usuarios.length > 0) {
+            this.atividadeSelecionada.usuariosResponsaveis = usuarios.map(user => ({
+              id: user.id,
+              nome: user.nome,
+              email: user.email
+            }));
+  
+            console.log("Depois da atribuição:", this.atividadeSelecionada.usuariosResponsaveis);
+  
+            // 🔹 Atualiza a interface após a atualização da variável
+            this.cdRef.detectChanges();
+          } else {
+            console.warn("Nenhum usuário encontrado para essa atividade.");
+          }
+        },
+        (error) => {
+          console.error("❌ Erro ao carregar usuários responsáveis:", error);
+        }
+      );
+    }
+  }
+  
 
 
 
