@@ -51,7 +51,6 @@ export class ProjetosComponent implements OnInit {
 
   // Utilize o novo tipo de exibição para armazenar campos extras
   projetoVisualizacao: ProjetoVisualizacao = {
-    projeto: null,
     id: 0,
     nome: '',
     descricao: '',
@@ -311,15 +310,33 @@ export class ProjetosComponent implements OnInit {
 
 
   carregarProjetos(): void {
-    this.projetosService.getProjetos().subscribe(
-      (data) => {
-        console.log("📢 Dados recebidos da API:", data);
-        this.projetos = data;
-        this.filtrarProjetos();
-      },
-      () => this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar projetos!' })
-    );
+    const userRole = localStorage.getItem('userRole');
+  
+    if (userRole === 'ROLE_ADMIN') {
+      this.projetosService.getProjetos().subscribe(
+        (data) => {
+          console.log("📥 Projetos recebidos (ADMIN):", data);
+          this.projetos = data;
+          this.filtrarProjetos();
+        },
+        (error) => {
+          console.error("❌ Erro ao carregar projetos!", error);
+        }
+      );
+    } else {
+      this.projetosService.getProjetos().subscribe( // ✅ Agora chama o endpoint correto para usuário comum
+        (data) => {
+          console.log("📥 Projetos recebidos (USUÁRIO):", data);
+          this.projetos = data;
+          this.filtrarProjetos();
+        },
+        (error) => {
+          console.error("❌ Erro ao carregar projetos para usuário!", error);
+        }
+      );
+    }
   }
+  
 
 
   filtrarProjetos(): void {
@@ -337,7 +354,6 @@ export class ProjetosComponent implements OnInit {
 
   novoProjeto(): Projeto {
     return {
-      projeto: null,
       id: 0,
       nome: '',
       descricao: '',

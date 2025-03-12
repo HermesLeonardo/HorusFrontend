@@ -1,202 +1,204 @@
 .atividades-container {
-    padding: 20px;
-    margin: 50px auto;
-    max-width: 90%;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .topo-atividades {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .nova-atividade-btn {
-    background-color: #007ad9;
-    color: white;
-    border-radius: 6px;
-    padding: 10px 20px;
-    font-weight: bold;
-    border: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  
-    &:hover {
-      background-color: #005bb5;
-    }
-  }
-  
-  .filtros-container {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    padding: 10px;
-    background: #1e1e2d;
-    border-radius: 8px;
-  }
-  
-  .filtro-btn {
-    background-color: #3b82f6;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  
-    &:hover {
-      background-color: #2563eb;
-    }
-  }
-  
-  .limpar {
-    background-color: #ef4444;
-  
-    &:hover {
-      background-color: #dc2626;
-    }
-  }
-  
-  
-  .atividades-card {
-    padding: 15px;
-    background: var(--card-background);
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px var(--card-shadow);
-    transition: background 0.3s ease, color 0.3s ease;
-  }
-  
-  .acao-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
-    font-size: 1.2rem;
-  }
-  
-  .editar {
-    color: #facc15;
-  }
-  
-  .excluir {
-    color: #ef4444;
-  }
-  
-  @media (max-width: 768px) {
-    .atividades-container {
-      padding: 10px;
-    }
-  }
-  
-  /* ================== MODAL DE CADASTRO/EDIÇÃO ================== */
-  .custom-modal {
-    width: 60%;
-    max-width: 900px;
-    background-color: #1e1e2d;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  /* Ajusta a disposição dos campos */
-  .modal-body {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  /* Estilização para agrupar elementos lado a lado */
-  .row {
-    display: flex;
-    gap: 15px;
-  }
-  
-  /* Define a largura dos elementos internos */
-  .row > .input-group {
-    flex: 1;
-  }
-  
-  /* Define o campo de Responsáveis para ocupar toda a linha */
-  p-multiSelect {
-    width: 100%;
-  }
-  
-  /* Define a cor de fundo correta */
-  textarea,
-  p-dropdown,
-  p-multiSelect {
-    padding: 10px;
-    border-radius: 6px;
-    color: #ffffff;
-    border: none;
-  }
+  padding: 20px;
+  margin: 50px auto;
+  max-width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
-  input {
+.topo-atividades {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nova-atividade-btn {
+  background-color: #007ad9;
+  color: white;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-weight: bold;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background-color: #005bb5;
+  }
+}
+
+.filtros-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  background: #1e1e2d;
+  border-radius: 8px;
+}
+
+.filtro-btn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background-color: #2563eb;
+  }
+}
+
+.limpar {
+  background-color: #ef4444;
+
+  &:hover {
+    background-color: #dc2626;
+  }
+}
+
+
+.atividades-card {
+  padding: 15px;
+  background: var(--card-background);
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px var(--card-shadow);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.acao-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  font-size: 1.2rem;
+}
+
+.editar {
+  color: #facc15;
+}
+
+.excluir {
+  color: #ef4444;
+}
+
+@media (max-width: 768px) {
+  .atividades-container {
     padding: 10px;
-    border-radius: 6px;
-    color: #ffffff;
-    border: none;
   }
-  
-  /* Remove fundo estranho dos dropdowns */
-  p-dropdown::ng-deep .p-dropdown,
-  p-multiSelect::ng-deep .p-multiselect {
-    background: #111827 !important;
-  }
-  
-  /* Botões */
-  .modal-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 10px;
-  }
-  
-  .modal-buttons button {
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  
-  /* Ajusta os botões */
-  button.salvar {
-    background-color: #3b82f6;
-    color: white;
-  }
-  
-  button.cancelar {
-    background-color: #ef4444;
-    color: white;
-  }
-  
-  button:hover {
-    opacity: 0.8;
-  }
-  
-  /* Ajusta o alinhamento dos inputs dentro da row */
+}
+
+/* ================== MODAL DE CADASTRO/EDIÇÃO ================== */
+.custom-modal {
+  width: 60%;
+  max-width: 900px;
+  background-color: #1e1e2d;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Ajusta a disposição dos campos */
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Estilização para agrupar elementos lado a lado */
 .row {
   display: flex;
   gap: 15px;
-  align-items: flex-start; /* Alinha os itens ao topo */
+}
+
+/* Define a largura dos elementos internos */
+.row>.input-group {
+  flex: 1;
+}
+
+/* Define o campo de Responsáveis para ocupar toda a linha */
+p-multiSelect {
+  width: 100%;
+}
+
+/* Define a cor de fundo correta */
+textarea,
+p-dropdown,
+p-multiSelect {
+  padding: 10px;
+  border-radius: 6px;
+  color: #ffffff;
+  border: none;
+}
+
+input {
+  padding: 10px;
+  border-radius: 6px;
+  color: #ffffff;
+  border: none;
+}
+
+/* Remove fundo estranho dos dropdowns */
+p-dropdown::ng-deep .p-dropdown,
+p-multiSelect::ng-deep .p-multiselect {
+  background: #111827 !important;
+}
+
+/* Botões */
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.modal-buttons button {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Ajusta os botões */
+button.salvar {
+  background-color: #3b82f6;
+  color: white;
+}
+
+button.cancelar {
+  background-color: #ef4444;
+  color: white;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+/* Ajusta o alinhamento dos inputs dentro da row */
+.row {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+  /* Alinha os itens ao topo */
 }
 
 /* Ajusta os inputs para ficarem uniformes */
 .input-group {
   display: flex;
   flex-direction: column;
-  flex: 1; /* Faz com que ambos os inputs tenham a mesma largura */
+  flex: 1;
+  /* Faz com que ambos os inputs tenham a mesma largura */
 }
 
 
@@ -208,11 +210,13 @@
 
 /* Faz os inputs de data ocuparem mais espaço horizontal */
 .full-width {
-  flex: 1; /* Garante que ambos ocupem a mesma proporção do espaço disponível */
+  flex: 1;
+  /* Garante que ambos ocupem a mesma proporção do espaço disponível */
 }
 
 input[type="date"] {
-  width: 100%; /* Faz os inputs ocuparem toda a largura da div */
+  width: 100%;
+  /* Faz os inputs ocuparem toda a largura da div */
   padding: 10px;
   border-radius: 6px;
   background: #111827;
@@ -222,7 +226,15 @@ input[type="date"] {
 
 
 
-  /* MODAL DE VISUALIZAÇÃO */
+/* MODAL DE VISUALIZAÇÃO */
+.responsavel-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-bottom: 1px solid #444;
+}
+
 .custom-modal-overlay {
   position: fixed;
   top: 0;
@@ -275,6 +287,7 @@ input[type="date"] {
 
 .visualizar {
   color: #47cb69; // Azul
+
   &:hover {
     color: #47cb69; // Azul escuro
   }

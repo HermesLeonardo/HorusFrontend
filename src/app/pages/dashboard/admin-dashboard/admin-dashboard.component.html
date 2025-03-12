@@ -1,3 +1,4 @@
+
 <div class="admin-dashboard">
 
   <!-- 🔹 Seção 1: Visão Geral (Cards de Métricas) -->
@@ -14,7 +15,7 @@
       <h3>Total de Horas Lançadas</h3>
       <p>{{ totalHorasLancadas }}</p>
     </div>
-    <div class="dashboard-card"  *ngIf="userRole === 'ROLE_ADMIN'">
+    <div class="dashboard-card" *ngIf="userRole === 'ROLE_ADMIN'">
       <h3>Total de Usuários</h3>
       <p>{{ totalUsuarios }}</p>
     </div>
@@ -71,21 +72,61 @@
       <thead>
         <tr>
           <th>Nome</th>
+          <th>Descrição</th>
           <th>Responsável</th>
+          <th>Atividades</th>
           <th>Status</th>
           <th>Data de Criação</th>
+          <th>Ações</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let projeto of projetosRecentes">
+        <tr *ngFor="let projeto of projetosRecentes" [ngClass]="{
+              'projeto-parado': projeto.diasSemAtividade > 10,
+              'projeto-prazo': projeto.prazoProximo
+            }">
           <td>{{ projeto.nome }}</td>
-          <td>{{ projeto.responsavel }}</td>
-          <td>{{ projeto.status }}</td>
+          <td>{{ projeto.descricao || 'Sem descrição' }}</td>
+          <td>{{ projeto.usuarioResponsavel?.nome || 'Não atribuído' }}</td>
+          <td>{{ projeto.quantidadeAtividades }}</td>
+          <td>
+            <select [(ngModel)]="projeto.status" (change)="atualizarStatusProjeto(projeto)">
+              <option value="PLANEJADO">Planejado</option>
+              <option value="EM_ANDAMENTO">Em Andamento</option>
+              <option value="CONCLUIDO">Concluído</option>
+              <option value="CANCELADO">Cancelado</option>
+            </select>
+          </td>
           <td>{{ projeto.dataCriacao | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <button (click)="abrirPicklistResponsaveis(projeto)">👥 Gerenciar Responsáveis</button>
+          </td>
         </tr>
       </tbody>
     </table>
   </section>
+
+
+<!-- 🔹 Modal Customizado para PickList -->
+<div class="custom-modal-picklist" *ngIf="exibirPicklist">
+  <div class="custom-modal-picklist-content">
+    <h2>Gerenciar Responsáveis</h2>
+
+    <p-pickList [source]="usuariosDisponiveis" [target]="responsaveisSelecionados"
+                sourceHeader="Usuários Disponíveis" targetHeader="Responsáveis"
+                (onMoveToTarget)="atualizarResponsaveis(projetoSelecionado)"
+                (onMoveToSource)="atualizarResponsaveis(projetoSelecionado)">
+      <ng-template let-item pTemplate="item">{{ item.nome }}</ng-template>
+    </p-pickList>
+
+    <div class="modal-footer">
+      <button class="fechar-btn" (click)="fecharPicklist()">Fechar</button>
+      <button class="salvar-btn" (click)="salvarResponsaveis()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+
 
   <!-- 🔹 Seção 4: Atividades Pendentes -->
   <section class="dashboard-pending-tasks">
