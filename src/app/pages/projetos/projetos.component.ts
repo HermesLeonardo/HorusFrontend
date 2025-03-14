@@ -99,19 +99,19 @@ export class ProjetosComponent implements OnInit {
 
   carregarUsuarios(): void {
     console.log("📢 Buscando usuários...");
-
+  
     this.usuariosService.getUsuarios().subscribe(
       (usuarios) => {
         console.log("✅ Usuários carregados com sucesso:", usuarios);
-
-        // 🔹 Garante que o primeiro campo mostre todos os usuários (Admins e Usuários comuns)
+  
         this.usuarios = usuarios;
-
+  
+        // 🔹 Adiciona o perfil ao label para exibição no dropdown
         this.usuariosOptions = usuarios.map(user => ({
-          label: user.nome,
+          label: `${user.nome} (${user.perfil === 'ADMIN' ? 'Administrador' : 'Usuário'})`,
           value: user.id
         }));
-
+  
         console.log("🎯 Todos os usuários carregados:", this.usuariosOptions);
       },
       (error) => {
@@ -120,6 +120,7 @@ export class ProjetosComponent implements OnInit {
       }
     );
   }
+  
 
 
   atualizarAdminsResponsaveis(): void {

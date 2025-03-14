@@ -135,8 +135,9 @@
 }
 
 ::ng-deep .p-dialog {
-  width: 30vw !important; // Ajuste conforme necessário
+  width: 30vw !important;
   max-width: 400px !important;
+  height: 480px !important; /* Ajuste a altura conforme necessário */
 }
 
 
@@ -243,7 +244,6 @@
 :host ::ng-deep .p-dialog {
   width: 50vw !important; 
   max-width: 750px !important; 
-  height: auto !important;
   display: flex;
   flex-direction: column;
 }

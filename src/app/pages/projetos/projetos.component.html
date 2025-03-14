@@ -95,10 +95,16 @@
         <div class="responsaveis-container">
           <div class="input-group usuarios-responsaveis">
             <label for="usuarios">Usuários Responsáveis:</label>
-            <p-multiSelect [options]="usuariosOptions" [(ngModel)]="projetoSelecionado.idUsuarioResponsavel"
-              optionLabel="label" placeholder="Selecione os responsáveis" (onChange)="atualizarAdminsResponsaveis()">
-              <!-- 🔹 Atualiza admins ao mudar os responsáveis -->
-            </p-multiSelect>
+            <p-multiSelect 
+            [options]="usuariosOptions" 
+            [(ngModel)]="projetoSelecionado.idUsuarioResponsavel"
+            optionLabel="label" 
+            placeholder="Selecione os responsáveis"
+            (onChange)="atualizarAdminsResponsaveis()"
+            [selectedItemsLabel]="'{0} usuários selecionados'"
+            [maxSelectedLabels]="2">
+          </p-multiSelect>
+          
           </div>
 
           <div class="input-group admin-responsavel">

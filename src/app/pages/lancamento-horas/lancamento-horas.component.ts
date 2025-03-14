@@ -213,7 +213,6 @@ export class LancamentoHorasComponent implements OnInit {
 
   filtrarLancamentos(): void {
     console.log("🔎 Filtro atual:", JSON.stringify(this.filtro, null, 2));
-    console.log("🔎 Lançamentos antes do filtro:", JSON.stringify(this.lancamentos, null, 2));
 
     this.lancamentosFiltrados = this.lancamentos.filter(lancamento => {
       console.log("🔹 Comparando atividadeId:", lancamento.idAtividade, "===", this.filtro.atividade?.value);
