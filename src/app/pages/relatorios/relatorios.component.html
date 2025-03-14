@@ -1,1 +1,40 @@
-<p>relatorios works!</p>
+<div class="filtros">
+    <label>Projeto:</label>
+    <input type="text" [(ngModel)]="filtros.idProjeto">
+  
+    <label>Usuário:</label>
+    <input type="text" [(ngModel)]="filtros.idUsuario">
+  
+    <label>Atividade:</label>
+    <input type="text" [(ngModel)]="filtros.idAtividade">
+  
+    <label>Data Início:</label>
+    <input type="date" [(ngModel)]="filtros.dataInicio">
+  
+    <label>Data Fim:</label>
+    <input type="date" [(ngModel)]="filtros.dataFim">
+  
+    <button (click)="buscarRelatorios()">Buscar</button>
+  </div>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Projeto</th>
+        <th>Atividade</th>
+        <th>Usuário</th>
+        <th>Horas Trabalhadas</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let relatorio of relatorios">
+        <td>{{ relatorio.projeto }}</td>
+        <td>{{ relatorio.atividade }}</td>
+        <td>{{ relatorio.usuario }}</td>
+        <td>{{ relatorio.horasTrabalhadas }}</td>
+        <td>{{ relatorio.status }}</td>
+      </tr>
+    </tbody>
+  </table>
+  

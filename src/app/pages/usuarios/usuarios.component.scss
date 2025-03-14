@@ -301,6 +301,10 @@ p {
   /* Cor levemente opaca para não poluir a UI */
 }
 
+.status-text.desativados {
+  color: #d9534f; // Vermelho para indicar desativados
+}
+
 
 @media (max-width: 768px) {
   .custom-modal {
@@ -321,4 +325,106 @@ body:not(.dark-mode) {
   --text-color: #000000;
   --card-bg: #f9f9f9;
   --border-color: #ccc;
+}
+
+
+
+
+
+
+/* 🔹 Ajustes exclusivos para o modo claro */
+body:not(.dark-mode) {
+  
+  /* 🔹 Melhorando os cartões e tabelas */
+  .usuarios-card {
+    background: #ffffff !important;
+    border-radius: 12px !important;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* 🔹 Ajustando o cabeçalho da tabela */
+  .usuarios-card th {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #000;
+  }
+
+  /* 🔹 Melhorando a área de filtros */
+  .filtros-container {
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  /* 🔹 Botões do filtro no modo claro */
+  .filtro-btn {
+    background-color: #f4f4f4;
+    color: #333;
+    border: 1px solid #ccc;
+  }
+
+  .filtro-btn:hover {
+    background-color: #e0e0e0;
+  }
+
+  /* 🔹 Melhorando o botão "Novo Usuário" */
+  .novo-usuario-btn {
+    background-color: #007bff;
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+  }
+
+  .novo-usuario-btn:hover {
+    background-color: #0056b3;
+  }
+
+  /* 🔹 Ajustando os botões de ação */
+  .acao-btn {
+    background: transparent;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .acao-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  /* 🔹 Melhorando a aparência do modal */
+  .custom-modal {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .custom-modal input,
+  .custom-modal select {
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+    color: #333;
+  }
+
+  /* 🔹 Ajustando os botões do modal */
+  .modal-buttons button {
+    border-radius: 8px;
+    font-weight: bold;
+  }
+
+  .modal-buttons button:first-child {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .modal-buttons button:first-child:hover {
+    background-color: #0056b3;
+  }
+
+  .modal-buttons button:last-child {
+    background-color: #6c757d;
+    color: white;
+  }
+
+  .modal-buttons button:last-child:hover {
+    background-color: #495057;
+  }
 }

@@ -22,7 +22,7 @@
             <button class="filtro-btn" (click)="toggleUsuariosDesativados()">
                 <i class="pi pi-user-minus"></i> {{ filtroAtivo ? 'Mostrar Usuários Desativados' : 'Mostrar Usuários Ativos' }}
             </button>
-            <span class="status-text">
+            <span class="status-text" [ngClass]="{'desativados': !filtroAtivo}">
                 {{ filtroAtivo ? 'Exibindo Usuários Ativos' : 'Exibindo Usuários Desativados' }}
             </span>
         </div>

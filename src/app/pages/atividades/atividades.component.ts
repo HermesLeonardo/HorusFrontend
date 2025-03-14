@@ -43,14 +43,16 @@ export class AtividadesComponent implements OnInit {
   atividadesFiltradas: Atividade[] = [];
   atividadeSelecionada: Atividade = this.novaAtividade();
   exibirDialog: boolean = false;
-  exibirVisualizacao: boolean = false; // 🔹 Estado para modal de visualização
-  filtro = { nome: '', projeto: null };
+  exibirVisualizacao: boolean = false; 
+  filtro: { nome: string, projeto: { id: number, nome: string } | null } = { nome: '', projeto: null };
   projetos: Projeto[] = [];
   usuarios: Usuario[] = [];
   modoEdicao: boolean = false;
   usuariosResponsaveis: { label: string, value: number }[] = [];
 
   userRole: string = '';
+
+  
 
 
   constructor(
@@ -70,41 +72,71 @@ export class AtividadesComponent implements OnInit {
   }
 
   filtrarAtividades(): void {
-    this.atividadesFiltradas = this.atividades.filter(atividade =>
-      (this.filtro.nome ? atividade.nome.toLowerCase().includes(this.filtro.nome.toLowerCase()) : true) &&
-      (this.filtro.projeto ? atividade.id_projeto === this.filtro.projeto : true)
-    );
+    console.log("🔍 Aplicando filtro...");
+    console.log("➡️ Filtro Nome:", this.filtro.nome);
+    console.log("➡️ Filtro Projeto:", this.filtro.projeto);
+    console.log("➡️ Filtro Projeto ID:", this.filtro.projeto?.id);
+  
+    this.atividadesFiltradas = this.atividades.filter(atividade => {
+      // 🔹 Força um ID para atividades sem projeto
+      const idProjetoAtividade = atividade.projeto && atividade.projeto.id ? atividade.projeto.id : 0;
+      console.log("🆔 ID do Projeto da Atividade (ajustado):", idProjetoAtividade);
+  
+      const nomeMatch = this.filtro.nome
+        ? atividade.nome.toLowerCase().includes(this.filtro.nome.toLowerCase())
+        : true;
+  
+      const projetoMatch = this.filtro.projeto && this.filtro.projeto.id
+        ? idProjetoAtividade === this.filtro.projeto.id
+        : true;
+  
+      // 🔍 Logs para cada atividade processada
+      console.log("-----------------------------------");
+      console.log("🎯 Atividade: ", atividade.nome);
+      console.log("✅ Nome corresponde?", nomeMatch);
+      console.log("✅ Projeto corresponde?", projetoMatch);
+      console.log("🔎 Resultado Final:", nomeMatch && projetoMatch);
+      
+      return nomeMatch && projetoMatch;
+    });
+  
+    console.log("✅ Atividades Filtradas:", this.atividadesFiltradas);
   }
+  
 
+  reativarAtividade(atividade: Atividade): void {
+    this.confirmationService.confirm({
+      message: `Deseja reativar a atividade "${atividade.nome}"?`,
+      accept: () => {
+        this.atividadesService.reativarAtividade(atividade.id).subscribe(() => {
+          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Atividade reativada com sucesso!' });
+          this.carregarAtividades(); // 🔄 Atualiza a lista após a reativação
+        }, error => {
+          console.error("❌ Erro ao reativar atividade:", error);
+          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao reativar atividade!' });
+        });
+      }
+    });
+  }
 
 
   carregarAtividades(): void {
     if (this.authService.getUserRole() === 'ROLE_ADMIN') {
       this.atividadesService.getAtividades().subscribe(
         (data) => {
-          console.log("📥 Atividades recebidas (ADMIN):", data);
+          console.log("📥 Atividades recebidas (ADMIN):", data); // <-- Adicione este console.log
           this.atividades = data;
           this.filtrarAtividades();
+          this.aplicarFiltroAtivo();
         },
         (error) => {
           console.error("❌ Erro ao carregar atividades!", error);
           this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar atividades!' });
         }
       );
-    } else {
-      this.atividadesService.getAtividadesUsuario().subscribe(
-        (data) => {
-          console.log("📥 Atividades recebidas (USUÁRIO):", data);
-          this.atividades = data;
-          this.filtrarAtividades();
-        },
-        (error) => {
-          console.error("❌ Erro ao carregar atividades para usuário!", error);
-          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar atividades!' });
-        }
-      );
     }
   }
+  
 
 
 
@@ -158,36 +190,27 @@ export class AtividadesComponent implements OnInit {
 
   abrirVisualizacao(atividade: Atividade): void {
     if (atividade) {
-      this.atividadeSelecionada = Object.assign({}, atividade, {
+      this.atividadeSelecionada = {
+        ...atividade,
         dataInicio: atividade.dataInicio ? new Date(atividade.dataInicio) : null,
         dataFim: atividade.dataFim ? new Date(atividade.dataFim) : null,
-        usuariosResponsaveis: [], // Inicialmente vazio, depois será preenchido
-        id_projeto: atividade.projeto ? atividade.projeto.id : null,
-        projeto: atividade.projeto || { id: null, nome: "Não definido" }
-      });
+        usuariosResponsaveis: [],
+        id_projeto: atividade.projeto?.id ?? null,
+        projeto: atividade.projeto ?? { id: null, nome: "Não definido" } // <-- Garante que sempre tenha um objeto
+      };
   
-      console.log("Antes da busca:", this.atividadeSelecionada.usuariosResponsaveis);
+      console.log("🧐 Atividade Selecionada para Visualização:", this.atividadeSelecionada);
   
-      this.exibirVisualizacao = true; // 🔹 Garante que o modal seja ativado antes da requisição
+      this.exibirVisualizacao = true;
   
       this.atividadesService.getUsuariosDaAtividade(atividade.id).subscribe(
         (usuarios) => {
-          console.log("Usuários recebidos:", usuarios);
-  
-          if (usuarios && usuarios.length > 0) {
-            this.atividadeSelecionada.usuariosResponsaveis = usuarios.map(user => ({
-              id: user.id,
-              nome: user.nome,
-              email: user.email
-            }));
-  
-            console.log("Depois da atribuição:", this.atividadeSelecionada.usuariosResponsaveis);
-  
-            // 🔹 Atualiza a interface após a atualização da variável
-            this.cdRef.detectChanges();
-          } else {
-            console.warn("Nenhum usuário encontrado para essa atividade.");
-          }
+          this.atividadeSelecionada.usuariosResponsaveis = usuarios.map(user => ({
+            id: user.id,
+            nome: user.nome,
+            email: user.email
+          }));
+          this.cdRef.detectChanges();
         },
         (error) => {
           console.error("❌ Erro ao carregar usuários responsáveis:", error);
@@ -265,17 +288,22 @@ export class AtividadesComponent implements OnInit {
 
 
 
-  deletarAtividade(atividade: Atividade): void {
+  desativarAtividade(atividade: Atividade): void {
     this.confirmationService.confirm({
-      message: `Tem certeza que deseja excluir a atividade "${atividade.nome}"?`,
+      message: `Tem certeza que deseja desativar a atividade "${atividade.nome}"?`,
       accept: () => {
-        this.atividadesService.deletarAtividade(atividade.id).subscribe(() => {
-          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Atividade deletada com sucesso!' });
+        this.atividadesService.desativarAtividade(atividade.id).subscribe(() => {
+          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Atividade desativada com sucesso!' });
           this.carregarAtividades();
+        }, error => {
+          console.error("❌ Erro ao desativar atividade:", error);
         });
+
       }
     });
   }
+
+
 
   novaAtividade(): Atividade {
     return {
@@ -287,7 +315,8 @@ export class AtividadesComponent implements OnInit {
       dataInicio: new Date(),
       dataFim: new Date(),
       status: 'ABERTA',
-      usuariosIds: []
+      usuariosIds: [],
+      ativo: true
     };
 
   }
@@ -297,47 +326,34 @@ export class AtividadesComponent implements OnInit {
     this.filtrarAtividades();
   }
 
-  getNomeUsuarioResponsavel(id_usuario_responsavel?: number): string {
-    if (!id_usuario_responsavel || !this.usuarios?.length) {
-      return 'Não definido';
-    }
-    return this.usuarios.find(u => u.id === id_usuario_responsavel)?.nome || 'Não definido';
-  }
-
-  onProjetoSelecionado(projetoSelecionado: any) {
-    if (!projetoSelecionado || !projetoSelecionado.id) {
-      console.warn("⚠ ID do projeto inválido:", projetoSelecionado);
-      return;
+  getNomeUsuarioResponsavel(atividade: Atividade): string {
+    if (!atividade || !atividade.usuariosResponsaveis) {
+        console.warn("⚠ Nenhum usuário encontrado para a atividade:", atividade);
+        return "Não definido";
     }
 
-    const projetoId = projetoSelecionado.id;
-    console.log("🔄 Projeto selecionado ID:", projetoId);
+    if (atividade.usuariosResponsaveis.length > 0) {
+        console.log("✅ Responsáveis encontrados:", atividade.usuariosResponsaveis);
+        return atividade.usuariosResponsaveis[0].nome || "Não definido";
+    }
 
-    this.projetosService.getUsuariosPorProjeto(projetoId).subscribe({
-      next: (usuarios) => {
-        console.log("✅ Usuários carregados:", usuarios);
+    return "Não definido";
+}
 
-        this.usuariosResponsaveis = usuarios.map(user => ({
-          label: user.nome,
-          value: user.id
-        }));
+  
 
-        if (!this.modoEdicao) {
-          this.atividadeSelecionada.usuariosResponsaveis = [];
-        } else {
-          const idsSelecionados = this.atividadeSelecionada.usuariosResponsaveis?.map(user => user.id) || [];
-          this.atividadeSelecionada.usuariosResponsaveis = usuarios.filter(user =>
-            idsSelecionados.includes(user.id));
-        }
-
-        console.log("✅ Usuários pré-selecionados:", this.atividadeSelecionada.usuariosResponsaveis);
-      },
-      error: (err) => {
-        console.error("❌ Erro ao carregar usuários do projeto", err);
-        this.usuariosResponsaveis = [];
-      }
-    });
+  onProjetoSelecionado(event: any): void {
+    if (event && event.value) {
+      console.log("🔄 Projeto selecionado:", event.value);
+      this.filtro.projeto = this.projetos.find(proj => proj.id === event.value.id) || null;
+      this.filtrarAtividades(); // Aplica o filtro imediatamente após a seleção
+    } else {
+      this.filtro.projeto = null;
+      this.filtrarAtividades();
+    }
+    this.cdRef.detectChanges();
   }
+  
 
 
 
@@ -349,6 +365,22 @@ export class AtividadesComponent implements OnInit {
 
     console.log("✅ Usuários selecionados atualizados:", this.atividadeSelecionada.usuariosResponsaveis);
   }
+
+
+
+  filtroAtivo: boolean = true; // Por padrão, exibe atividades ativas
+
+  toggleAtividadesDesativadas(): void {
+    this.filtroAtivo = !this.filtroAtivo;
+    this.aplicarFiltroAtivo();
+  }
+
+  aplicarFiltroAtivo(): void {
+    this.atividadesFiltradas = this.atividades.filter(atividade =>
+      this.filtroAtivo ? atividade.ativo === true : atividade.ativo === false
+    );
+  }
+
 
 
 

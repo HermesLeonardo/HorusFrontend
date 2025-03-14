@@ -19,10 +19,8 @@ export class AtividadesService {
 
 
 
-
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
-    console.log('Token enviado no cabeçalho em Atividades:', token);  // 🔍 Log para depuração
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -35,7 +33,7 @@ export class AtividadesService {
 
     let url = this.apiUrl;
     if (userRole !== 'ROLE_ADMIN') {
-      url = `${this.apiUrl}/usuario-logado`;  // ✅ Ajustado para a rota correta
+      url = `${this.apiUrl}/usuario-logado`;
     }
 
     return this.http.get<Atividade[]>(url, { headers: this.getAuthHeaders() }).pipe(
@@ -47,8 +45,15 @@ export class AtividadesService {
     );
   }
 
+  desativarAtividade(id: number): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}/desativar`, {}, { headers: this.getAuthHeaders() });
+  }
 
-
+  reativarAtividade(id: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/reativar`, {}, { headers: this.getAuthHeaders() });
+  }
+  
+  
   getAtividadesUsuario(): Observable<Atividade[]> {
     return this.http.get<Atividade[]>(`${this.apiUrl}/usuario-logado`, { headers: this.getAuthHeaders() });
   }
@@ -56,7 +61,7 @@ export class AtividadesService {
   getUsuariosDaAtividade(idAtividade: number): Observable<Usuario[]> {
     return this.http.get<Usuario[]>(`${this.apiUrl}/${idAtividade}/usuarios-responsaveis`, { headers: this.getAuthHeaders() });
   }
-  
+
 
   getAtividadeById(id: number): Observable<Atividade> {
     return this.http.get<Atividade>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() }).pipe(

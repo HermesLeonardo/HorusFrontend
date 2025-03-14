@@ -10,6 +10,7 @@ export interface Atividade {
     dataFim: Date  | null;     
     status: 'ABERTA' | 'EM_ANDAMENTO' | 'CONCLUIDA' | 'PAUSADA';
     usuariosResponsaveis?: Usuario[];
+    ativo: boolean;  
 }
 
 

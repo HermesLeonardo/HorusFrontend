@@ -4,19 +4,38 @@
 <div class="atividades-container">
     <div class="topo-atividades">
         <h2>Gerenciamento de Atividades</h2>
-        <button class="nova-atividade-btn" (click)="abrirDialog()">
+        <button class="nova-atividade-btn" *ngIf="userRole === 'ROLE_ADMIN'" (click)="abrirDialog()">
             <i class="pi pi-plus"></i> Nova Atividade
         </button>
     </div>
 
     <!-- FILTROS -->
     <div class="filtros-container">
-        <p-dropdown [options]="projetos" [(ngModel)]="filtro.projeto" optionLabel="nome"
-            placeholder="Projeto"></p-dropdown>
+        <p-dropdown 
+        [options]="projetos" 
+        [(ngModel)]="filtro.projeto"
+        optionLabel="nome" 
+        placeholder="Projeto">
+      </p-dropdown>
+      
+
         <input pInputText [(ngModel)]="filtro.nome" placeholder="Buscar Atividade..." />
         <button class="filtro-btn" (click)="filtrarAtividades()"><i class="pi pi-filter"></i> Filtrar</button>
         <button class="filtro-btn limpar" (click)="resetarFiltros()"><i class="pi pi-times"></i> Limpar</button>
+
+        <!-- Botão de Alternância -->
+        <div class="status-container">
+            <button class="filtro-btn" (click)="toggleAtividadesDesativadas()">
+                <i class="pi pi-ban"></i> {{ filtroAtivo ? 'Mostrar Atividades Desativadas' : 'Mostrar Atividades
+                Ativas' }}
+            </button>
+            <span class="status-text" [ngClass]="{'desativados': !filtroAtivo}">
+                {{ filtroAtivo ? 'Exibindo Atividades Ativas' : 'Exibindo Atividades Desativadas' }}
+            </span>
+        </div>
+
     </div>
+
 
     <!-- TABELA DE ATIVIDADES -->
     <div class="atividades-card">
@@ -43,11 +62,20 @@
                             (click)="abrirDialog(atividade)">
                             <i class="pi pi-pencil"></i>
                         </button>
-                        <button class="acao-btn excluir" *ngIf="userRole === 'ROLE_ADMIN'"
-                            (click)="deletarAtividade(atividade)">
+
+                        <!-- 🔹 Se a atividade estiver ativa, exibe a lixeira -->
+                        <button class="acao-btn excluir" *ngIf="userRole === 'ROLE_ADMIN' && atividade.ativo"
+                            (click)="desativarAtividade(atividade)">
                             <i class="pi pi-trash"></i>
                         </button>
+
+                        <!-- 🔹 Se a atividade estiver desativada, exibe o ícone de restauração -->
+                        <button class="acao-btn restaurar" *ngIf="userRole === 'ROLE_ADMIN' && !atividade.ativo"
+                            (click)="reativarAtividade(atividade)">
+                            <i class="pi pi-refresh"></i>
+                        </button>
                     </td>
+
                 </tr>
             </ng-template>
         </p-table>
@@ -130,23 +158,25 @@
                 <p><strong>Projeto:</strong> {{ atividadeSelecionada?.projeto?.nome || 'Não definido' }}</p>
                 <p><strong>Responsáveis:</strong></p>
 
-                <div *ngIf="atividadeSelecionada.usuariosResponsaveis && atividadeSelecionada.usuariosResponsaveis.length > 0">
-                  <div *ngFor="let user of atividadeSelecionada.usuariosResponsaveis" class="responsavel-item">
-                    <i class="pi pi-user" style="font-size: 1.2rem; margin-right: 8px;"></i>
-                    <div>
-                      <span class="font-bold">{{ user.nome }}</span>
-                      <br>
-                      <small class="text-gray-500">{{ user.email }}</small>
+                <div
+                    *ngIf="atividadeSelecionada.usuariosResponsaveis && atividadeSelecionada.usuariosResponsaveis.length > 0">
+                    <div *ngFor="let user of atividadeSelecionada.usuariosResponsaveis" class="responsavel-item">
+                        <i class="pi pi-user" style="font-size: 1.2rem; margin-right: 8px;"></i>
+                        <div>
+                            <span class="font-bold">{{ user.nome }}</span>
+                            <br>
+                            <small class="text-gray-500">{{ user.email }}</small>
+                        </div>
                     </div>
-                  </div>
                 </div>
-                
-                <p *ngIf="!atividadeSelecionada.usuariosResponsaveis || atividadeSelecionada.usuariosResponsaveis.length === 0">
+
+                <p
+                    *ngIf="!atividadeSelecionada.usuariosResponsaveis || atividadeSelecionada.usuariosResponsaveis.length === 0">
                     Nenhum responsável cadastrado.
                 </p>
-                
-                
-                
+
+
+
 
 
                 <p><strong>Data de Início:</strong> {{ atividadeSelecionada?.dataInicio ?

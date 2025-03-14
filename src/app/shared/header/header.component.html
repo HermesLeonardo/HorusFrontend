@@ -7,7 +7,13 @@
   </div>
   <div class="header-right">
     <app-theme-toggle></app-theme-toggle>
-    <input type="text" placeholder="Buscar projetos..." class="search-input">
+    
+    <!-- ✅ Exibe o nome do usuário -->
+    <span class="user-name">{{ nomeUsuario }}</span> 
+    
     <img src="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png" alt="Perfil" class="profile-image">
+    <button class="logout-button" (click)="logout()">
+      <i class="pi pi-sign-out"></i> Sair
+    </button>
   </div>
 </header>

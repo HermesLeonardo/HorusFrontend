@@ -1,4 +1,3 @@
-
 <div class="admin-dashboard">
 
   <!-- 🔹 Seção 1: Visão Geral (Cards de Métricas) -->
@@ -8,13 +7,15 @@
       <p>{{ totalProjetos }}</p>
     </div>
     <div class="dashboard-card">
+      <h3>Total de Horas Lançadas</h3>
+      <p>{{ totalHorasLancadas | number:'1.2-2' }}</p>
+    </div>
+
+    <div class="dashboard-card">
       <h3>Total de Atividades</h3>
       <p>{{ totalAtividades }}</p>
     </div>
-    <div class="dashboard-card">
-      <h3>Total de Horas Lançadas</h3>
-      <p>{{ totalHorasLancadas }}</p>
-    </div>
+
     <div class="dashboard-card" *ngIf="userRole === 'ROLE_ADMIN'">
       <h3>Total de Usuários</h3>
       <p>{{ totalUsuarios }}</p>
@@ -73,8 +74,8 @@
         <tr>
           <th>Nome</th>
           <th>Descrição</th>
-          <th>Responsável</th>
-          <th>Atividades</th>
+          <!-- <th>Responsável</th> -->
+          <th>Atividades Vinculadas</th>
           <th>Status</th>
           <th>Data de Criação</th>
           <th>Ações</th>
@@ -87,8 +88,8 @@
             }">
           <td>{{ projeto.nome }}</td>
           <td>{{ projeto.descricao || 'Sem descrição' }}</td>
-          <td>{{ projeto.usuarioResponsavel?.nome || 'Não atribuído' }}</td>
-          <td>{{ projeto.quantidadeAtividades }}</td>
+          <!-- <td>{{ projeto.usuarioResponsavel?.nome || 'Não atribuído' }}</td> -->
+          <td>{{ projeto.quantidadeAtividades || 0 }}</td>
           <td>
             <select [(ngModel)]="projeto.status" (change)="atualizarStatusProjeto(projeto)">
               <option value="PLANEJADO">Planejado</option>
@@ -107,24 +108,23 @@
   </section>
 
 
-<!-- 🔹 Modal Customizado para PickList -->
-<div class="custom-modal-picklist" *ngIf="exibirPicklist">
-  <div class="custom-modal-picklist-content">
-    <h2>Gerenciar Responsáveis</h2>
+  <!-- 🔹 Modal Customizado para PickList -->
+  <div class="custom-modal-picklist" *ngIf="exibirPicklist">
+    <div class="custom-modal-picklist-content">
+      <h2>Gerenciar Responsáveis</h2>
 
-    <p-pickList [source]="usuariosDisponiveis" [target]="responsaveisSelecionados"
-                sourceHeader="Usuários Disponíveis" targetHeader="Responsáveis"
-                (onMoveToTarget)="atualizarResponsaveis(projetoSelecionado)"
-                (onMoveToSource)="atualizarResponsaveis(projetoSelecionado)">
-      <ng-template let-item pTemplate="item">{{ item.nome }}</ng-template>
-    </p-pickList>
+      <p-pickList [source]="usuariosDisponiveis" [target]="responsaveisSelecionados" sourceHeader="Usuários Disponíveis"
+        targetHeader="Responsáveis" (onMoveToTarget)="atualizarResponsaveis(projetoSelecionado)"
+        (onMoveToSource)="atualizarResponsaveis(projetoSelecionado)">
+        <ng-template let-item pTemplate="item">{{ item.nome }}</ng-template>
+      </p-pickList>
 
-    <div class="modal-footer">
-      <button class="fechar-btn" (click)="fecharPicklist()">Fechar</button>
-      <button class="salvar-btn" (click)="salvarResponsaveis()">Salvar</button>
+      <div class="modal-footer">
+        <button class="fechar-btn" (click)="fecharPicklist()">Fechar</button>
+        <button class="salvar-btn" (click)="salvarResponsaveis()">Salvar</button>
+      </div>
     </div>
   </div>
-</div>
 
 
 
@@ -135,14 +135,16 @@
       <thead>
         <tr>
           <th>Nome</th>
-          <th>Responsável</th>
+          <th>Projeto</th>
+          <th>Descrição</th>
           <th>Data de Vencimento</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let atividade of atividadesPendentes">
           <td>{{ atividade.nome }}</td>
-          <td>{{ atividade.responsavel }}</td>
+          <td>{{ atividade.projetoNome || 'Projeto não encontrado' }}</td>
+          <td>{{ atividade.descricao || 'Sem descrição' }}</td>
           <td>{{ atividade.dataFim | date:'dd/MM/yyyy' }}</td>
         </tr>
       </tbody>
@@ -170,15 +172,28 @@
     </table>
   </section>
 
-  <!-- 🔹 Seção 6: Ações Rápidas -->
-  <section class="dashboard-quick-actions" *ngIf="userRole === 'ROLE_ADMIN'">
-    <h2>Ações Rápidas</h2>
-    <div class="quick-actions-container">
-      <button (click)="abrirDialogProjeto()">➕ Criar Novo Projeto</button>
-      <button (click)="criarNovaAtividade()">📌 Criar Nova Atividade</button>
-      <button (click)="acessarRelatorios()">📊 Acessar Relatórios</button>
-      <button (click)="gerenciarUsuarios()">👤 Gerenciar Usuários</button>
-    </div>
+  <!-- 🔹 Seção de Últimos Lançamentos -->
+  <section class="dashboard-latest-entries">
+    <h2>Últimos Lançamentos</h2>
+    <table class="dashboard-table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Atividade</th>
+          <th>Horas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let lancamento of ultimosLancamentos">
+          <td>{{ lancamento.dataInicio | date:'dd/MM/yyyy' }}</td>
+          <td>{{ lancamento.atividade?.nome || 'Atividade não encontrada' }}</td>
+          <td>{{ calcularHorasLancadas(lancamento) }} h</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button (click)="verTodosLancamentos()">Ver Todos</button>
   </section>
+
 
 </div>
