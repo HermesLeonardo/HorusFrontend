@@ -224,6 +224,21 @@ input[type="date"] {
   border: none;
 }
 
+.status-container {
+  display: flex;
+  align-items: center; /* Garante alinhamento vertical */
+  gap: 10px; /* Espaço entre o botão e o texto */
+}
+
+.status-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffffb3;
+}
+
+.status-text.desativados {
+  color: #d9534f;
+}
 
 
 /* MODAL DE VISUALIZAÇÃO */

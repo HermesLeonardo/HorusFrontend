@@ -15,6 +15,7 @@ import { ToastModule } from 'primeng/toast';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { ListboxModule } from 'primeng/listbox';
 import { CardModule } from 'primeng/card';
+import { AuthService } from '../../core/services/auth.service';
 
 
 @Component({
@@ -46,10 +47,11 @@ export class ProjetosComponent implements OnInit {
   usuarios: Usuario[] = [];
   adminsOptions: { label: string; value: number }[] = [];
   admins: Array<{ label: string; value: number }> = [];
+  userRole: string = ''; 
 
 
 
-  // Utilize o novo tipo de exibição para armazenar campos extras
+
   projetoVisualizacao: ProjetoVisualizacao = {
     id: 0,
     nome: '',
@@ -61,7 +63,8 @@ export class ProjetosComponent implements OnInit {
     dataFim: '',
     dataInicioFormatada: '',
     dataFimFormatada: '',
-    nomesUsuariosResponsaveis: ''
+    nomesUsuariosResponsaveis: '',
+    atividades: [],
   };
   exibirVisualizacao: boolean = false;
 
@@ -84,10 +87,12 @@ export class ProjetosComponent implements OnInit {
     private projetosService: ProjetosService,
     private usuariosService: UsuariosService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void {
+    this.userRole = this.authService.getUserRole();
     this.carregarProjetos();
     this.carregarUsuarios();
   }
@@ -232,11 +237,6 @@ export class ProjetosComponent implements OnInit {
           this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao salvar o projeto!' });
         });
     }
-    console.log("🔹 Dados sendo enviados para a API:", novoProjeto);
-    console.log("📌 Admin selecionado para o projeto:", this.projetoSelecionado.idUsuarioResponsavel);
-    console.log("🚀 JSON corrigido antes do envio:", novoProjeto);
-    console.log("📌 IDs dos usuários enviados para a API:", usuariosIds);
-
 
   }
 
@@ -244,11 +244,6 @@ export class ProjetosComponent implements OnInit {
 
 
   visualizarProjeto(projeto: Projeto): void {
-    console.log("🟢 Abrindo visualização para o projeto:", projeto);
-
-    // 🔍 Verifica se os IDs vieram corretamente
-    console.log("📌 IDs dos responsáveis recebidos:", projeto.idUsuarioResponsavel);
-
     const usuariosIds = projeto.usuarios ? projeto.usuarios.map(user => user.id) : [];
 
     // 🔹 Filtra os usuários com base nos IDs e gera os nomes corretamente
@@ -256,11 +251,6 @@ export class ProjetosComponent implements OnInit {
       .filter(user => usuariosIds.includes(user.id)) // ✅ Agora sempre será um array válido
       .map(user => user.nome)
       .join(', ');
-
-
-    console.log("👥 Usuários carregados:", this.usuarios);
-    console.log("✅ IDs dos responsáveis usados:", usuariosIds);
-    console.log("📝 Nomes formatados:", usuariosNomes);
 
     this.projetoVisualizacao = {
       ...projeto,
@@ -361,7 +351,8 @@ export class ProjetosComponent implements OnInit {
       prioridade: 'MEDIA',
       idUsuarioResponsavel: [],
       dataInicio: new Date(),
-      dataFim: undefined
+      dataFim: undefined,
+      atividades: []
     };
   }
 }

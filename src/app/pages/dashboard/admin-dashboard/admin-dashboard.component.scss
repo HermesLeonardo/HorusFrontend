@@ -442,3 +442,117 @@ body:not(.dark-mode) {
     }
   }
 }
+
+
+/* 🔹 Correção do Ícone do Menu Hamburguer */
+.header-menu-icon {
+  filter: invert(1); // Deixa o ícone preto no modo claro
+}
+
+body.dark-mode .header-menu-icon {
+  filter: invert(0); // Mantém o branco no modo escuro
+}
+
+/* 🔹 Apenas alteração de cores e sombras sem mexer na estrutura */
+.dashboard-recent-projects,
+.dashboard-pending-tasks,
+.dashboard-last-logins {
+  background: rgba(255, 255, 255, 0.1); /* Mesmo fundo da seção "Últimos Lançamentos" */
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+body:not(.dark-mode) .dashboard-recent-projects,
+body:not(.dark-mode) .dashboard-pending-tasks,
+body:not(.dark-mode) .dashboard-last-logins {
+  background: #ffffff; /* Fundo branco no modo claro */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 🔹 Ajuste do cabeçalho das tabelas nessas seções para contraste melhor */
+.dashboard-recent-projects th,
+.dashboard-pending-tasks th,
+.dashboard-last-logins th {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: var(--primary-text);
+}
+
+body:not(.dark-mode) .dashboard-recent-projects th,
+body:not(.dark-mode) .dashboard-pending-tasks th,
+body:not(.dark-mode) .dashboard-last-logins th {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #000;
+}
+
+
+/* 🔹 Ajuste nos títulos para ficarem melhor posicionados */
+.dashboard-recent-projects h2,
+.dashboard-pending-tasks h2,
+.dashboard-last-logins h2 {
+  text-align: center;
+  line-height: 2.6; /* Ajusta a altura da linha para melhorar o espaçamento vertical */
+}
+
+
+/* 🔹 Arredondamento dos cards e espaçamento dos títulos */
+.dashboard-recent-projects,
+.dashboard-pending-tasks,
+.dashboard-last-logins {
+  border-radius: 12px; /* Arredondando os cantos */
+}
+
+
+
+/* 🔹 Estilização do botão "Gerenciar Responsáveis" */
+.dashboard-table button {
+  background-color: var(--primary-color); /* Mantém a cor do tema */
+  color: #fff; /* Texto branco */
+  font-weight: bold;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px; /* Bordas arredondadas */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+
+body:not(.dark-mode) .dashboard-table button {
+  background-color: #007bff; /* Azul padrão no modo claro */
+  color: #fff;
+}
+
+body:not(.dark-mode) .dashboard-table button:hover {
+  background-color: #0056b3; /* Azul mais escuro no hover */
+}
+
+/* 🔹 Estilização do select de Status */
+.dashboard-table select {
+  background-color: var(--secondary-bg); /* Fundo adaptável ao tema */
+  color: var(--text-primary); /* Cor do texto adaptável */
+  border: 1px solid var(--border-color); /* Borda sutil */
+  padding: 6px 8px;
+  border-radius: 6px; /* Deixa mais moderno */
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.dashboard-table select:focus {
+  outline: none;
+  border-color: var(--primary-color); /* Realce na borda ao focar */
+}
+
+body:not(.dark-mode) .dashboard-table select {
+  background-color: #fff; /* Fundo branco no modo claro */
+  color: #000; /* Texto preto para melhor contraste */
+}
+
+body:not(.dark-mode) .dashboard-table select:focus {
+  border-color: #007bff; /* Azul no foco para combinar com o botão */
+}
+
+
+
+
+

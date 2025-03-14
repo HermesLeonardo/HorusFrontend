@@ -85,6 +85,7 @@ export class AtividadesComponent implements OnInit {
           console.log("📥 Atividades recebidas (ADMIN):", data);
           this.atividades = data;
           this.filtrarAtividades();
+          this.aplicarFiltroAtivo(); 
         },
         (error) => {
           console.error("❌ Erro ao carregar atividades!", error);
@@ -165,24 +166,24 @@ export class AtividadesComponent implements OnInit {
         id_projeto: atividade.projeto ? atividade.projeto.id : null,
         projeto: atividade.projeto || { id: null, nome: "Não definido" }
       });
-  
+
       console.log("Antes da busca:", this.atividadeSelecionada.usuariosResponsaveis);
-  
+
       this.exibirVisualizacao = true; // 🔹 Garante que o modal seja ativado antes da requisição
-  
+
       this.atividadesService.getUsuariosDaAtividade(atividade.id).subscribe(
         (usuarios) => {
           console.log("Usuários recebidos:", usuarios);
-  
+
           if (usuarios && usuarios.length > 0) {
             this.atividadeSelecionada.usuariosResponsaveis = usuarios.map(user => ({
               id: user.id,
               nome: user.nome,
               email: user.email
             }));
-  
+
             console.log("Depois da atribuição:", this.atividadeSelecionada.usuariosResponsaveis);
-  
+
             // 🔹 Atualiza a interface após a atualização da variável
             this.cdRef.detectChanges();
           } else {
@@ -195,7 +196,7 @@ export class AtividadesComponent implements OnInit {
       );
     }
   }
-  
+
 
 
 
@@ -265,17 +266,22 @@ export class AtividadesComponent implements OnInit {
 
 
 
-  deletarAtividade(atividade: Atividade): void {
+  desativarAtividade(atividade: Atividade): void {
     this.confirmationService.confirm({
-      message: `Tem certeza que deseja excluir a atividade "${atividade.nome}"?`,
+      message: `Tem certeza que deseja desativar a atividade "${atividade.nome}"?`,
       accept: () => {
-        this.atividadesService.deletarAtividade(atividade.id).subscribe(() => {
-          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Atividade deletada com sucesso!' });
+        this.atividadesService.desativarAtividade(atividade.id).subscribe(() => {
+          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Atividade desativada com sucesso!' });
           this.carregarAtividades();
+        }, error => {
+          console.error("❌ Erro ao desativar atividade:", error);
         });
+
       }
     });
   }
+
+
 
   novaAtividade(): Atividade {
     return {
@@ -287,7 +293,8 @@ export class AtividadesComponent implements OnInit {
       dataInicio: new Date(),
       dataFim: new Date(),
       status: 'ABERTA',
-      usuariosIds: []
+      usuariosIds: [],
+      ativo: true
     };
 
   }
@@ -349,6 +356,22 @@ export class AtividadesComponent implements OnInit {
 
     console.log("✅ Usuários selecionados atualizados:", this.atividadeSelecionada.usuariosResponsaveis);
   }
+
+
+
+  filtroAtivo: boolean = true; // Por padrão, exibe atividades ativas
+
+  toggleAtividadesDesativadas(): void {
+    this.filtroAtivo = !this.filtroAtivo;
+    this.aplicarFiltroAtivo();
+  }
+
+  aplicarFiltroAtivo(): void {
+    this.atividadesFiltradas = this.atividades.filter(atividade =>
+      this.filtroAtivo ? atividade.ativo === true : atividade.ativo === false
+    );
+  }
+
 
 
 

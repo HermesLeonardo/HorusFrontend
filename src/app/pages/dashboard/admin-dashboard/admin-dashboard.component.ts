@@ -100,7 +100,7 @@ export class AdminDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.carregarDados();
-    this.carregarTotalHorasLancadas();
+    setTimeout(() => this.carregarTotalHorasLancadas(), 1000); // 🔄 Pequeno atraso para evitar falhas
     this.carregarUltimosLancamentos();
 
     this.statusProjetos.forEach(status => this.statusSelecionadosProjetos[status] = true);
@@ -109,31 +109,31 @@ export class AdminDashboardComponent implements OnInit {
     this.userRole = this.authService.getUserRole() ?? 'ROLE_USER';
     this.userId = this.authService.getUserId();
 
-    console.log("🔍 UserID no Dashboard:", this.userId);
   }
 
 
   private carregarTotalHorasLancadas(): void {
     this.lancamentoService.getTotalHorasLancadas().subscribe({
       next: (horas) => {
-        this.totalHorasLancadas = parseFloat(horas.toFixed(2));
-        console.log("🔹 Total de horas carregadas:", this.totalHorasLancadas);
+        if (horas !== null && horas !== undefined) {
+          this.totalHorasLancadas = horas;
+        } else {
+        }
       },
       error: (err) => {
-        console.error("❌ Erro ao carregar total de horas lançadas:", err);
+        setTimeout(() => this.carregarTotalHorasLancadas(), 3000); // 🔄 Tenta recarregar após 3 segundos
       }
     });
   }
+  
 
 
   private carregarUltimosLancamentos(): void {
     this.lancamentoService.getUltimosLancamentos().subscribe({
       next: (lancamentos) => {
-        console.log("📌 Últimos lançamentos carregados:", lancamentos);
         this.ultimosLancamentos = lancamentos;
       },
       error: (err) => {
-        console.error("❌ Erro ao carregar últimos lançamentos:", err);
       }
     });
   }
@@ -170,82 +170,67 @@ export class AdminDashboardComponent implements OnInit {
       usuarios: this.usuariosService.getUsuarios(),
       lancamentos: this.lancamentoService.getLancamentos(),
       ultimosLancamentos: this.lancamentoService.getUltimosLancamentos()
-
-
     }).subscribe({
       next: ({ projetos, atividades, usuarios, lancamentos, ultimosLancamentos }) => {
-        // 🔹 Filtragem de Projetos conforme a Role do Usuário
-        this.totalProjetos = isAdmin ? projetos.length : projetos.filter(proj =>
-          proj.idUsuarioResponsavel && (
-            Array.isArray(proj.idUsuarioResponsavel)
-              ? proj.idUsuarioResponsavel.includes(this.userId)
-              : proj.idUsuarioResponsavel === this.userId
-          )).length;
 
-        const projetosUsuario = isAdmin ? projetos : projetos.filter(proj => {
-          if (!proj.idUsuarioResponsavel) return false;
-          return Array.isArray(proj.idUsuarioResponsavel)
+        // 🔹 Filtragem de Projetos conforme a Role do Usuário
+        const projetosUsuario = isAdmin ? projetos : projetos.filter(proj =>
+          proj.idUsuarioResponsavel &&
+          (Array.isArray(proj.idUsuarioResponsavel)
             ? proj.idUsuarioResponsavel.includes(this.userId)
-            : proj.idUsuarioResponsavel === this.userId;
-        });
+            : proj.idUsuarioResponsavel === this.userId)
+        );
+
+        this.totalProjetos = projetosUsuario.length;
 
         this.projetosRecentes = projetosUsuario.slice(0, 5).map(projeto => {
-          const projetosUsuario = isAdmin ? projetos : projetos.filter(proj =>
-            proj.idUsuarioResponsavel && (
-              Array.isArray(proj.idUsuarioResponsavel)
-                ? proj.idUsuarioResponsavel.includes(this.userId)
-                : proj.idUsuarioResponsavel === this.userId
-            )
-          );
+          const atividadesProjeto = projeto.atividades || []; // 🛠 Garante que sempre tenha um array
 
-          this.ultimosLancamentos = ultimosLancamentos;
+          const idResponsavel = Array.isArray(projeto.idUsuarioResponsavel)
+            ? projeto.idUsuarioResponsavel[0] // Pega o primeiro usuário da lista (caso seja um array)
+            : projeto.idUsuarioResponsavel;   // Caso seja um único número
 
-          const atividadesProjeto = atividades.filter(ativ => ativ.id_projeto === projeto.id);
+          const usuarioResponsavel = idResponsavel
+            ? usuarios.find(user => user.id === idResponsavel) || { nome: 'Não atribuído' }
+            : { nome: 'Não atribuído' };
 
-          const ultimaAtividade = atividadesProjeto
-            .map(a => a.dataFim ? new Date(a.dataFim).getTime() : 0)
-            .reduce((max, time) => Math.max(max, time), 0);
-
-          const ultimaAtividadeDate = ultimaAtividade ? new Date(ultimaAtividade) : null;
-
-          const diasSemAtividade = ultimaAtividadeDate
-            ? Math.ceil((new Date().getTime() - ultimaAtividadeDate.getTime()) / (1000 * 60 * 60 * 24))
-            : 999;
-
-          const prazoProximo = projeto.dataFim
-            ? (new Date(projeto.dataFim).getTime() - new Date().getTime()) < (2 * 24 * 60 * 60 * 1000)
-            : false;
-
-          const responsavel = usuarios.find(user =>
-            Array.isArray(projeto.idUsuarioResponsavel)
-              ? projeto.idUsuarioResponsavel.includes(user.id)
-              : user.id === projeto.idUsuarioResponsavel
-          ) || { nome: 'Não atribuído' };
-
-
-
-          return {
+          const projetoFormatado = {
             ...projeto,
-            usuarioResponsavel: responsavel,
-            quantidadeAtividades: atividadesProjeto.length,
-            diasSemAtividade,
-            prazoProximo
+            usuarioResponsavel: usuarioResponsavel, // ✅ Garante que um objeto válido sempre será atribuído
+            quantidadeAtividades: atividadesProjeto.length
           };
+
+          console.log(`🔍 Projeto: ${projeto.nome}, ID Responsável: ${idResponsavel}, Nome Responsável: ${usuarioResponsavel.nome}`);
+
+
+          return projetoFormatado;
+
         });
 
-        // 🔹 Filtragem de Atividades conforme Role
         this.totalAtividades = isAdmin ? atividades.length : atividades.filter(ativ =>
-          Array.isArray(ativ.usuariosResponsaveis) && ativ.usuariosResponsaveis.some(user => user.id === this.userId)
+          Array.isArray(ativ.usuariosResponsaveis) &&
+          ativ.usuariosResponsaveis.some(user => user.id === this.userId)
         ).length;
 
         const atividadesUsuario = isAdmin ? atividades : atividades.filter(ativ =>
-          Array.isArray(ativ.usuariosResponsaveis) && ativ.usuariosResponsaveis.some(user => user.id === this.userId)
+          Array.isArray(ativ.usuariosResponsaveis) &&
+          ativ.usuariosResponsaveis.some(user => user.id === this.userId)
         );
-
-        // 🔹 Lista apenas as atividades pendentes
-        this.atividadesPendentes = atividadesUsuario.filter(a => a.status !== 'CONCLUIDA').slice(0, 5);
-
-        // 🔹 Processamento de Lançamentos de Horas
+        
+        // 🔹 Lista apenas as atividades pendentes com os projetos corretos e exclui as desativadas
+        this.atividadesPendentes = atividadesUsuario.filter(a =>
+          a.status !== 'CONCLUIDA' && Number(a.ativo) === 1 // Exclui as atividades desativadas
+        ).map(atividade => {
+          const projetoEncontrado = projetos.find(proj =>
+            proj.atividades?.some((ativ: Atividade) => ativ.id === atividade.id)
+          );
+        
+          return {
+            ...atividade,
+            projetoNome: projetoEncontrado ? projetoEncontrado.nome : 'Projeto não encontrado'
+          };
+        }).slice(0, 5);
+        
         const lancamentosUsuario = isAdmin ? lancamentos : lancamentos.filter(lanc => lanc.idUsuario === this.userId);
         this.totalHorasLancadas = lancamentosUsuario.reduce((total, lanc) => {
           const horaInicio = new Date(`1970-01-01T${lanc.horaInicio}:00`);
@@ -263,6 +248,7 @@ export class AdminDashboardComponent implements OnInit {
         // 🔹 Atualiza os gráficos com os novos dados
         this.processarDadosParaGrafico(projetosUsuario, atividadesUsuario);
 
+        // 🔍 Log para depuração
         console.log("📌 Dados carregados:", {
           totalProjetos: this.totalProjetos,
           totalAtividades: this.totalAtividades,
@@ -279,6 +265,7 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
+
 
 
 
@@ -330,9 +317,6 @@ export class AdminDashboardComponent implements OnInit {
       statusProjetosCount["PLANEJADO"] = 1;
       statusAtividadesCount["ABERTA"] = 1;
     }
-
-    console.log("📊 Contagem de Status Projetos:", statusProjetosCount);
-    console.log("📊 Contagem de Status Atividades:", statusAtividadesCount);
 
     // 🔹 Atualiza os dados do gráfico
     this.statusProjetosData = {
@@ -423,14 +407,10 @@ export class AdminDashboardComponent implements OnInit {
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      // 🔹 Destroi o gráfico antigo antes de criar um novo
       if (this.chartInstance) {
         this.chartInstance.destroy();
       }
 
-      console.log("Criando novo gráfico com os dados:", this.statusProjetosData);
-
-      // 🔹 Cria um novo gráfico e armazena a instância
       this.chartInstance = new Chart(ctx, {
         type: this.tipoGrafico, // 'bar', 'pie' ou 'polarArea'
         data: this.statusProjetosData,
@@ -450,24 +430,6 @@ export class AdminDashboardComponent implements OnInit {
   }
 
 
-  // 🔹 Métodos para os botões de ação rápida
-  criarNovoProjeto(): void {
-    console.log('Criando novo projeto...');
-  }
-
-  criarNovaAtividade(): void {
-    console.log('Criando nova atividade...');
-  }
-
-  acessarRelatorios(): void {
-    console.log('Acessando relatórios...');
-  }
-
-  gerenciarUsuarios(): void {
-    console.log('Gerenciando usuários...');
-  }
-
-
 
   //Seção de configuração para os modais
 
@@ -476,7 +438,6 @@ export class AdminDashboardComponent implements OnInit {
     this.projetoSelecionado = this.novoProjeto();
     this.carregarUsuarios();
     this.exibirDialogProjeto = true;
-    console.log("🔹 Modal deve aparecer - exibirDialogProjeto =", this.exibirDialogProjeto);
   }
 
 
@@ -559,7 +520,8 @@ export class AdminDashboardComponent implements OnInit {
       prioridade: 'MEDIA',
       idUsuarioResponsavel: [],
       dataInicio: new Date(),
-      dataFim: undefined
+      dataFim: undefined,
+      atividades: []
     };
   }
 
@@ -611,6 +573,7 @@ export class AdminDashboardComponent implements OnInit {
         dataFim: this.projetoSelecionado.dataFim,
         status: this.projetoSelecionado.status,
         prioridade: this.projetoSelecionado.prioridade,
+        atividades: this.projetoSelecionado.atividades
       },
       usuariosIds: idsResponsaveis, // ✅ Apenas IDs dos usuários vinculados
       idUsuarioResponsavel: idUsuarioResponsavel // ✅ ID do responsável

@@ -15,7 +15,6 @@ export class ProjetosService {
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
-    console.log('Token enviado no cabeçalho em Projetos:', token);  // 🔍 Log para depuração
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -26,9 +25,9 @@ export class ProjetosService {
   getProjetos(): Observable<Projeto[]> {
     const userRole = localStorage.getItem('userRole');
   
-    let url = this.apiUrl;
+    let url = `${this.apiUrl}/detalhes`; // 
     if (userRole !== 'ROLE_ADMIN') {
-      url = `${this.apiUrl}/usuario-logado`; // ✅ Endpoint correto para usuários comuns
+      url = `${this.apiUrl}/usuario-logado`; // 
     }
   
     return this.http.get<Projeto[]>(url, { headers: this.getAuthHeaders() });
@@ -36,9 +35,9 @@ export class ProjetosService {
   
 
   private formatarData(data: string | Date | null): string | null {
-    if (!data) return null; // Retorna null corretamente se a data for nula
-    if (typeof data === 'string') return data.split('T')[0]; // Se já for string, formata
-    return data instanceof Date ? data.toISOString().split('T')[0] : null; // Se for Date, converte para string
+    if (!data) return null; 
+    if (typeof data === 'string') return data.split('T')[0]; 
+    return data instanceof Date ? data.toISOString().split('T')[0] : null; 
   }
 
 
@@ -66,7 +65,6 @@ export class ProjetosService {
 
 
 
-    console.log("📢 JSON corrigido antes do envio:", requestBody);
 
     return this.http.post<Projeto>(this.apiUrl, requestBody, { headers });
   }
@@ -91,7 +89,6 @@ export class ProjetosService {
             : idUsuarioResponsavel ?? null
     };
 
-    console.log("📢 JSON enviado na atualização:", JSON.stringify(requestBody, null, 2));
 
     return this.http.put<Projeto>(`${this.apiUrl}/${id}`, requestBody, { headers });
 }
@@ -120,7 +117,6 @@ export class ProjetosService {
   }
 
   getUsuariosPorProjeto(projetoId: number) {
-    console.log("🔍 Buscando usuários para o projeto ID:", projetoId);
     return this.http.get<Usuario[]>(`${this.apiUrl}/${projetoId}/usuarios`, {
       headers: this.getAuthHeaders()
     });

@@ -106,7 +106,7 @@
   display: flex;
   gap: 15px;
   align-items: center; /* Alinha verticalmente os campos */
-  justify-content: space-between; /* Distribui os campos uniformemente */
+  justify-content: space-between;
 }
 
 .form-group {
@@ -117,25 +117,113 @@
 
 @media (max-width: 768px) {
   .form-row {
-    flex-direction: column; /* Em telas menores, mantém os campos empilhados */
+    flex-direction: column; 
   }
 }
 
-// Estilos apenas para o campo da barra de filtros
 :host ::ng-deep .filtro-atividade {
-  width: 250px !important; // Define um tamanho fixo menor para a barra de filtros
+  width: 250px !important; 
 }
 
 // Estilos apenas para o campo do modal
 :host ::ng-deep .modal-atividade {
-  width: 100% !important; // Faz o campo ocupar toda a largura disponível no modal
+  width: 100% !important; 
 }
 
 :host ::ng-deep .modal-atividade .p-inputtext {
-  width: 46.5vw !important; // Aumenta a largura do input dentro do p-autoComplete no modal
+  width: 46.5vw !important; 
+}
+
+::ng-deep .p-dialog {
+  width: 30vw !important; // Ajuste conforme necessário
+  max-width: 400px !important;
 }
 
 
+
+::ng-deep .custom-confirm-dialog {
+  width: 400px !important;
+  max-width: 90%;
+  border-radius: 8px;
+  background: var(--card-background);
+  box-shadow: 0px 4px 6px var(--card-shadow);
+}
+
+::ng-deep .custom-confirm-dialog .p-dialog-content {
+  padding: 20px !important;
+  text-align: center;
+}
+
+::ng-deep .custom-confirm-dialog .p-dialog-header {
+  font-size: 1.2rem !important;
+  font-weight: bold;
+  text-align: center;
+}
+
+::ng-deep .custom-confirm-dialog .p-dialog-footer {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+::ng-deep .custom-confirm-dialog .p-button {
+  padding: 8px 15px;
+  font-size: 0.85rem;
+}
+
+::ng-deep .custom-confirm-dialog .modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+::ng-deep .custom-confirm-dialog .modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+::ng-deep .custom-confirm-dialog .btn-primary {
+  background-color: #007ad9;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.restaurar-btn {
+  color: #28a745; /* Verde padrão */
+  font-size: 1.2rem;
+  transition: 0.3s;
+
+  &:hover {
+    color: #218838; /* Verde mais escuro ao passar o mouse */
+    transform: scale(1.1); /* Pequeno efeito de zoom */
+  }
+}
+
+
+::ng-deep .custom-confirm-dialog .btn-secondary {
+  background-color: #3a3a4a;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+::ng-deep .custom-confirm-dialog .btn-primary:hover {
+  background-color: #005bb5;
+}
+
+::ng-deep .custom-confirm-dialog .btn-secondary:hover {
+  background-color: #5a5a6a;
+}
 
 .form-group {
   width: 100% !important;
@@ -155,7 +243,6 @@
 :host ::ng-deep .p-dialog {
   width: 50vw !important; 
   max-width: 750px !important; 
-  min-height: 500px !important; 
   height: auto !important;
   display: flex;
   flex-direction: column;
@@ -261,6 +348,100 @@
     }
   }
 }
+
+
+
+::ng-deep .custom-confirm-dialog {
+  width: 300px !important;  // Ajuste o tamanho conforme necessário
+  max-width: 90vw;
+  border-radius: 8px;
+}
+
+::ng-deep .custom-confirm-dialog .p-dialog-content {
+  padding: 15px !important;
+  text-align: center;
+}
+
+::ng-deep .custom-confirm-dialog .p-dialog-header {
+  font-size: 1rem !important;
+}
+
+::ng-deep .custom-confirm-dialog .p-dialog-footer {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+::ng-deep .custom-confirm-dialog .p-button {
+  padding: 8px 15px;
+  font-size: 0.85rem;
+}
+
+
+
+/* ================== ESTILIZAÇÃO DO MODAL DE VISUALIZAÇÃO ================== */
+
+.custom-modal {
+  max-width: 600px;
+  width: 100%;
+  border-radius: 8px;
+  padding: 20px;
+
+  .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  /* Estilizando os grupos de informações */
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    label {
+      font-weight: bold;
+      color: #b3b3b3;
+    }
+
+    p {
+      margin: 0;
+      color: #ffffff;
+    }
+  }
+
+  /* Alinhando itens lado a lado */
+  .form-row {
+    display: flex;
+    gap: 20px;
+
+    .form-group {
+      flex: 1;
+    }
+  }
+
+  /* Botão de fechar no rodapé */
+  .p-dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 10px;
+
+    .btn-secondary {
+      background-color: #3a3a4a;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s ease;
+
+      &:hover {
+        background-color: #5a5a6a;
+      }
+    }
+  }
+}
+
 
 /* ================== RESPONSIVIDADE ================== */
 @media (max-width: 768px) {

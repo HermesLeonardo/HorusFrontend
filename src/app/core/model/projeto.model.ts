@@ -1,6 +1,7 @@
 import { Usuario } from './usuario.model';
 
 export interface Projeto {
+  atividades: any;
   id: number;
   nome: string;
   descricao: string;

@@ -5,7 +5,7 @@
 <div class="projetos-container">
   <div class="topo-projetos">
     <h2>Gerenciamento de Projetos</h2>
-    <button class="novo-projeto-btn" (click)="abrirDialog()">
+    <button class="novo-projeto-btn" *ngIf="userRole === 'ROLE_ADMIN'"(click)="abrirDialog()">
       <i class="pi pi-plus"></i> Novo Projeto
     </button>
   </div>
@@ -40,10 +40,10 @@
             <button class="acao-btn visualizar" (click)="visualizarProjeto(projeto)">
               <i class="pi pi-eye"></i>
             </button>
-            <button class="acao-btn editar" (click)="abrirDialog(projeto)">
+            <button class="acao-btn editar" *ngIf="userRole === 'ROLE_ADMIN'" (click)="abrirDialog(projeto)">
               <i class="pi pi-pencil"></i>
             </button>
-            <button class="acao-btn excluir" (click)="confirmarExclusao(projeto)">
+            <button class="acao-btn excluir" *ngIf="userRole === 'ROLE_ADMIN'" (click)="confirmarExclusao(projeto)">
               <i class="pi pi-trash"></i>
             </button>
           </td>
@@ -96,7 +96,8 @@
           <div class="input-group usuarios-responsaveis">
             <label for="usuarios">Usuários Responsáveis:</label>
             <p-multiSelect [options]="usuariosOptions" [(ngModel)]="projetoSelecionado.idUsuarioResponsavel"
-              optionLabel="label" placeholder="Selecione os responsáveis" (onChange)="atualizarAdminsResponsaveis()"> <!-- 🔹 Atualiza admins ao mudar os responsáveis -->
+              optionLabel="label" placeholder="Selecione os responsáveis" (onChange)="atualizarAdminsResponsaveis()">
+              <!-- 🔹 Atualiza admins ao mudar os responsáveis -->
             </p-multiSelect>
           </div>
 
@@ -157,6 +158,7 @@
           </p-listbox>
         </ng-template>
       </p-card>
+
 
       <!-- ✅ Botão de Fechar Ajustado -->
       <div class="modal-buttons">

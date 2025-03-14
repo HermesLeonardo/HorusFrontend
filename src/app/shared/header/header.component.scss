@@ -85,3 +85,23 @@
     color: #f05454;
   }
 }
+
+/* 🔹 Ajuste no botão de sair */
+.logout-button {
+  color: var(--text-primary); /* Adapta a cor conforme o tema */
+
+  &:hover {
+    color: #f05454; /* Mantém o efeito de hover */
+  }
+}
+
+/* 🔹 Ajuste no menu toggle (três risquinhos) */
+.menu-toggle {
+  color: var(--text-primary); /* Garante que os ícones fiquem visíveis no modo claro e escuro */
+}
+
+/* 🔹 Garante que no modo claro os ícones fiquem escuros */
+body:not(.dark-mode) .logout-button,
+body:not(.dark-mode) .menu-toggle {
+  color: #000; /* Ícones e texto em preto para melhor visibilidade */
+}
